@@ -1,0 +1,65 @@
+"use server";
+
+import { z } from "zod";
+import { createAdminClient } from "@/lib/supabase/admin";
+import { normalizePhone } from "@/lib/utils";
+import { clientIp, rateLimit } from "@/lib/ratelimit";
+
+type R = { ok: boolean; message: string };
+
+export async function subscribe(input: unknown): Promise<R> {
+  const p = z.object({ email: z.string().trim().toLowerCase().email("Enter a valid email").max(120), website: z.string() }).safeParse(input);
+  if (!p.success) return { ok: false, message: p.error.issues[0].message };
+  if (p.data.website) return { ok: true, message: "Thanks, you are on the list." };
+  if (!(await rateLimit(`sub:${await clientIp()}`, 5, 600))) return { ok: false, message: "Too many tries. Please wait a few minutes." };
+  try {
+    const db = createAdminClient();
+    const { error } = await db.from("leads").insert({ email: p.data.email, source: "newsletter" });
+    if (error && error.code !== "23505") return { ok: false, message: "Could not save your email. Please try again." };
+    await db.from("leads").update({ unsubscribed: false }).eq("email", p.data.email);
+    await db.from("email_optouts").delete().eq("email", p.data.email);
+    return { ok: true, message: "Thanks, you are on the list." };
+  } catch {
+    return { ok: false, message: "Sign up is not available right now." };
+  }
+}
+
+export async function chatLead(input: unknown): Promise<R> {
+  const p = z.object({ name: z.string().trim().min(2, "Enter your name").max(80), phone: z.string().trim().max(20), message: z.string().trim().max(300) }).safeParse(input);
+  if (!p.success) return { ok: false, message: p.error.issues[0].message };
+  const phone = normalizePhone(p.data.phone);
+  if (!phone) return { ok: false, message: "Enter a valid mobile number, like 01712345678." };
+  if (!(await rateLimit(`lead:${await clientIp()}`, 5, 600))) return { ok: false, message: "Too many tries. Please wait a few minutes." };
+  try {
+    const { error } = await createAdminClient().from("leads").insert({ name: p.data.name, phone, source: "chatbot", notes: p.data.message || null });
+    if (error) return { ok: false, message: "Could not save your details. Please try again." };
+    return { ok: true, message: "Thank you. We will contact you soon." };
+  } catch {
+    return { ok: false, message: "Not available right now." };
+  }
+}
+
+export async function sendContact(input: unknown): Promise<R> {
+  const p = z.object({
+    name: z.string().trim().min(2, "Enter your name").max(80),
+    phone: z.string().trim().max(20),
+    email: z.union([z.literal(""), z.string().trim().toLowerCase().email("Enter a valid email").max(120)]),
+    message: z.string().trim().min(10, "Write a few words so we can help").max(1000),
+    website: z.string(),
+  }).safeParse(input);
+  if (!p.success) return { ok: false, message: p.error.issues[0].message };
+  if (p.data.website) return { ok: true, message: "Thank you. We will get back to you soon." };
+  const phone = normalizePhone(p.data.phone);
+  if (!phone) return { ok: false, message: "Enter a valid mobile number, like 01712345678." };
+  if (!(await rateLimit(`contact:${await clientIp()}`, 4, 600))) return { ok: false, message: "Too many messages. Please wait a few minutes." };
+  try {
+    const db = createAdminClient();
+    const row = { name: p.data.name, phone, source: "contact", notes: p.data.message };
+    let { error } = await db.from("leads").insert({ ...row, email: p.data.email || null });
+    if (error?.code === "23505") ({ error } = await db.from("leads").insert(row)); // that email is already a lead
+    if (error) return { ok: false, message: "Could not send your message. Please try again." };
+    return { ok: true, message: "Thank you. We will get back to you soon." };
+  } catch {
+    return { ok: false, message: "Messages are not available right now. Please call us." };
+  }
+}
