@@ -18,7 +18,7 @@ export default async function Shipping() {
               <input name="name" aria-label="Area name" defaultValue={z.name} required className={input} />
               <input name="fee" aria-label="Fee" type="number" min={0} step="0.01" defaultValue={z.fee} required className={input} />
               <input name="free_over" aria-label="Free delivery over" type="number" min={0} step="0.01" defaultValue={z.free_over ?? ""} placeholder="Free over (optional)" className={input} />
-              <button className="rounded-full bg-accent px-5 py-2 text-sm font-semibold text-accent-ink">Save</button>
+              <button className="rounded-pill bg-accent px-5 py-2 text-sm font-semibold text-accent-ink">Save</button>
             </form>
             <div className="flex gap-4 text-xs md:col-span-4">
               <form action={toggleZone}><input type="hidden" name="id" value={z.id} /><input type="hidden" name="active" value={String(z.active)} /><button className="underline">{z.active ? "Turn off" : "Turn on"}</button></form>
@@ -33,7 +33,7 @@ export default async function Shipping() {
         <input name="name" placeholder="Area name" required className={input} />
         <input name="fee" type="number" min={0} step="0.01" placeholder="Fee" required className={input} />
         <input name="free_over" type="number" min={0} step="0.01" placeholder="Free over (optional)" className={input} />
-        <button className="rounded-full bg-accent px-5 py-2 text-sm font-semibold text-accent-ink">Add</button>
+        <button className="rounded-pill bg-accent px-5 py-2 text-sm font-semibold text-accent-ink">Add</button>
       </form>
     </>
   );

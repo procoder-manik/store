@@ -10,7 +10,7 @@ export const metadata: Metadata = { title: "My account", robots: { index: false 
 
 const input = "w-full rounded-xl border border-line bg-surface px-3 py-2.5 text-sm";
 const card = "rounded-2xl border border-line bg-surface p-5";
-const btn = "rounded-full bg-accent px-6 py-2.5 text-sm font-semibold text-accent-ink";
+const btn = "rounded-pill bg-accent px-6 py-2.5 text-sm font-semibold text-accent-ink";
 
 export default async function Account() {
   const supabase = await createClient();
@@ -51,7 +51,7 @@ export default async function Account() {
           <div className="mt-3 grid gap-3">
             {(addrs ?? []).map((a) => (
               <div key={a.id} className={card}>
-                <p className="text-sm font-medium">{a.label || a.name} {a.is_default && <span className="ml-1 rounded-full bg-paper px-2 py-0.5 text-xs font-normal text-muted">Default</span>}</p>
+                <p className="text-sm font-medium">{a.label || a.name} {a.is_default && <span className="ml-1 rounded-pill bg-paper px-2 py-0.5 text-xs font-normal text-muted">Default</span>}</p>
                 <p className="mt-1 text-sm text-muted">{a.name}, {a.phone}<br />{a.address}, {a.district}</p>
                 <div className="mt-3 flex gap-4 text-xs">
                   {!a.is_default && <form action={setDefaultAddress}><input type="hidden" name="id" value={a.id} /><button className="underline">Make default</button></form>}

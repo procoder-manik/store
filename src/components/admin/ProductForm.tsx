@@ -4,7 +4,8 @@ import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { Sparkles, Star, Trash2 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
-import { imageUrl as publicUrl, isAllowedImageUrl } from "@/lib/utils";
+import { SITE_URL } from "@/lib/config";
+import { imageUrl as publicUrl, isAllowedImageUrl, slugify } from "@/lib/utils";
 import { deleteProduct, duplicateProduct, saveProduct } from "@/app/admin/products/actions";
 import { generateField, generateProductDetails } from "@/app/admin/products/ai";
 
@@ -171,7 +172,7 @@ export function ProductForm({ categories, initial = EMPTY, allProducts = [] }: {
         <section className={`${box} grid gap-4`}>
           <div><label className={label}>Name</label><input className={input} required maxLength={120} value={f.name} onChange={(e) => set("name", e.target.value)} /></div>
           <div className="flex flex-wrap items-center gap-3">
-            <button type="button" onClick={autofill} disabled={aiBusy || f.name.trim().length < 2} className="rounded-full border border-accent px-4 py-2 text-sm font-medium text-accent disabled:opacity-40">{aiBusy ? "Writing..." : "Auto-fill with AI"}</button>
+            <button type="button" onClick={autofill} disabled={aiBusy || f.name.trim().length < 2} className="rounded-pill border border-accent px-4 py-2 text-sm font-medium text-accent disabled:opacity-40">{aiBusy ? "Writing..." : "Auto-fill with AI"}</button>
             <label className="flex items-center gap-2 text-xs text-muted"><input type="checkbox" checked={replace} onChange={(e) => setReplace(e.target.checked)} /> Replace fields I already filled</label>
           </div>
           <div>{lbl("Description", "description")}<textarea className={input} rows={5} maxLength={5000} data-no-ai value={f.description} onChange={(e) => set("description", e.target.value)} /></div>
@@ -188,7 +189,7 @@ export function ProductForm({ categories, initial = EMPTY, allProducts = [] }: {
             {f.images.map((im, i) => (
               <div key={im.path} className="group relative">
                 <img src={publicUrl(im.path)} alt={im.alt} className="aspect-square w-full rounded-lg border border-line object-cover" />
-                {i === 0 && <span className="absolute left-1 top-1 rounded-full bg-accent px-2 py-0.5 text-[10px] font-semibold text-accent-ink">Main</span>}
+                {i === 0 && <span className="absolute left-1 top-1 rounded-pill bg-accent px-2 py-0.5 text-[10px] font-semibold text-accent-ink">Main</span>}
                 <div className="absolute right-1 top-1 flex gap-1">
                   {i !== 0 && <button type="button" aria-label="Make main image" onClick={() => set("images", [im, ...f.images.filter((_, j) => j !== i)])} className="grid h-7 w-7 place-items-center rounded-full bg-surface/90"><Star size={14} /></button>}
                   <button type="button" aria-label="Remove image" onClick={() => set("images", f.images.filter((_, j) => j !== i))} className="grid h-7 w-7 place-items-center rounded-full bg-surface/90"><Trash2 size={14} /></button>
@@ -201,7 +202,7 @@ export function ProductForm({ categories, initial = EMPTY, allProducts = [] }: {
           {uploading && <p className="mt-2 text-xs text-muted">Uploading...</p>}
           <div className="mt-3 flex gap-2">
             <input className={input} placeholder="Or paste an image link from Pexels, Unsplash or Pixabay" value={urlInput} onChange={(e) => setUrlInput(e.target.value)} />
-            <button type="button" onClick={addUrl} className="shrink-0 rounded-full border border-line px-4 py-2 text-sm font-medium hover:bg-paper">Add</button>
+            <button type="button" onClick={addUrl} className="shrink-0 rounded-pill border border-line px-4 py-2 text-sm font-medium hover:bg-paper">Add</button>
           </div>
         </section>
 
@@ -211,7 +212,7 @@ export function ProductForm({ categories, initial = EMPTY, allProducts = [] }: {
           <div className="mt-3 grid gap-2 sm:grid-cols-[1fr_1fr_auto]">
             <div className="relative"><input className={`${input} pr-9`} placeholder="Colors: Sage:#8fa88b, Ink:#23262d" data-no-ai value={genColors} onChange={(e) => setGenColors(e.target.value)} />{aiIcon("colors", "absolute right-1.5 top-1.5")}</div>
             <div className="relative"><input className={`${input} pr-9`} placeholder="Sizes: S, M, L, XL" data-no-ai value={genSizes} onChange={(e) => setGenSizes(e.target.value)} />{aiIcon("sizes", "absolute right-1.5 top-1.5")}</div>
-            <button type="button" onClick={generate} className="rounded-full border border-line px-4 py-2 text-sm font-medium hover:bg-paper">Generate</button>
+            <button type="button" onClick={generate} className="rounded-pill border border-line px-4 py-2 text-sm font-medium hover:bg-paper">Generate</button>
           </div>
           <div className="mt-4 overflow-x-auto">
             {f.variants.length > 0 && (
@@ -255,7 +256,7 @@ export function ProductForm({ categories, initial = EMPTY, allProducts = [] }: {
           <h2 className="font-display text-base font-semibold">Search listing</h2>
           <div>{lbl(`Page title (${f.seoTitle.length}/70)`, "seoTitle")}<input className={input} maxLength={70} data-no-ai value={f.seoTitle} onChange={(e) => set("seoTitle", e.target.value)} /></div>
           <div>{lbl(`Meta description (${f.seoDescription.length}/170)`, "seoDescription")}<textarea className={input} rows={3} maxLength={170} data-no-ai value={f.seoDescription} onChange={(e) => set("seoDescription", e.target.value)} /></div>
-          <div>{lbl("URL slug", "slug")}<input className={input} placeholder="Auto from name" data-no-ai value={f.slug} onChange={(e) => set("slug", e.target.value)} /></div>
+          <div>{lbl("Page address", "slug")}<input className={input} placeholder="Auto from name" data-no-ai value={f.slug} onChange={(e) => set("slug", e.target.value)} /><p className="mt-1 break-all text-xs text-muted">{`${SITE_URL}/product/${f.slug || slugify(f.name) || "..."}`}</p></div>
         </section>
       </div>
 
@@ -284,15 +285,15 @@ export function ProductForm({ categories, initial = EMPTY, allProducts = [] }: {
             <span className={label}>Tags</span>
             <div className="flex flex-wrap gap-2">
               {TAGS.map((t) => (
-                <button key={t} type="button" aria-pressed={f.tags.includes(t)} onClick={() => set("tags", f.tags.includes(t) ? f.tags.filter((x) => x !== t) : [...f.tags, t])} className={`rounded-full border px-3 py-1 text-xs capitalize ${f.tags.includes(t) ? "border-accent bg-accent text-accent-ink" : "border-line"}`}>{t}</button>
+                <button key={t} type="button" aria-pressed={f.tags.includes(t)} onClick={() => set("tags", f.tags.includes(t) ? f.tags.filter((x) => x !== t) : [...f.tags, t])} className={`rounded-pill border px-3 py-1 text-xs capitalize ${f.tags.includes(t) ? "border-accent bg-accent text-accent-ink" : "border-line"}`}>{t}</button>
               ))}
             </div>
           </div>
         </section>
         {error && <p role="alert" className="text-sm text-red-600">{error}</p>}
-        <button disabled={pending || uploading} className="rounded-full bg-accent py-3 text-sm font-semibold text-accent-ink disabled:opacity-50">{pending ? "Saving..." : "Save product"}</button>
-        {f.id && <button type="button" disabled={pending} onClick={() => start(async () => { const r = await duplicateProduct(f.id as string); if (!r.ok) return setError(r.error); router.push(`/admin/products/${r.id}`); router.refresh(); })} className="rounded-full border border-line py-3 text-sm font-medium hover:bg-paper disabled:opacity-50">Duplicate as a draft</button>}
-        {f.id && <button type="button" onClick={remove} disabled={pending} className="rounded-full border border-line py-3 text-sm text-red-600 disabled:opacity-50">Delete product</button>}
+        <button disabled={pending || uploading} className="rounded-pill bg-accent py-3 text-sm font-semibold text-accent-ink disabled:opacity-50">{pending ? "Saving..." : "Save product"}</button>
+        {f.id && <button type="button" disabled={pending} onClick={() => start(async () => { const r = await duplicateProduct(f.id as string); if (!r.ok) return setError(r.error); router.push(`/admin/products/${r.id}`); router.refresh(); })} className="rounded-pill border border-line py-3 text-sm font-medium hover:bg-paper disabled:opacity-50">Duplicate as a draft</button>}
+        {f.id && <button type="button" onClick={remove} disabled={pending} className="rounded-pill border border-line py-3 text-sm text-red-600 disabled:opacity-50">Delete product</button>}
       </aside>
     </form>
   );

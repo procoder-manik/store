@@ -25,7 +25,7 @@ function ping() {
 }
 
 function Text({ text }: { text: string }) {
-  const parts = text.split(/(\/(?:product\/[a-z0-9-]+|shop(?:\?cat=[a-z0-9-]+)?|track))/g);
+  const parts = text.split(/(\/(?:product\/[a-z0-9-]+|shop|category\/[a-z0-9-]+|track))/g);
   return <>{parts.map((p, i) => (i % 2 ? <Link key={i} href={p} className="font-medium underline">{p}</Link> : <span key={i}>{p}</span>))}</>;
 }
 
@@ -108,14 +108,14 @@ export function ChatWidget({ name, greeting }: { name: string; greeting: string 
                 <input name="name" required placeholder="Your name" className="rounded-xl border border-line bg-paper px-3 py-2 text-sm" />
                 <input name="phone" required inputMode="tel" placeholder="Mobile number" className="rounded-xl border border-line bg-paper px-3 py-2 text-sm" />
                 {leadErr && <p role="alert" className="text-xs text-red-600">{leadErr}</p>}
-                <button disabled={pending} className="rounded-full bg-accent py-2 text-sm font-semibold text-accent-ink disabled:opacity-50">Call me</button>
+                <button disabled={pending} className="rounded-pill bg-accent py-2 text-sm font-semibold text-accent-ink disabled:opacity-50">Call me</button>
               </form>
             )}
             {lead === "done" && <p className="rounded-2xl bg-paper p-3 text-sm">Thank you. We will contact you soon.</p>}
             <div ref={end} />
           </div>
           <form onSubmit={send} className="flex gap-2 border-t border-line p-3">
-            <input value={text} onChange={(e) => setText(e.target.value)} maxLength={500} placeholder="Ask about products or delivery" aria-label="Your message" className="min-w-0 flex-1 rounded-full border border-line bg-paper px-4 py-2.5 text-sm" />
+            <input value={text} onChange={(e) => setText(e.target.value)} maxLength={500} placeholder="Ask about products or delivery" aria-label="Your message" className="min-w-0 flex-1 rounded-pill border border-line bg-paper px-4 py-2.5 text-sm" />
             <button aria-label="Send" disabled={busy || !text.trim()} className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-accent text-accent-ink disabled:opacity-40"><Send size={16} /></button>
           </form>
         </section>

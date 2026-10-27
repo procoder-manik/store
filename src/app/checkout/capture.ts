@@ -9,7 +9,7 @@ const schema = z.object({
   name: z.string().trim().max(80),
   phone: z.string().trim().max(20),
   email: z.string().trim().max(120),
-  items: z.array(z.object({ id: z.string().max(64), variantId: z.string().max(64).optional(), name: z.string().max(160), color: z.string().max(40), size: z.string().max(20), price: z.number().min(0).max(10_000_000), qty: z.number().int().min(1).max(10) })).min(1).max(30),
+  items: z.array(z.object({ id: z.string().max(64), variantId: z.string().max(64).optional(), name: z.string().max(160), color: z.string().max(40), size: z.string().max(20), price: z.number().min(0).max(10_000_000), qty: z.number().int().min(1).max(10), image: z.string().max(500).optional(), kind: z.enum(["tee", "hoodie", "cover", "decor"]).optional(), hex: z.string().max(9).optional() })).min(1).max(30),
 });
 
 /** Saves a cart once a visitor has typed contact details, so staff can follow up if they leave. */

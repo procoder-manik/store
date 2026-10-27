@@ -47,7 +47,7 @@ export function EmailTemplateForm({ initial = EMPTY, brand }: { initial?: Templa
         </div>
         <div><label className={label}>Top image link (optional, Pexels, Unsplash or Pixabay)</label><input className={input} value={f.imageUrl} onChange={(e) => set("imageUrl", e.target.value)} /></div>
         {error && <p role="alert" className="text-sm text-red-600">{error}</p>}
-        <button disabled={pending} className="w-fit rounded-full bg-accent px-7 py-3 text-sm font-semibold text-accent-ink disabled:opacity-50">{pending ? "Saving..." : "Save template"}</button>
+        <button disabled={pending} className="w-fit rounded-pill bg-accent px-7 py-3 text-sm font-semibold text-accent-ink disabled:opacity-50">{pending ? "Saving..." : "Save template"}</button>
       </form>
       <div>
         <p className="mb-2 text-xs font-medium text-muted">Live preview</p>

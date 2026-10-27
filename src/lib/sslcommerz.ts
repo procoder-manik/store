@@ -90,7 +90,7 @@ export async function settle(tranId: string, valId: string): Promise<{ orderId: 
   await db.rpc("set_order_status", { p_order: p.order_id, p_status: "confirmed", p_actor: null, p_note: `Paid online${v.card_type ? ` (${v.card_type})` : ""}` });
 
   const { data: o } = await db.from("orders").select("order_no, total, guest_name, guest_email, order_items(name_snapshot, qty)").eq("id", p.order_id).maybeSingle();
-  if (o?.guest_email) await sendOrderEmail("placed", { email: o.guest_email as string, name: o.guest_name as string, orderNo: Number(o.order_no), total: Number(o.total), paid: true, items: (o.order_items as { name_snapshot: string; qty: number }[]).map((i) => `${i.name_snapshot} x ${i.qty}`) });
+  if (o?.guest_email) await sendOrderEmail("placed", { email: o.guest_email as string, name: o.guest_name as string, orderId: p.order_id as string, orderNo: Number(o.order_no), total: Number(o.total), paid: true, items: (o.order_items as { name_snapshot: string; qty: number }[]).map((i) => `${i.name_snapshot} x ${i.qty}`) });
   return { orderId: p.order_id as string, paid: true };
 }
 

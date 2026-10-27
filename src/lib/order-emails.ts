@@ -1,21 +1,24 @@
 import "server-only";
-import { SITE_URL, formatPrice } from "@/lib/config";
-import { getPublicSettings } from "@/lib/settings";
-import { brandedEmail } from "@/lib/email-html";
-import { emailConfigured, sendEmails } from "@/lib/email";
+import { SITE_URL } from "@/lib/config";
+import { sendAutoEmail, money } from "@/lib/auto-emails";
 
-type Info = { email: string; name: string; orderNo: number; total: number; items?: string[]; paid?: boolean; courier?: string; trackingCode?: string };
+type Info = { email: string; name: string; orderNo: number; total: number; items?: string[]; paid?: boolean; courier?: string; trackingCode?: string; orderId?: string };
 
-/** Order emails use the same branded layout as campaigns. Failures are swallowed so ordering never breaks. */
+/** Order emails use the wording you set in Email marketing, Automatic emails. A failure never blocks an order. */
 export async function sendOrderEmail(kind: "placed" | "shipped" | "delivered", o: Info) {
-  if (!o.email || !emailConfigured()) return;
-  const brand = (await getPublicSettings()).brand.name;
-  const first = o.name.split(" ")[0];
-  const copy = {
-    placed: { subject: `Order #${o.orderNo} received`, heading: `Thank you, ${first}`, body: `We received order #${o.orderNo} and will call you shortly to confirm it.\n\n${(o.items ?? []).map((i) => `- ${i}`).join("\n")}\n\n${o.paid ? `Paid online: ${formatPrice(o.total)}` : `Total to pay on delivery: ${formatPrice(o.total)}`}`, button: "Track your order" },
-    shipped: { subject: `Order #${o.orderNo} is on the way`, heading: "Your order is on the way", body: `Order #${o.orderNo} has been handed to our delivery partner. ${o.paid ? "Your payment is already received." : `Please keep ${formatPrice(o.total)} ready to pay on delivery.`}${o.courier ? `\n\nCourier: ${o.courier}${o.trackingCode ? `, tracking number ${o.trackingCode}` : ""}.` : ""}`, button: "Track your order" },
-    delivered: { subject: `Order #${o.orderNo} delivered`, heading: "Delivered, enjoy it", body: `Order #${o.orderNo} has been delivered. Thank you for shopping with ${brand}.`, button: "Shop again" },
-  }[kind];
-  const { html, text } = brandedEmail({ brand, heading: copy.heading, body: copy.body, buttonText: copy.button, buttonUrl: kind === "delivered" ? "/shop" : "/track", siteUrl: SITE_URL, footer: `This is an order update from ${brand}.` });
-  try { await sendEmails([{ to: o.email, subject: copy.subject, html, text }]); } catch { /* never block orders */ }
+  if (!o.email) return;
+  try {
+    await sendAutoEmail(`order_${kind}` as "order_placed", o.email, {
+      name: o.name.split(" ")[0] || "there",
+      order_no: String(o.orderNo),
+      total: money(o.total),
+      items: (o.items ?? []).map((i) => `- ${i}`).join("\n"),
+      payment: o.paid ? `Paid online: ${money(o.total)}` : `Total to pay on delivery: ${money(o.total)}`,
+      payment_note: o.paid ? "Your payment is already received." : `Please keep ${money(o.total)} ready to pay on delivery.`,
+      courier: o.courier ? `Courier: ${o.courier}${o.trackingCode ? `, tracking number ${o.trackingCode}` : ""}.` : "",
+      invoice_line: o.orderId ? `Your invoice: ${SITE_URL}/invoice/${o.orderId}` : "",
+    });
+  } catch (e) {
+    console.error("[email] order email failed:", (e as Error).message);
+  }
 }

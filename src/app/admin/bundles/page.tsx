@@ -24,7 +24,7 @@ export default async function Bundles() {
           <legend className="mb-1 text-xs font-medium text-muted">Products (choose 2 to 4)</legend>
           {(products ?? []).map((p) => <label key={p.id as string} className="flex items-center gap-2 rounded-lg px-2 py-1.5 text-sm hover:bg-paper"><input type="checkbox" name="p" value={p.id as string} />{p.name as string}</label>)}
         </fieldset>
-        <button className="w-fit rounded-full bg-accent px-6 py-2.5 text-sm font-semibold text-accent-ink">Create bundle</button>
+        <button className="w-fit rounded-pill bg-accent px-6 py-2.5 text-sm font-semibold text-accent-ink">Create bundle</button>
       </form>
       <ul className="mt-6 grid max-w-2xl gap-3">
         {!error && (bundles ?? []).length === 0 && <li className="rounded-xl border border-line bg-surface p-5 text-sm text-muted">No bundles yet.</li>}

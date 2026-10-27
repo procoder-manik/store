@@ -42,7 +42,7 @@ function LoginForm() {
         <input name="email" type="email" required placeholder="Email" autoComplete="email" className="rounded-xl border border-line bg-surface px-4 py-3 text-sm" />
         <input name="password" type="password" required minLength={10} placeholder="Password (10+ characters)" autoComplete={mode === "in" ? "current-password" : "new-password"} className="rounded-xl border border-line bg-surface px-4 py-3 text-sm" />
         {error && <p role="alert" className="text-sm text-red-600">{error}</p>}
-        <button disabled={busy} className="rounded-full bg-accent py-3 text-sm font-semibold text-accent-ink disabled:opacity-50">{mode === "in" ? "Sign in" : "Create account"}</button>
+        <button disabled={busy} className="rounded-pill bg-accent py-3 text-sm font-semibold text-accent-ink disabled:opacity-50">{mode === "in" ? "Sign in" : "Create account"}</button>
       </form>
       <button onClick={() => setMode(mode === "in" ? "up" : "in")} className="mt-4 text-sm text-muted underline">
         {mode === "in" ? "New here? Create an account" : "Have an account? Sign in"}

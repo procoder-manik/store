@@ -70,7 +70,7 @@ export function LandingView({ landing, product, zones }: { landing: LandingData;
               const save = normal - o.price;
               return (
                 <label key={o.qty} className={`flex cursor-pointer items-center justify-between gap-3 rounded-2xl border-2 p-4 ${offerQty === o.qty ? "border-accent bg-accent/5" : "border-line"}`}>
-                  <span className="flex items-center gap-3 text-sm"><input type="radio" name="offer" checked={offerQty === o.qty} onChange={() => setOfferQty(o.qty)} /><span className="font-medium">{o.label || `Buy ${o.qty}`}</span>{save > 0 && <span className="rounded-full bg-accent/10 px-2 py-0.5 text-xs text-accent">Save {formatPrice(save)}</span>}</span>
+                  <span className="flex items-center gap-3 text-sm"><input type="radio" name="offer" checked={offerQty === o.qty} onChange={() => setOfferQty(o.qty)} /><span className="font-medium">{o.label || `Buy ${o.qty}`}</span>{save > 0 && <span className="rounded-pill bg-accent/10 px-2 py-0.5 text-xs text-accent">Save {formatPrice(save)}</span>}</span>
                   <span className="font-display text-lg font-semibold">{formatPrice(o.price)}</span>
                 </label>
               );
@@ -106,7 +106,7 @@ export function LandingView({ landing, product, zones }: { landing: LandingData;
             <div className="flex justify-between text-base font-semibold"><dt>Total, pay on delivery</dt><dd>{formatPrice(offer.price + shipping)}</dd></div>
           </dl>
           {error && <p role="alert" className="text-sm text-red-600">{error}</p>}
-          <button disabled={pending || !ok || zones.length === 0} className="rounded-full bg-accent py-3.5 text-sm font-semibold text-accent-ink disabled:opacity-50">{!ok ? "Not enough stock in this option" : pending ? "Placing order..." : landing.cta}</button>
+          <button disabled={pending || !ok || zones.length === 0} className="rounded-pill bg-accent py-3.5 text-sm font-semibold text-accent-ink disabled:opacity-50">{!ok ? "Not enough stock in this option" : pending ? "Placing order..." : landing.cta}</button>
         </form>
       </div>
     </main>

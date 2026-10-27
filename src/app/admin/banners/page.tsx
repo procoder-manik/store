@@ -17,7 +17,7 @@ export default async function Banners() {
         <input name="link" placeholder="Link, like /shop?cat=hoodies" className={input} />
         <input name="button" maxLength={30} placeholder="Button text" className={input} />
         <input name="sort" type="number" min={0} placeholder="Order (0 shows first)" className={input} />
-        <button className="w-fit rounded-full bg-accent px-6 py-2.5 text-sm font-semibold text-accent-ink">Add banner</button>
+        <button className="w-fit rounded-pill bg-accent px-6 py-2.5 text-sm font-semibold text-accent-ink">Add banner</button>
       </form>
       <ul className="mt-6 grid max-w-3xl gap-3">
         {(data ?? []).length === 0 && <li className="rounded-xl border border-line bg-surface p-5 text-sm text-muted">No banners yet.</li>}

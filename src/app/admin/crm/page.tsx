@@ -12,7 +12,7 @@ export default async function CRM({ searchParams }: { searchParams: Promise<{ ta
   const supabase = await createClient();
   const leadsTab = tab === "leads";
 
-  const tabCls = (on: boolean) => `rounded-full border px-4 py-1.5 text-sm ${on ? "border-accent bg-accent text-accent-ink" : "border-line"}`;
+  const tabCls = (on: boolean) => `rounded-pill border px-4 py-1.5 text-sm ${on ? "border-accent bg-accent text-accent-ink" : "border-line"}`;
   const head = (
     <>
       <div className="flex flex-wrap items-center justify-between gap-3">
@@ -63,9 +63,9 @@ export default async function CRM({ searchParams }: { searchParams: Promise<{ ta
     <>
       {head}
       <form className="mt-4 flex flex-wrap gap-2 text-sm">
-        <input name="q" defaultValue={q} placeholder="Search name, phone or email" className="w-64 rounded-full border border-line bg-surface px-4 py-2" />
-        <select name="seg" defaultValue={seg} className="rounded-full border border-line bg-surface px-3 py-2 capitalize">{SEGMENTS.map((s) => <option key={s}>{s}</option>)}</select>
-        <button className="rounded-full border border-line px-4 py-2">Filter</button>
+        <input name="q" defaultValue={q} placeholder="Search name, phone or email" className="w-64 rounded-pill border border-line bg-surface px-4 py-2" />
+        <select name="seg" defaultValue={seg} className="rounded-pill border border-line bg-surface px-3 py-2 capitalize">{SEGMENTS.map((s) => <option key={s}>{s}</option>)}</select>
+        <button className="rounded-pill border border-line px-4 py-2">Filter</button>
       </form>
       <p className="mt-2 text-xs text-muted">VIP means 3 or more orders or ৳10,000 spent. Inactive means no order in 90 days.</p>
       <div className="mt-4 overflow-x-auto rounded-xl border border-line bg-surface">
@@ -79,7 +79,7 @@ export default async function CRM({ searchParams }: { searchParams: Promise<{ ta
                 <td className="p-3">{Number(c.orders)}</td>
                 <td className="p-3">{formatPrice(Number(c.spent))}</td>
                 <td className="p-3 text-muted">{new Date(c.last_order).toLocaleDateString("en-GB", { dateStyle: "medium" })}</td>
-                <td className="p-3"><span className={`rounded-full px-2.5 py-0.5 text-xs capitalize ${badge[c.segment]}`}>{c.segment}</span></td>
+                <td className="p-3"><span className={`rounded-pill px-2.5 py-0.5 text-xs capitalize ${badge[c.segment]}`}>{c.segment}</span></td>
               </tr>
             ))}
           </tbody>

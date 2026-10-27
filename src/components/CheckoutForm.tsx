@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { useCart } from "@/lib/cart";
+import { ProductArt } from "./ProductArt";
 import { formatPrice } from "@/lib/config";
 import { placeOrder, quoteOrder } from "@/app/checkout/actions";
 import { captureCart } from "@/app/checkout/capture";
@@ -56,7 +57,7 @@ export function CheckoutForm({ zones, bump = null, prefill = null, onlineEnabled
     const key = `${phone}|${email}|${cartKey}`;
     if (key === lastCap.current) return;
     lastCap.current = key;
-    void captureCart({ name: String(f.get("name") ?? ""), phone, email, items: items.map((i) => ({ id: i.id, variantId: i.variantId, name: i.name, color: i.color, size: i.size, price: i.price, qty: i.qty })) });
+    void captureCart({ name: String(f.get("name") ?? ""), phone, email, items: items.map((i) => ({ id: i.id, variantId: i.variantId, name: i.name, color: i.color, size: i.size, price: i.price, qty: i.qty, image: i.image, kind: i.kind, hex: i.hex })) });
   }
 
   function submit(e: React.FormEvent<HTMLFormElement>) {
@@ -83,7 +84,7 @@ export function CheckoutForm({ zones, bump = null, prefill = null, onlineEnabled
       <main className="mx-auto max-w-xl px-5 py-16">
         <h1 className="font-display text-2xl font-semibold">Your cart is empty</h1>
         <p className="mt-3 text-sm text-muted">Pick something off the rail, then come back to check out.</p>
-        <Link href="/" className="mt-5 inline-block rounded-full bg-accent px-6 py-3 text-sm font-semibold text-accent-ink">Keep shopping</Link>
+        <Link href="/" className="mt-5 inline-block rounded-pill bg-accent px-6 py-3 text-sm font-semibold text-accent-ink">Keep shopping</Link>
       </main>
     );
   }
@@ -134,8 +135,10 @@ export function CheckoutForm({ zones, bump = null, prefill = null, onlineEnabled
           <h2 className="font-display text-lg font-semibold">Order summary</h2>
           <ul className="mt-3 divide-y divide-line text-sm">
             {items.map((i) => (
-              <li key={i.key} className="flex justify-between gap-3 py-3">
-                <span>{i.name}<span className="block text-xs text-muted">{[i.color, i.size].filter(Boolean).join(", ")} x {i.qty}</span></span>
+              <li key={i.key} className="flex gap-3 py-3">
+                {i.image ? <img src={i.image} alt="" className="h-16 w-12 shrink-0 rounded-lg border border-line object-cover" /> : <ProductArt kind={i.kind ?? "tee"} color={i.hex ?? "#cfd2d8"} className="h-16 w-12 shrink-0 rounded-lg border border-line" />}
+                <span className="min-w-0 flex-1"><span className="block font-medium leading-snug">{i.name}</span><span className="text-xs text-muted">{[i.color, i.size].filter(Boolean).join(", ")}{(i.color || i.size) && ", "}x {i.qty}</span></span>
+                <span className="font-medium tabular-nums">{formatPrice(i.price * i.qty)}</span>
               </li>
             ))}
             {bumpOn && bump && <li className="flex justify-between gap-3 py-3"><span>{bump.name}<span className="block text-xs text-muted">Extra offer x 1</span></span></li>}
@@ -143,7 +146,7 @@ export function CheckoutForm({ zones, bump = null, prefill = null, onlineEnabled
 
           <div className="mt-3 flex gap-2">
             <input aria-label="Coupon code" placeholder="Coupon code" value={couponInput} onChange={(e) => setCouponInput(e.target.value)} className={input} />
-            <button type="button" onClick={() => setCoupon(couponInput.trim())} className="shrink-0 rounded-full border border-line px-4 text-sm font-medium hover:bg-paper">Apply</button>
+            <button type="button" onClick={() => setCoupon(couponInput.trim())} className="shrink-0 rounded-pill border border-line px-4 text-sm font-medium hover:bg-paper">Apply</button>
           </div>
           {quote?.couponError && <p className="mt-2 text-xs text-red-600">{quote.couponError}</p>}
 
@@ -157,7 +160,8 @@ export function CheckoutForm({ zones, bump = null, prefill = null, onlineEnabled
             </dl>
           )}
           {error && <p role="alert" className="mt-3 text-sm text-red-600">{error}</p>}
-          <button disabled={pending || !quote} className="mt-5 w-full rounded-full bg-accent py-3 text-sm font-semibold text-accent-ink disabled:opacity-50">{pending ? "Placing order..." : online ? "Continue to payment" : "Place order"}</button>
+          <button disabled={pending || !quote} className="mt-5 w-full rounded-pill bg-accent py-3 text-sm font-semibold text-accent-ink disabled:opacity-50">{pending ? "Placing order..." : online ? "Continue to payment" : "Place order"}</button>
+          <p className="mt-3 text-center text-xs text-muted">We will call you to confirm. {online ? "Your payment is processed on a secure page." : "You pay in cash when it arrives."}</p>
         </aside>
       </form>
     </main>

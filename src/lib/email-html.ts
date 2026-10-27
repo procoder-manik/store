@@ -1,5 +1,5 @@
 export type EmailParts = {
-  brand: string; heading: string; body: string; buttonText?: string; buttonUrl?: string; imageUrl?: string;
+  brand: string; logo?: string; heading: string; body: string; buttonText?: string; buttonUrl?: string; imageUrl?: string;
   footer?: string; unsubscribeUrl?: string; siteUrl: string;
 };
 
@@ -20,7 +20,7 @@ export function brandedEmail(p: EmailParts): { html: string; text: string } {
   const html = `<!doctype html><html><body style="margin:0;background:#f5f6f8;font-family:-apple-system,'Segoe UI',Roboto,Arial,sans-serif;color:#15171c">
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f5f6f8;padding:24px 12px"><tr><td align="center">
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;background:#ffffff;border-radius:16px;overflow:hidden">
-<tr><td style="padding:22px 28px;border-bottom:1px solid #e3e6eb;font-size:20px;font-weight:700;color:${accent}">${esc(p.brand)}</td></tr>
+<tr><td style="padding:22px 28px;border-bottom:1px solid #e3e6eb;font-size:20px;font-weight:700;color:${accent}">${p.logo && p.logo.startsWith("https://") ? `<img src="${esc(p.logo)}" alt="${esc(p.brand)}" height="36" style="display:block;height:36px;max-width:200px">` : esc(p.brand)}</td></tr>
 ${img ? `<tr><td><img src="${esc(img)}" alt="" width="560" style="display:block;width:100%;height:auto"></td></tr>` : ""}
 <tr><td style="padding:28px">
 <h1 style="margin:0 0 16px;font-size:24px;line-height:1.25">${esc(p.heading)}</h1>
@@ -32,3 +32,7 @@ ${link && p.buttonText ? `<p style="margin:22px 0 4px"><a href="${esc(link)}" st
   const text = [p.heading, "", ...paras, ...(link && p.buttonText ? ["", `${p.buttonText}: ${link}`] : []), ...(p.unsubscribeUrl ? ["", `Unsubscribe: ${p.unsubscribeUrl}`] : [])].join("\n");
   return { html, text };
 }
+
+/** Replaces {{name}}-style placeholders and tidies empty lines. */
+export const fillTemplate = (s: string, vars: Record<string, string>) =>
+  s.replace(/\{\{\s*([a-z_]+)\s*\}\}/gi, (_, k: string) => vars[k.toLowerCase()] ?? "").replace(/\n{3,}/g, "\n\n").trim();

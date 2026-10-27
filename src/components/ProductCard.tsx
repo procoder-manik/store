@@ -22,7 +22,7 @@ export function ProductCard({ p }: { p: Product }) {
           ) : (
             <ProductArt kind={p.kind} color={p.colors[0].hex} className="aspect-[4/5] w-full transition duration-500 group-hover:scale-105" />
           )}
-          {badge && <span className={`absolute left-3 top-3 rounded-full px-3 py-1 text-xs font-medium ${soldOut ? "bg-ink text-paper" : "bg-surface/90 text-ink backdrop-blur"}`}>{badge}</span>}
+          {badge && <span className={`absolute left-3 top-3 rounded-pill px-3 py-1 text-xs font-medium ${soldOut ? "bg-ink text-paper" : "bg-surface/90 text-ink backdrop-blur"}`}>{badge}</span>}
         </div>
         <div className="mt-3 flex items-start justify-between gap-3">
           <div>

@@ -3,7 +3,7 @@ import { createPublicClient } from "@/lib/supabase/public";
 import { CATEGORIES, DEMO_PRODUCTS, type ColorOpt, type Product } from "@/lib/demo-products";
 import { imageUrl, slugify } from "@/lib/utils";
 
-export type Cat = { id: string; label: string };
+export type Cat = { id: string; label: string; description?: string };
 
 type VRow = { id: string; color_name: string | null; color_hex: string | null; size: string | null; price_delta: number | string; stock: number };
 type IRow = { path: string; alt: string | null; sort: number };
@@ -11,12 +11,13 @@ type Row = {
   id: string; slug: string; name: string; kind: Product["kind"]; description: string | null;
   base_price: number | string; compare_at_price: number | string | null; tags: string[] | null;
   seo: { title?: string; description?: string } | null;
+  updated_at?: string | null;
   categories: { slug: string } | { slug: string }[] | null;
   product_variants: VRow[]; product_images: IRow[];
 };
 
 const SELECT =
-  "id, slug, name, kind, description, base_price, compare_at_price, tags, seo, categories(slug), product_variants(id, color_name, color_hex, size, price_delta, stock), product_images(path, alt, sort)";
+  "id, slug, name, kind, description, base_price, compare_at_price, tags, seo, updated_at, categories(slug), product_variants(id, color_name, color_hex, size, price_delta, stock), product_images(path, alt, sort)";
 
 function mapRow(r: Row): Product {
   const variants = (r.product_variants ?? []).map((v) => ({
@@ -61,6 +62,7 @@ function mapRow(r: Row): Product {
     image: imgs[0]?.url,
     images: imgs,
     seo: r.seo ?? {},
+    updatedAt: r.updated_at ?? undefined,
   };
 }
 
@@ -72,14 +74,16 @@ export const getCatalog = cache(async (): Promise<{ products: Product[]; categor
 
   const [prods, cats] = await Promise.all([
     sb.from("products").select(SELECT).eq("status", "active").order("created_at", { ascending: false }),
-    sb.from("categories").select("slug, name").eq("active", true).order("sort").order("name"),
+    sb.from("categories").select("slug, name, description").eq("active", true).order("sort").order("name"),
   ]);
   const rel = await sb.from("product_relations").select("product_id, related_id").order("sort");
   const relMap = new Map<string, string[]>();
   for (const r of (rel.error ? [] : rel.data ?? []) as { product_id: string; related_id: string }[]) relMap.set(r.product_id, [...(relMap.get(r.product_id) ?? []), r.related_id]);
   const products = ((prods.data ?? []) as unknown as Row[]).map(mapRow).map((p) => ({ ...p, related: relMap.get(p.id) ?? [] }));
+  let catRows = cats.data as { slug: string; name: string; description?: string | null }[] | null;
+  if (cats.error) catRows = ((await sb.from("categories").select("slug, name").eq("active", true).order("sort").order("name")).data ?? []) as typeof catRows; // description column not added yet
   const used = new Set(products.map((p) => p.category));
-  const categories = (cats.data ?? []).filter((c) => used.has(c.slug as string)).map((c) => ({ id: c.slug as string, label: c.name as string }));
+  const categories = (catRows ?? []).filter((c) => used.has(c.slug as string)).map((c) => ({ id: c.slug, label: c.name, description: c.description ?? undefined }));
   return { source: "db", products, categories };
 });
 

@@ -33,7 +33,7 @@ export function BundleBox({ name, percent, products }: { name: string; percent: 
   function addAll() {
     for (const { p, o, price, tracked } of picks) {
       const v = tracked ? (p.variants ?? []).find((x) => x.id === o?.id) : undefined;
-      add({ id: p.id, variantId: v?.id, name: p.name, color: v?.colorName ?? "", size: v?.size ?? "", price }, 1);
+      add({ id: p.id, variantId: v?.id, name: p.name, color: v?.colorName ?? "", size: v?.size ?? "", price, image: p.image, kind: p.kind, hex: p.colors[0].hex }, 1);
       trackAddToCart({ id: p.id, name: p.name, price, qty: 1 });
     }
     setAdded(true); setOpen(true);
@@ -59,8 +59,8 @@ export function BundleBox({ name, percent, products }: { name: string; percent: 
         ))}
       </div>
       <div className="mt-6 flex flex-wrap items-center justify-between gap-4 border-t border-line pt-5">
-        <p className="text-sm"><span className="text-muted">Together </span><span className="text-muted line-through">{formatPrice(sum)}</span> <span className="font-display text-xl font-semibold">{formatPrice(sum - save)}</span> <span className="rounded-full bg-accent/10 px-2.5 py-0.5 text-xs text-accent">Save {formatPrice(save)}</span></p>
-        <button disabled={!allOk} onClick={addAll} className="flex items-center gap-2 rounded-full bg-accent px-7 py-3 text-sm font-semibold text-accent-ink disabled:opacity-40">{added ? <><Check size={16} /> Added</> : allOk ? "Add all to cart" : "Not available"}</button>
+        <p className="text-sm"><span className="text-muted">Together </span><span className="text-muted line-through">{formatPrice(sum)}</span> <span className="font-display text-xl font-semibold">{formatPrice(sum - save)}</span> <span className="rounded-pill bg-accent/10 px-2.5 py-0.5 text-xs text-accent">Save {formatPrice(save)}</span></p>
+        <button disabled={!allOk} onClick={addAll} className="flex items-center gap-2 rounded-pill bg-accent px-7 py-3 text-sm font-semibold text-accent-ink disabled:opacity-40">{added ? <><Check size={16} /> Added</> : allOk ? "Add all to cart" : "Not available"}</button>
       </div>
     </section>
   );

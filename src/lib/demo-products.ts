@@ -21,6 +21,7 @@ export type Product = {
   images?: { url: string; alt: string }[];
   compareAt?: number | null;
   related?: string[];
+  updatedAt?: string;
   seo?: { title?: string; description?: string };
 };
 

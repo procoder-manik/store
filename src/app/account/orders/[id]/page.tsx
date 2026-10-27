@@ -21,7 +21,7 @@ export default async function OrderPage({ params }: { params: Promise<{ id: stri
   return (
     <main className="mx-auto max-w-3xl px-5 py-8 md:py-12">
       <Link href="/account" className="text-sm text-muted hover:underline">My account</Link>
-      <h1 className="mt-2 font-display text-3xl font-semibold">Order #{o.order_no}</h1>
+      <div className="mt-2 flex flex-wrap items-center justify-between gap-3"><h1 className="font-display text-3xl font-semibold">Order #{o.order_no}</h1><a href={`/invoice/${o.id}`} target="_blank" className="rounded-pill border border-line px-5 py-2.5 text-sm font-medium hover:bg-surface">View or download invoice</a></div>
       <div className="mt-6 grid gap-6 md:grid-cols-[1fr_260px]">
         <div className="rounded-2xl border border-line bg-surface p-5">
           <ul className="divide-y divide-line text-sm">

@@ -14,7 +14,7 @@ export default async function Products() {
     <>
       <div className="flex items-center justify-between">
         <h1 className="font-display text-2xl font-semibold">Products</h1>
-        <Link href="/admin/products/new" className="rounded-full bg-accent px-5 py-2 text-sm font-semibold text-accent-ink">Add product</Link>
+        <Link href="/admin/products/new" className="rounded-pill bg-accent px-5 py-2 text-sm font-semibold text-accent-ink">Add product</Link>
       </div>
       <div className="mt-6 overflow-x-auto rounded-xl border border-line bg-surface">
         <table className="w-full min-w-[560px] text-left text-sm">

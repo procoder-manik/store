@@ -16,7 +16,7 @@ export async function ReviewsSection({ productId, slug }: { productId: string; s
         <ul className="grid content-start gap-5">
           {reviews.map((r) => (
             <li key={r.id} className="border-b border-line pb-5">
-              <div className="flex items-center gap-2"><Stars value={r.rating} size={14} />{r.verified && <span className="rounded-full bg-paper px-2 py-0.5 text-xs text-muted">Verified purchase</span>}</div>
+              <div className="flex items-center gap-2"><Stars value={r.rating} size={14} />{r.verified && <span className="rounded-pill bg-paper px-2 py-0.5 text-xs text-muted">Verified purchase</span>}</div>
               {r.title && <p className="mt-2 text-sm font-medium">{r.title}</p>}
               <p className="mt-1 whitespace-pre-line text-sm text-muted">{r.body}</p>
               <p className="mt-2 text-xs text-muted">{r.author}, {new Date(r.created_at).toLocaleDateString("en-GB", { dateStyle: "medium" })}</p>

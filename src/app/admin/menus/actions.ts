@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { requireAdmin } from "@/lib/admin";
+import { isLogoUrl } from "@/lib/utils";
 
 const link = z.object({
   label: z.string().trim().min(1, "Every link needs a label").max(40),
@@ -10,7 +11,7 @@ const link = z.object({
 });
 
 const schema = z.object({
-  brand: z.object({ name: z.string().trim().min(1, "Add a store name").max(40), tagline: z.string().trim().max(120) }),
+  brand: z.object({ name: z.string().trim().min(1, "Add a store name").max(40), tagline: z.string().trim().max(120), logo: z.union([z.literal(""), z.string().max(500).refine(isLogoUrl, "The logo must be uploaded here or come from Pexels, Unsplash or Pixabay")]) }),
   header: z.object({ links: z.array(link).max(8) }),
   footer: z.object({
     about: z.string().trim().max(240),

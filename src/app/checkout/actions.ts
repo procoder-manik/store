@@ -108,7 +108,7 @@ export async function placeOrder(input: unknown): Promise<Placed> {
       const pay = await startPayment(created.id);
       return pay.ok ? { ok: true, id: created.id, payUrl: pay.url } : { ok: true, id: created.id };
     }
-    if (d.email) await sendOrderEmail("placed", { email: d.email.toLowerCase(), name: d.name, orderNo: Number(created.order_no), total: priced.total, items: priced.lines.map((l) => `${l.name} x ${l.qty}`) });
+    if (d.email) await sendOrderEmail("placed", { email: d.email.toLowerCase(), name: d.name, orderId: created.id, orderNo: Number(created.order_no), total: priced.total, items: priced.lines.map((l) => `${l.name} x ${l.qty}`) });
     return { ok: true, id: created.id };
   } catch {
     return { ok: false, error: "Checkout is not available right now." };

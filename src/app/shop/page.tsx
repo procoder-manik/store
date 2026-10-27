@@ -3,7 +3,7 @@ import { Suspense } from "react";
 import { getCatalog } from "@/lib/catalog";
 import { ShopGrid } from "@/components/ShopGrid";
 
-export const metadata: Metadata = { title: "Shop", description: "Browse clothing, bedding and home decor." };
+export const metadata: Metadata = { title: "Shop", description: "Browse clothing, bedding and home decor. Cash on delivery across Bangladesh.", alternates: { canonical: "/shop" } };
 export const revalidate = 60;
 
 export default async function Shop() {

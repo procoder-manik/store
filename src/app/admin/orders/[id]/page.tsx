@@ -31,7 +31,7 @@ export default async function OrderDetail({ params }: { params: Promise<{ id: st
   return (
     <>
       <Link href="/admin/orders" className="text-sm text-muted hover:underline">All orders</Link>
-      <div className="mt-2 flex flex-wrap items-center justify-between gap-3"><h1 className="font-display text-2xl font-semibold">Order #{o.order_no} <span className="ml-2 text-base font-normal capitalize text-muted">{o.status}</span></h1><a href={`/admin/orders/${o.id}/invoice`} target="_blank" className="rounded-full border border-line px-4 py-2 text-sm font-medium hover:bg-paper">Print invoice</a></div>
+      <div className="mt-2 flex flex-wrap items-center justify-between gap-3"><h1 className="font-display text-2xl font-semibold">Order #{o.order_no} <span className="ml-2 text-base font-normal capitalize text-muted">{o.status}</span></h1><span className="flex gap-2"><a href={`/admin/orders/${o.id}/label`} target="_blank" className="rounded-pill border border-line px-4 py-2 text-sm font-medium hover:bg-paper">Parcel label</a><a href={`/admin/orders/${o.id}/invoice`} target="_blank" className="rounded-pill border border-line px-4 py-2 text-sm font-medium hover:bg-paper">Invoice</a></span></div>
 
       <div className="mt-6 grid gap-5 lg:grid-cols-[1fr_340px]">
         <div className="grid gap-5">
@@ -52,7 +52,7 @@ export default async function OrderDetail({ params }: { params: Promise<{ id: st
             <ul className="mt-2 grid gap-2 text-sm">
               {events.map((e) => <li key={e.id}><span className="font-medium capitalize">{e.status}</span> <span className="text-muted">{new Date(e.created_at).toLocaleString("en-GB", { dateStyle: "medium", timeStyle: "short" })}{e.note ? `, ${e.note}` : ""}</span></li>)}
             </ul>
-            <form action={addOrderNote} className="mt-4 flex gap-2 border-t border-line pt-4"><input type="hidden" name="id" value={o.id} /><input name="note" required maxLength={300} placeholder="Add an internal note" className="min-w-0 flex-1 rounded-xl border border-line bg-paper px-3 py-2 text-sm" /><button className="shrink-0 rounded-full border border-line px-4 text-sm font-medium hover:bg-paper">Add</button></form>
+            <form action={addOrderNote} className="mt-4 flex gap-2 border-t border-line pt-4"><input type="hidden" name="id" value={o.id} /><input name="note" required maxLength={300} placeholder="Add an internal note" className="min-w-0 flex-1 rounded-xl border border-line bg-paper px-3 py-2 text-sm" /><button className="shrink-0 rounded-pill border border-line px-4 text-sm font-medium hover:bg-paper">Add</button></form>
           </section>
         </div>
 
@@ -78,11 +78,11 @@ export default async function OrderDetail({ params }: { params: Promise<{ id: st
               <input name="courier" list="couriers" maxLength={40} defaultValue={o.courier ?? ""} placeholder="Courier, like Steadfast or Pathao" className="rounded-xl border border-line bg-paper px-3 py-2 text-sm" />
               <datalist id="couriers">{["Steadfast", "Pathao", "RedX", "eCourier", "Paperfly", "Sundarban", "SA Paribahan"].map((c) => <option key={c} value={c} />)}</datalist>
               <input name="tracking" maxLength={60} defaultValue={o.tracking_code ?? ""} placeholder="Tracking number" className="rounded-xl border border-line bg-paper px-3 py-2 text-sm" />
-              <button className="rounded-full border border-line py-2 text-sm font-medium hover:bg-paper">Save shipment</button>
+              <button className="rounded-pill border border-line py-2 text-sm font-medium hover:bg-paper">Save shipment</button>
             </form>
             {o.consignment_id && <p className="mt-3 text-xs text-muted">Booked with Steadfast. Consignment {o.consignment_id}.</p>}
             {steadfastConfigured() && !o.consignment_id && ["confirmed", "processing"].includes(o.status) && (
-              <form action={bookSteadfast} className="mt-3"><input type="hidden" name="id" value={o.id} /><button className="w-full rounded-full bg-ink py-2.5 text-sm font-semibold text-paper">Book with Steadfast</button><p className="mt-2 text-xs text-muted">Sends the name, phone, address and cash to collect.</p></form>
+              <form action={bookSteadfast} className="mt-3"><input type="hidden" name="id" value={o.id} /><button className="w-full rounded-pill bg-ink py-2.5 text-sm font-semibold text-paper">Book with Steadfast</button><p className="mt-2 text-xs text-muted">Sends the name, phone, address and cash to collect.</p></form>
             )}
           </section>
           {actions.length > 0 && (
@@ -96,7 +96,7 @@ export default async function OrderDetail({ params }: { params: Promise<{ id: st
                     <input type="hidden" name="status" value={a.to} />
                     {a.to === "shipped" && <><input name="courier" list="couriers" maxLength={40} defaultValue={o.courier ?? ""} placeholder="Courier (optional)" className="rounded-xl border border-line bg-paper px-3 py-2 text-sm" /><input name="tracking" maxLength={60} defaultValue={o.tracking_code ?? ""} placeholder="Tracking number (optional)" className="rounded-xl border border-line bg-paper px-3 py-2 text-sm" /></>}
                     <input name="note" maxLength={300} placeholder="Note (optional)" className="rounded-xl border border-line bg-paper px-3 py-2 text-sm" />
-                    <button className={`rounded-full py-2.5 text-sm font-semibold ${a.to === "cancelled" || a.to === "returned" ? "border border-line text-red-600" : "bg-accent text-accent-ink"}`}>{a.label}</button>
+                    <button className={`rounded-pill py-2.5 text-sm font-semibold ${a.to === "cancelled" || a.to === "returned" ? "border border-line text-red-600" : "bg-accent text-accent-ink"}`}>{a.label}</button>
                   </form>
                 ))}
               </div>

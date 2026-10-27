@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { CampaignControls } from "@/components/admin/CampaignControls";
+import { createAdminClient } from "@/lib/supabase/admin";
 
 export default async function Emails() {
   const supabase = await createClient();
@@ -9,11 +10,13 @@ export default async function Emails() {
     supabase.from("email_campaigns").select("id, name, audience, sent_count, failed_count, created_at").order("created_at", { ascending: false }).limit(10),
   ]);
   const configured = !!(process.env.RESEND_API_KEY && process.env.EMAIL_FROM);
+  let log: { id: string; to_email: string; subject: string; kind: string; status: string; error: string | null; created_at: string }[] = [];
+  try { log = ((await createAdminClient().from("email_log").select("*").order("created_at", { ascending: false }).limit(8)).data ?? []) as typeof log; } catch { /* log not set up */ }
   return (
     <>
       <div className="flex items-center justify-between">
         <h1 className="font-display text-2xl font-semibold">Email marketing</h1>
-        <Link href="/admin/emails/new" className="rounded-full bg-accent px-5 py-2 text-sm font-semibold text-accent-ink">New template</Link>
+        <span className="flex gap-2"><Link href="/admin/emails/automatic" className="rounded-pill border border-line px-5 py-2 text-sm font-medium hover:bg-surface">Automatic emails</Link><Link href="/admin/emails/new" className="rounded-pill bg-accent px-5 py-2 text-sm font-semibold text-accent-ink">New template</Link></span>
       </div>
       <p className="mt-1 max-w-2xl text-sm text-muted">Every email uses your brand name and colors automatically. Write the message, preview it, send yourself a test, then send it to an audience. Each email includes an unsubscribe link.</p>
       {!configured && <p className="mt-4 max-w-2xl rounded-xl border border-line bg-paper p-4 text-sm">Sending is off. Add <code>RESEND_API_KEY</code> and <code>EMAIL_FROM</code> to your <code>.env.local</code> file and restart the server. Order confirmation emails use the same setup.</p>}
@@ -27,6 +30,14 @@ export default async function Emails() {
           </li>
         ))}
       </ul>
+      {log.length > 0 && (
+        <section className="mt-10 max-w-3xl">
+          <h2 className="font-display text-lg font-semibold">Latest emails sent by the store</h2>
+          <ul className="mt-3 divide-y divide-line rounded-xl border border-line bg-surface text-sm">
+            {log.map((m) => <li key={m.id} className="p-4"><div className="flex justify-between gap-3"><span className="min-w-0 truncate">{m.subject}<span className="block truncate text-xs text-muted">to {m.to_email}</span></span><span className={`shrink-0 text-xs font-medium ${m.status === "sent" ? "text-emerald-700" : "text-red-600"}`}>{m.status === "sent" ? "Sent" : "Failed"}</span></div>{m.error && <p className="mt-2 rounded-lg bg-paper p-3 text-xs">{m.error}</p>}</li>)}
+          </ul>
+        </section>
+      )}
       {(camps ?? []).length > 0 && (
         <section className="mt-10 max-w-3xl">
           <h2 className="font-display text-lg font-semibold">Recent sends</h2>

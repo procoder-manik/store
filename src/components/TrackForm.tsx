@@ -30,7 +30,7 @@ export function TrackForm() {
         <input name="orderNo" required inputMode="numeric" placeholder="Order number, like 1042" className={input} />
         <input name="phone" required inputMode="tel" placeholder="Mobile number used for the order" className={input} />
         {error && <p role="alert" className="text-sm text-red-600">{error}</p>}
-        <button disabled={pending} className="rounded-full bg-accent py-3 text-sm font-semibold text-accent-ink disabled:opacity-50">{pending ? "Checking..." : "Track order"}</button>
+        <button disabled={pending} className="rounded-pill bg-accent py-3 text-sm font-semibold text-accent-ink disabled:opacity-50">{pending ? "Checking..." : "Track order"}</button>
       </form>
       {found && (
         <div className="mt-6 rounded-2xl border border-line bg-surface p-5">

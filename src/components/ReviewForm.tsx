@@ -46,7 +46,7 @@ export function ReviewForm({ productId, slug }: { productId: string; slug: strin
       <input name="title" placeholder="Title (optional)" maxLength={80} className={input} />
       <textarea name="body" required minLength={10} maxLength={1000} rows={4} placeholder="What did you think of it?" className={input} />
       {msg && !msg.ok && <p role="alert" className="text-sm text-red-600">{msg.text}</p>}
-      <button disabled={pending} className="w-fit rounded-full bg-accent px-6 py-2.5 text-sm font-semibold text-accent-ink disabled:opacity-50">{pending ? "Sending..." : "Submit review"}</button>
+      <button disabled={pending} className="w-fit rounded-pill bg-accent px-6 py-2.5 text-sm font-semibold text-accent-ink disabled:opacity-50">{pending ? "Sending..." : "Submit review"}</button>
     </form>
   );
 }

@@ -3,6 +3,8 @@
 import { useState, useTransition } from "react";
 import { ArrowDown, ArrowUp, Plus, Trash2 } from "lucide-react";
 import { saveSite } from "@/app/admin/menus/actions";
+import { createClient } from "@/lib/supabase/client";
+import { imageUrl } from "@/lib/utils";
 import type { Settings } from "@/lib/settings";
 
 type L = { label: string; href: string };
@@ -56,6 +58,23 @@ export function MenuEditor({ initial, suggestions }: { initial: Pick<Settings, "
           <div><label className={label}>Name (shown in the header, footer, emails and browser tab)</label><input className={input} required maxLength={40} value={brand.name} onChange={(e) => setBrand({ ...brand, name: e.target.value })} /></div>
           <div><label className={label}>Tagline</label><input className={input} maxLength={120} value={brand.tagline} onChange={(e) => setBrand({ ...brand, tagline: e.target.value })} /></div>
         </div>
+        <div>
+          <label className={label}>Logo (shown in the header, invoices, parcel labels and emails)</label>
+          <div className="flex flex-wrap items-center gap-3">
+            {brand.logo ? <img src={brand.logo} alt="Logo preview" className="h-12 max-w-[180px] rounded-lg border border-line bg-paper object-contain p-1" /> : <span className="grid h-12 w-24 place-items-center rounded-lg border border-dashed border-line text-xs text-muted">No logo</span>}
+            <input type="file" accept="image/png,image/jpeg,image/webp,image/svg+xml" aria-label="Upload a logo" className="text-sm" onChange={async (e) => {
+              const f = e.target.files?.[0]; e.target.value = "";
+              if (!f) return;
+              if (f.size > 2 * 1024 * 1024) { setMsg({ ok: false, text: "The logo must be under 2 MB." }); return; }
+              const ext = ({ "image/png": "png", "image/jpeg": "jpg", "image/webp": "webp", "image/svg+xml": "svg" } as Record<string, string>)[f.type];
+              if (!ext) { setMsg({ ok: false, text: "Use a PNG, JPG, WebP or SVG file." }); return; }
+              const path = `logo-${crypto.randomUUID()}.${ext}`;
+              const { error } = await createClient().storage.from("product-images").upload(path, f, { contentType: f.type });
+              if (error) setMsg({ ok: false, text: error.message }); else { setBrand((b) => ({ ...b, logo: imageUrl(path) })); setMsg(null); }
+            }} />
+            {brand.logo && <button type="button" onClick={() => setBrand({ ...brand, logo: "" })} className="text-sm text-red-600 underline">Remove</button>}
+          </div>
+        </div>
       </section>
 
       <section className={card}>
@@ -81,7 +100,7 @@ export function MenuEditor({ initial, suggestions }: { initial: Pick<Settings, "
       </section>
 
       {msg && <p role="status" className={`text-sm ${msg.ok ? "text-muted" : "text-red-600"}`}>{msg.text}</p>}
-      <button disabled={pending} className="w-fit rounded-full bg-accent px-7 py-3 text-sm font-semibold text-accent-ink disabled:opacity-50">{pending ? "Saving..." : "Save changes"}</button>
+      <button disabled={pending} className="w-fit rounded-pill bg-accent px-7 py-3 text-sm font-semibold text-accent-ink disabled:opacity-50">{pending ? "Saving..." : "Save changes"}</button>
     </form>
   );
 }

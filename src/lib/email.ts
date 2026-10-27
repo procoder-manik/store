@@ -6,9 +6,23 @@ export const emailConfigured = () => !!(process.env.RESEND_API_KEY && process.en
 
 export type Outgoing = { to: string; subject: string; html: string; text: string };
 
-/** Sends through Resend in batches of 100. Returns counts so a failure never throws into a customer flow. */
-export async function sendEmails(msgs: Outgoing[]): Promise<{ sent: number; failed: number; error?: string }> {
-  if (!emailConfigured()) return { sent: 0, failed: msgs.length, error: "Add RESEND_API_KEY and EMAIL_FROM to .env.local." };
+/** Turns the email service's raw error into a sentence the store owner can act on. */
+export function explainEmailError(raw: string): string {
+  const t = raw.toLowerCase();
+  if (t.includes("own email address") || t.includes("testing emails")) return "Your Resend account is still in testing mode, so it can only send to the email you signed up with. Verify your own domain at resend.com/domains, then set EMAIL_FROM to an address on that domain, like hello@yourdomain.com.";
+  if (t.includes("domain is not verified") || t.includes("not verified")) return "The domain in EMAIL_FROM is not verified in Resend. Open resend.com/domains, add your domain and add the DNS records it shows.";
+  if (t.includes("api key is invalid") || t.includes("invalid api key") || t.includes("restricted_api_key") || t.includes("401")) return "RESEND_API_KEY is wrong or has no permission to send. Create a new key with Sending access at resend.com/api-keys.";
+  if (t.includes("invalid `from`") || t.includes("from field") || t.includes("invalid from")) return "EMAIL_FROM is not a valid sender. Use the form hello@yourdomain.com or Your Shop <hello@yourdomain.com>.";
+  if (t.includes("rate") && t.includes("limit")) return "Too many emails too quickly. Try again in a minute.";
+  return raw.slice(0, 220);
+}
+
+/** Sends through Resend in batches of 100. Never throws into a customer flow, and records every result in the email log. */
+export async function sendEmails(msgs: Outgoing[], kind = "other"): Promise<{ sent: number; failed: number; error?: string }> {
+  if (!emailConfigured()) {
+    await log(msgs, kind, "failed", "Email is not set up. Add RESEND_API_KEY and EMAIL_FROM to .env.local.");
+    return { sent: 0, failed: msgs.length, error: "Add RESEND_API_KEY and EMAIL_FROM to .env.local." };
+  }
   let sent = 0, failed = 0, error: string | undefined;
   for (let i = 0; i < msgs.length; i += 100) {
     const chunk = msgs.slice(i, i + 100);
@@ -18,14 +32,33 @@ export async function sendEmails(msgs: Outgoing[]): Promise<{ sent: number; fail
         headers: { "content-type": "application/json", authorization: `Bearer ${process.env.RESEND_API_KEY}` },
         body: JSON.stringify(chunk.map((m) => ({ from: process.env.EMAIL_FROM, to: [m.to], subject: m.subject, html: m.html, text: m.text }))),
       });
-      if (res.ok) sent += chunk.length;
-      else { failed += chunk.length; error = (await res.text()).slice(0, 160); }
-    } catch {
+      if (res.ok) { sent += chunk.length; await log(chunk, kind, "sent"); }
+      else {
+        const raw = await res.text();
+        let msg = raw;
+        try { const j = JSON.parse(raw) as { message?: string }; msg = j.message ?? raw; } catch { /* plain text */ }
+        failed += chunk.length;
+        error = explainEmailError(`${res.status} ${msg}`);
+        await log(chunk, kind, "failed", error);
+        console.error("[email] send failed:", res.status, msg);
+      }
+    } catch (e) {
       failed += chunk.length;
-      error = "Could not reach the email service.";
+      error = "Could not reach the email service. Check the internet connection of the server.";
+      await log(chunk, kind, "failed", error);
+      console.error("[email] network error:", (e as Error).message);
     }
   }
   return { sent, failed, error };
+}
+
+async function log(msgs: Outgoing[], kind: string, status: "sent" | "failed", error?: string) {
+  try {
+    const { createAdminClient } = await import("@/lib/supabase/admin");
+    await createAdminClient().from("email_log").insert(msgs.map((m) => ({ to_email: m.to, subject: m.subject.slice(0, 200), kind, status, error: error ?? null })));
+  } catch {
+    // The log is a convenience. It must never break sending.
+  }
 }
 
 const secret = () => process.env.EMAIL_SECRET || process.env.SUPABASE_SERVICE_ROLE_KEY || "";

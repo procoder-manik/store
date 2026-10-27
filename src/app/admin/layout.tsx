@@ -19,7 +19,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   }
   const { brand } = await getPublicSettings();
   return (
-    <div className="min-h-dvh bg-paper lg:grid lg:grid-cols-[264px_minmax(0,1fr)]">
+    <div data-theme="studio" className="min-h-dvh bg-paper text-ink lg:grid lg:grid-cols-[264px_minmax(0,1fr)]">
       <AdminSidebar brand={brand.name} />
       <main data-admin-main className="min-w-0 px-4 py-6 md:px-8 lg:px-12 lg:py-10">
         <div className="mx-auto max-w-6xl">{children}</div>

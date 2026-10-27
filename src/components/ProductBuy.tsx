@@ -9,9 +9,9 @@ import { useCart } from "@/lib/cart";
 import { trackAddToCart } from "@/lib/track";
 import { ListButtons } from "./ListButtons";
 
-type Props = { product: Product; colorIdx: number; onColor: (i: number) => void };
+type Props = { product: Product; colorIdx: number; onColor: (i: number) => void; compact?: boolean };
 
-export function ProductBuy({ product, colorIdx, onColor }: Props) {
+export function ProductBuy({ product, colorIdx, onColor, compact = false }: Props) {
   const router = useRouter();
   const [size, setSize] = useState(product.sizes[1] ?? product.sizes[0] ?? "");
   const [qty, setQty] = useState(1);
@@ -32,18 +32,26 @@ export function ProductBuy({ product, colorIdx, onColor }: Props) {
   const stockNote = !tracked || !variant ? "" : variant.stock <= 0 ? "Sold out in this option" : variant.stock <= 5 ? `Only ${variant.stock} left` : "In stock";
 
   const addToCart = () => {
-    add({ id: product.id, variantId: variant?.id, name: product.name, color: hasColors ? color.name : "", size, price }, q);
+    add({ id: product.id, variantId: variant?.id, name: product.name, color: hasColors ? color.name : "", size, price, image: product.image, kind: product.kind, hex: color.hex }, q);
     trackAddToCart({ id: product.id, name: product.name, price, qty: q });
   };
   const onAdd = () => { addToCart(); setAdded(true); setOpen(true); window.setTimeout(() => setAdded(false), 1800); };
   const buyNow = () => { addToCart(); router.push("/checkout"); };
+
+  const stepper = (
+    <div className="inline-flex shrink-0 items-center rounded-pill border border-line">
+      <button aria-label="Decrease quantity" onClick={() => setQty(Math.max(1, q - 1))} className="grid h-10 w-9 place-items-center"><Minus size={14} /></button>
+      <span className="w-6 text-center text-sm tabular-nums" aria-live="polite">{q}</span>
+      <button aria-label="Increase quantity" onClick={() => setQty(Math.min(maxQty, q + 1))} className="grid h-10 w-9 place-items-center"><Plus size={14} /></button>
+    </div>
+  );
 
   return (
     <div>
       <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
         <p className="font-display text-3xl font-semibold">{formatPrice(price)}</p>
         {saving > 0 && <p className="text-sm text-muted line-through">{formatPrice(product.compareAt as number)}</p>}
-        {saving > 0 && <p className="rounded-full bg-accent/10 px-2.5 py-0.5 text-xs font-medium text-accent">Save {formatPrice(saving)}</p>}
+        {saving > 0 && <p className="rounded-pill bg-accent/10 px-2.5 py-0.5 text-xs font-medium text-accent">Save {formatPrice(saving)}</p>}
       </div>
 
       {hasColors && (
@@ -72,21 +80,26 @@ export function ProductBuy({ product, colorIdx, onColor }: Props) {
         </div>
       )}
 
-      <div className="mt-5 flex items-center gap-4">
-        <div className="inline-flex items-center rounded-full border border-line">
-          <button aria-label="Decrease quantity" onClick={() => setQty(Math.max(1, q - 1))} className="grid h-10 w-10 place-items-center"><Minus size={14} /></button>
-          <span className="w-8 text-center text-sm tabular-nums" aria-live="polite">{q}</span>
-          <button aria-label="Increase quantity" onClick={() => setQty(Math.min(maxQty, q + 1))} className="grid h-10 w-10 place-items-center"><Plus size={14} /></button>
-        </div>
-        {stockNote && <p className={`text-sm ${available ? "text-muted" : "text-red-600"}`}>{stockNote}</p>}
-      </div>
-
-      <div className="mt-5 grid gap-2.5">
-        <button disabled={!available} onClick={onAdd} className="flex items-center justify-center gap-2 rounded-full bg-accent py-3.5 text-sm font-semibold text-accent-ink transition active:scale-[0.99] disabled:opacity-40">
-          {added ? <><Check size={16} /> Added to cart</> : available ? "Add to cart" : "Sold out"}
-        </button>
-        <button disabled={!available} onClick={buyNow} className="rounded-full bg-ink py-3.5 text-sm font-semibold text-paper transition active:scale-[0.99] disabled:opacity-40">Buy now</button>
-      </div>
+      {compact ? (
+        <>
+          <div className="mt-4 flex items-center gap-2">
+            {stepper}
+            <button disabled={!available} onClick={onAdd} className="flex flex-1 items-center justify-center gap-1.5 rounded-pill bg-accent py-3 text-sm font-semibold text-accent-ink transition active:scale-[0.99] disabled:opacity-40">{added ? <><Check size={15} /> Added</> : available ? "Add to cart" : "Sold out"}</button>
+            <button disabled={!available} onClick={buyNow} className="flex-1 rounded-pill bg-ink py-3 text-sm font-semibold text-paper transition active:scale-[0.99] disabled:opacity-40">Buy now</button>
+          </div>
+          {stockNote && <p className={`mt-2 text-xs ${available ? "text-muted" : "text-red-600"}`}>{stockNote}</p>}
+        </>
+      ) : (
+        <>
+          <div className="mt-5 flex items-center gap-4">{stepper}{stockNote && <p className={`text-sm ${available ? "text-muted" : "text-red-600"}`}>{stockNote}</p>}</div>
+          <div className="mt-5 grid gap-2.5">
+            <button disabled={!available} onClick={onAdd} className="flex items-center justify-center gap-2 rounded-pill bg-accent py-3.5 text-sm font-semibold text-accent-ink transition active:scale-[0.99] disabled:opacity-40">
+              {added ? <><Check size={16} /> Added to cart</> : available ? "Add to cart" : "Sold out"}
+            </button>
+            <button disabled={!available} onClick={buyNow} className="rounded-pill bg-ink py-3.5 text-sm font-semibold text-paper transition active:scale-[0.99] disabled:opacity-40">Buy now</button>
+          </div>
+        </>
+      )}
       <p className="mt-3 flex items-center gap-2 text-xs text-muted"><Truck size={14} /> Cash on delivery. Pay when it arrives.</p>
       <ListButtons id={product.id} />
     </div>

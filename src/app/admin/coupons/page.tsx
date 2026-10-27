@@ -16,7 +16,7 @@ export default async function Coupons() {
         <input name="min_subtotal" type="number" min={0} step="0.01" placeholder="Minimum order (optional)" className={input} />
         <input name="max_uses" type="number" min={1} step={1} placeholder="Max uses (optional)" className={input} />
         <input name="ends_at" type="date" aria-label="Expires on" className={input} />
-        <button className="rounded-full bg-accent px-5 py-2.5 text-sm font-semibold text-accent-ink md:col-span-3 md:w-40">Add coupon</button>
+        <button className="rounded-pill bg-accent px-5 py-2.5 text-sm font-semibold text-accent-ink md:col-span-3 md:w-40">Add coupon</button>
       </form>
       <div className="mt-6 overflow-x-auto rounded-xl border border-line bg-surface">
         <table className="w-full min-w-[640px] text-left text-sm">

@@ -70,7 +70,7 @@ export function ManualOrderForm({ options, zones }: { options: Option[]; zones: 
 
       <p className="text-sm text-muted">Items {formatPrice(subtotal)} plus delivery {formatPrice(fee)} before discounts. The exact total is worked out when you create the order.</p>
       {error && <p role="alert" className="text-sm text-red-600">{error}</p>}
-      <button disabled={pending || zones.length === 0} className="w-fit rounded-full bg-accent px-7 py-3 text-sm font-semibold text-accent-ink disabled:opacity-50">{pending ? "Creating..." : "Create order"}</button>
+      <button disabled={pending || zones.length === 0} className="w-fit rounded-pill bg-accent px-7 py-3 text-sm font-semibold text-accent-ink disabled:opacity-50">{pending ? "Creating..." : "Create order"}</button>
     </form>
   );
 }

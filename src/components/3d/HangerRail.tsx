@@ -8,6 +8,8 @@ import { formatPrice } from "@/lib/config";
 
 const SPACING = 2;
 const RAIL_Y = 1.35;
+/** With nothing selected the first item sits one step left of center, so products show on both sides. */
+const START = -SPACING;
 const clamp = (v: number, a: number, b: number) => Math.min(b, Math.max(a, v));
 const damp = THREE.MathUtils.damp;
 
@@ -141,7 +143,7 @@ function drawTag(name: string, price: string) {
   c.strokeStyle = "rgba(0,0,0,0.12)"; c.lineWidth = 3; c.stroke();
   c.globalCompositeOperation = "destination-out"; c.beginPath(); c.arc(46, h / 2, 13, 0, Math.PI * 2); c.fill();
   c.globalCompositeOperation = "source-over";
-  const fam = getComputedStyle(document.documentElement).getPropertyValue("--font-display").trim() || "system-ui, sans-serif";
+  const fam = getComputedStyle(document.documentElement).getPropertyValue("--ff-display").trim() || "system-ui, sans-serif";
   c.fillStyle = "#17191e"; c.textBaseline = "alphabetic";
   c.font = `600 42px ${fam}`;
   let t = name;
@@ -168,9 +170,9 @@ function Thread({ a, b }: { a: [number, number]; b: [number, number] }) {
 
 /* ---------- one product on the rail ---------- */
 
-type ItemProps = { p: Product; i: number; selected: boolean; dim: boolean; colorHex: string; onSelect: (id: string) => void; sh: Shared; rot: MutableRefObject<number> };
+type ItemProps = { p: Product; i: number; selected: boolean; dim: boolean; colorHex: string; onSelect: (id: string) => void; sh: Shared; rot: MutableRefObject<number>; narrow: boolean };
 
-function Item({ p, i, selected, dim, colorHex, onSelect, sh, rot }: ItemProps) {
+function Item({ p, i, selected, dim, colorHex, onSelect, sh, rot, narrow }: ItemProps) {
   const swing = useRef<THREE.Group>(null);
   const tagRef = useRef<THREE.Group>(null);
   const hover = useRef(false);
@@ -233,9 +235,9 @@ function Item({ p, i, selected, dim, colorHex, onSelect, sh, rot }: ItemProps) {
     const sway = Math.sin(t * 1.1 + i * 1.3) * 0.025 + (hover.current ? Math.sin(t * 7) * 0.03 : 0);
     g.rotation.z = damp(g.rotation.z, selected ? 0 : sway, 4, dt);
     g.rotation.y = damp(g.rotation.y, selected ? rot.current + Math.sin(t * 0.6) * 0.12 : 0, 6, dt);
-    g.position.z = damp(g.position.z, selected ? 1.2 : dim ? -0.35 : 0, 5, dt);
-    g.position.y = damp(g.position.y, selected ? RAIL_Y - 0.12 : RAIL_Y, 5, dt);
-    g.scale.setScalar(damp(g.scale.x, selected ? 1.42 : dim ? 0.92 : 1, 5, dt));
+    g.position.z = damp(g.position.z, selected ? (narrow ? 0 : 0.9) : dim ? -0.35 : 0, 5, dt);
+    g.position.y = damp(g.position.y, selected ? RAIL_Y - 0.1 + (narrow ? 0.95 : 0) : RAIL_Y, 5, dt);
+    g.scale.setScalar(damp(g.scale.x, selected ? (narrow ? 0.8 : 1.2) : dim ? 0.92 : 1, 5, dt));
     if (tagRef.current) tagRef.current.scale.setScalar(damp(tagRef.current.scale.x, selected ? 0.001 : 1, 8, dt));
     if (mode !== "card") mat.color.lerp(target.set(selected ? colorHex : p.colors[0].hex), Math.min(1, dt * 8));
   });
@@ -382,7 +384,8 @@ function Track({ products, selectedId, colorHex, onSelect, nudge, onIndex, sh, d
   const last = useRef(-1);
   const lastSel = useRef(0);
   const prevSel = useRef<string | null>(null);
-  const width = useThree((s) => s.size.width);
+  const size = useThree((s) => s.size);
+  const width = size.width;
   const off = width >= 900 ? -1.1 : 0;
   const max = Math.max(0, (products.length - 1) * SPACING);
   locked.current = !!selectedId;
@@ -404,8 +407,9 @@ function Track({ products, selectedId, colorHex, onSelect, nudge, onIndex, sh, d
   useFrame((_, dt) => {
     const g = group.current;
     if (!g) return;
-    g.position.x = damp(g.position.x, target.current, 4, dt);
-    const idx = clamp(Math.round(-g.position.x / SPACING), 0, Math.max(0, products.length - 1));
+    const base = locked.current || size.width < 700 ? 0 : START;
+    g.position.x = damp(g.position.x, target.current + base, 4, dt);
+    const idx = locked.current ? lastSel.current : clamp(Math.round(-(g.position.x - base) / SPACING), 0, Math.max(0, products.length - 1));
     if (idx !== last.current) { last.current = idx; onIndex(idx); }
   });
 
@@ -414,7 +418,7 @@ function Track({ products, selectedId, colorHex, onSelect, nudge, onIndex, sh, d
       <Controls target={target} max={max} rot={rot} locked={locked} dragged={dragged} />
       <group ref={group}>
         {products.map((p, i) => (
-          <Item key={p.id} p={p} i={i} selected={p.id === selectedId} dim={!!selectedId && p.id !== selectedId} colorHex={colorHex} onSelect={onSelect} sh={sh} rot={rot} />
+          <Item key={p.id} p={p} i={i} selected={p.id === selectedId} dim={!!selectedId && p.id !== selectedId} colorHex={colorHex} onSelect={onSelect} sh={sh} rot={rot} narrow={width < 700} />
         ))}
       </group>
     </>

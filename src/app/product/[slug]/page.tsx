@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
-import { notFound } from "next/navigation";
+import { notFound, permanentRedirect } from "next/navigation";
+import { findRedirect } from "@/lib/redirects";
 import { getCatalog, getProduct } from "@/lib/catalog";
 import { SITE_URL } from "@/lib/config";
 import { getPublicSettings } from "@/lib/settings";
@@ -30,9 +31,14 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
 export default async function ProductPage({ params }: Params) {
   const { slug } = await params;
   const p = await getProduct(slug);
-  if (!p) notFound();
+  if (!p) {
+    const to = await findRedirect(`/product/${slug}`);
+    if (to) permanentRedirect(to);
+    notFound();
+  }
 
-  const { products } = await getCatalog();
+  const { products, categories } = await getCatalog();
+  const cat = categories.find((c) => c.id === p.category);
   const same = products.filter((x) => x.id !== p.id && x.category === p.category);
   const pairs = (products.find((x) => x.id === p.id)?.related ?? []).map((id) => products.find((x) => x.id === id)).filter((x): x is NonNullable<typeof x> => !!x);
   const { avg, count } = await getReviews(p.id);
@@ -57,6 +63,7 @@ export default async function ProductPage({ params }: Params) {
           url,
           priceCurrency: "BDT",
           price: String(p.basePrice),
+          itemCondition: "https://schema.org/NewCondition",
           availability: inStock ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
         },
       },
@@ -64,7 +71,8 @@ export default async function ProductPage({ params }: Params) {
         "@type": "BreadcrumbList",
         itemListElement: [
           { "@type": "ListItem", position: 1, name: "Home", item: SITE_URL },
-          { "@type": "ListItem", position: 2, name: p.name, item: url },
+          ...(cat ? [{ "@type": "ListItem", position: 2, name: cat.label, item: `${SITE_URL}/category/${cat.id}` }] : []),
+          { "@type": "ListItem", position: cat ? 3 : 2, name: p.name, item: url },
         ],
       },
     ],
@@ -73,7 +81,7 @@ export default async function ProductPage({ params }: Params) {
   return (
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(ld).replace(/</g, "\\u003c") }} />
-      <ProductDetail product={p} related={related} pairs={pairs} reviews={<ReviewsSection productId={p.id} slug={p.slug} />} whatsapp={contact.whatsapp} bundle={mine && bundleProducts.length === mine.productIds.length ? <BundleBox name={mine.name} percent={mine.percent} products={bundleProducts} /> : undefined} />
+      <ProductDetail product={p} category={cat} related={related} pairs={pairs} reviews={<ReviewsSection productId={p.id} slug={p.slug} />} whatsapp={contact.whatsapp} bundle={mine && bundleProducts.length === mine.productIds.length ? <BundleBox name={mine.name} percent={mine.percent} products={bundleProducts} /> : undefined} />
     </>
   );
 }

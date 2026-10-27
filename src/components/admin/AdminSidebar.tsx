@@ -4,8 +4,8 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import {
-  Boxes, FileText, FolderTree, GalleryHorizontal, LayoutDashboard, Mail, Menu, Package, PanelsTopLeft, Rocket, ScrollText,
-  Search, Settings, ShieldAlert, ShoppingBag, ShoppingCart, Sparkles, Star, Store, TicketPercent, Truck, Users, X,
+  Boxes, FileText, HeartPulse, Link2, FolderTree, GalleryHorizontal, LayoutDashboard, Mail, Menu, Package, PanelsTopLeft, Rocket, ScrollText,
+  Receipt, Search, Settings, ShieldAlert, ShoppingBag, ShoppingCart, Sparkles, Star, Store, TicketPercent, Truck, Users, X,
 } from "lucide-react";
 import { SignOutButton } from "@/components/SignOutButton";
 
@@ -13,6 +13,7 @@ const GROUPS = [
   { title: "Overview", items: [{ href: "/admin", label: "Dashboard", icon: LayoutDashboard }] },
   { title: "Sales", items: [
     { href: "/admin/orders", label: "Orders", icon: ShoppingBag },
+    { href: "/admin/invoices", label: "Invoices", icon: Receipt },
     { href: "/admin/abandoned", label: "Abandoned carts", icon: ShoppingCart },
     { href: "/admin/coupons", label: "Coupons", icon: TicketPercent },
     { href: "/admin/bundles", label: "Bundles", icon: Boxes },
@@ -34,8 +35,10 @@ const GROUPS = [
   { title: "Website", items: [
     { href: "/admin/pages", label: "Pages", icon: FileText },
     { href: "/admin/menus", label: "Site and menu", icon: PanelsTopLeft },
+    { href: "/admin/permalinks", label: "URLs and search", icon: Link2 },
     { href: "/admin/settings", label: "Settings", icon: Settings },
     { href: "/admin/audit", label: "Audit log", icon: ScrollText },
+    { href: "/admin/health", label: "Health check", icon: HeartPulse },
   ] },
 ];
 
@@ -69,13 +72,13 @@ export function AdminSidebar({ brand }: { brand: string }) {
   const body = (
     <div className="flex h-full flex-col gap-6 p-4">
       <div className="flex items-center justify-between px-2 pt-1">
-        <Link href="/admin" className="font-display text-lg font-semibold tracking-tight">{brand}<span className="ml-2 rounded-full bg-paper px-2 py-0.5 align-middle text-xs font-normal text-muted">Admin</span></Link>
+        <Link href="/admin" className="font-display text-lg font-semibold tracking-tight">{brand}<span className="ml-2 rounded-pill bg-paper px-2 py-0.5 align-middle text-xs font-normal text-muted">Admin</span></Link>
       </div>
       <div className="min-h-0 flex-1 overflow-y-auto pr-1"><Nav path={path} /></div>
       <div className="grid gap-2 border-t border-line pt-4">
         <p className="flex items-center gap-2 px-2 text-xs text-muted"><Sparkles size={14} className="text-accent" /> Click any text box, then the spark, to write it with AI.</p>
         <div className="flex items-center gap-2">
-          <Link href="/" target="_blank" className="flex flex-1 items-center justify-center gap-2 rounded-full border border-line py-2 text-sm font-medium hover:bg-paper"><Store size={15} /> View store</Link>
+          <Link href="/" target="_blank" className="flex flex-1 items-center justify-center gap-2 rounded-pill border border-line py-2 text-sm font-medium hover:bg-paper"><Store size={15} /> View store</Link>
           <SignOutButton />
         </div>
       </div>

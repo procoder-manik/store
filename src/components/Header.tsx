@@ -8,13 +8,13 @@ import { Heart, Menu, Monitor, Moon, ShoppingBag, Sun, User, X } from "lucide-re
 import { useCart } from "@/lib/cart";
 import { useWishlist } from "@/lib/lists";
 import type { Cat } from "@/lib/catalog";
-import { PalettePicker } from "./PalettePicker";
+import { ThemePicker } from "./ThemePicker";
 import { SearchOverlay } from "./SearchOverlay";
 
 const ORDER = ["light", "dark", "system"] as const;
 const icon = "grid h-10 w-10 place-items-center rounded-full transition hover:bg-surface";
 
-export function Header({ brand, links, categories = [], palettePicker = false }: { brand: string; links: { label: string; href: string }[]; categories?: Cat[]; palettePicker?: boolean }) {
+export function Header({ brand, logo = "", links, categories = [], themePicker = false }: { brand: string; logo?: string; links: { label: string; href: string }[]; categories?: Cat[]; themePicker?: boolean }) {
   const { theme, setTheme } = useTheme();
   const path = usePathname();
   const [mounted, setMounted] = useState(false);
@@ -33,14 +33,14 @@ export function Header({ brand, links, categories = [], palettePicker = false }:
     <header className="sticky top-0 z-30 border-b border-line/70 bg-paper/80 backdrop-blur-xl">
       <div className="mx-auto flex h-16 max-w-7xl items-center gap-2 px-3 md:px-8">
         <button aria-label="Open menu" onClick={() => setMenu(true)} className={`${icon} md:hidden`}><Menu size={20} /></button>
-        <Link href="/" className="font-display text-xl font-semibold tracking-tight">{brand}</Link>
+        <Link href="/" className="font-display text-xl font-semibold tracking-tight">{logo ? <img src={logo} alt={brand} className="h-8 max-w-[160px] object-contain" /> : brand}</Link>
         <nav aria-label="Main" className="ml-8 hidden items-center gap-1 text-sm md:flex">
-          {links.map((l) => <Link key={l.label + l.href} href={l.href} className={`rounded-full px-3.5 py-2 transition ${active(l.href) ? "bg-surface font-medium text-ink" : "text-muted hover:text-ink"}`}>{l.label}</Link>)}
+          {links.map((l) => <Link key={l.label + l.href} href={l.href} className={`rounded-pill px-3.5 py-2 transition ${active(l.href) ? "bg-surface font-medium text-ink" : "text-muted hover:text-ink"}`}>{l.label}</Link>)}
         </nav>
         <div className="ml-auto flex items-center">
           <SearchOverlay />
-          {palettePicker && <PalettePicker />}
-          <button aria-label={`Switch to ${next} theme`} onClick={() => setTheme(next)} className={icon}><ThemeIcon size={18} /></button>
+          {themePicker && <ThemePicker />}
+          <button aria-label={mounted ? `Switch to ${next} mode` : "Change light or dark mode"} onClick={() => setTheme(next)} className={icon}><ThemeIcon size={18} /></button>
           <Link aria-label="My account" href="/account" className={`${icon} hidden sm:grid`}><User size={18} /></Link>
           <Link aria-label="Wishlist" href="/wishlist" className={`${icon} relative hidden sm:grid`}>
             <Heart size={18} />
@@ -67,7 +67,7 @@ export function Header({ brand, links, categories = [], palettePicker = false }:
             {categories.length > 0 && (
               <div className="mt-6 border-t border-line pt-5">
                 <p className="px-3 text-xs text-muted">Categories</p>
-                <div className="mt-2 grid gap-1">{categories.map((c) => <Link key={c.id} href={`/shop?cat=${c.id}`} className="rounded-xl px-3 py-2.5 hover:bg-paper">{c.label}</Link>)}</div>
+                <div className="mt-2 grid gap-1">{categories.map((c) => <Link key={c.id} href={`/category/${c.id}`} className="rounded-xl px-3 py-2.5 hover:bg-paper">{c.label}</Link>)}</div>
               </div>
             )}
             <div className="mt-auto grid gap-1 border-t border-line pt-5 text-sm">

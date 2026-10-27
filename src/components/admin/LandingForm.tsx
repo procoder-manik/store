@@ -83,8 +83,8 @@ export function LandingForm({ products, initial = EMPTY }: { products: { id: str
 
       {error && <p role="alert" className="text-sm text-red-600">{error}</p>}
       <div className="flex gap-3">
-        <button disabled={pending} className="rounded-full bg-accent px-7 py-3 text-sm font-semibold text-accent-ink disabled:opacity-50">{pending ? "Saving..." : "Save landing page"}</button>
-        {f.id && <button type="button" disabled={pending} onClick={() => { if (confirm("Delete this landing page?")) start(async () => { await deleteLanding(f.id as string); router.push("/admin/landing-pages"); router.refresh(); }); }} className="rounded-full border border-line px-6 py-3 text-sm text-red-600">Delete</button>}
+        <button disabled={pending} className="rounded-pill bg-accent px-7 py-3 text-sm font-semibold text-accent-ink disabled:opacity-50">{pending ? "Saving..." : "Save landing page"}</button>
+        {f.id && <button type="button" disabled={pending} onClick={() => { if (confirm("Delete this landing page?")) start(async () => { await deleteLanding(f.id as string); router.push("/admin/landing-pages"); router.refresh(); }); }} className="rounded-pill border border-line px-6 py-3 text-sm text-red-600">Delete</button>}
       </div>
     </form>
   );

@@ -52,7 +52,7 @@ export function PromoPopup({ p }: { p: Settings["popup"] }) {
             <span className="text-sm text-accent">{copied ? "Copied" : "Copy code"}</span>
           </button>
         )}
-        <Link href="/shop" onClick={() => setOpen(false)} className="mt-4 block rounded-full bg-accent py-3 text-center text-sm font-semibold text-accent-ink">{p.button || "Shop now"}</Link>
+        <Link href="/shop" onClick={() => setOpen(false)} className="mt-4 block rounded-pill bg-accent py-3 text-center text-sm font-semibold text-accent-ink">{p.button || "Shop now"}</Link>
       </div>
     </div>
   );

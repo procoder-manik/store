@@ -9,7 +9,7 @@ import { ProductArt } from "./ProductArt";
 import { ProductCard } from "./ProductCard";
 import { SITE_URL } from "@/lib/config";
 
-export function ProductDetail({ product, related, pairs, reviews, bundle, whatsapp }: { product: Product; related: Product[]; pairs: Product[]; reviews: React.ReactNode; bundle?: React.ReactNode; whatsapp?: string }) {
+export function ProductDetail({ product, related, pairs, reviews, bundle, whatsapp, category }: { product: Product; related: Product[]; pairs: Product[]; reviews: React.ReactNode; bundle?: React.ReactNode; whatsapp?: string; category?: { id: string; label: string } }) {
   const [colorIdx, setColorIdx] = useState(0);
   const [img, setImg] = useState(0);
   const images = product.images ?? [];
@@ -17,7 +17,7 @@ export function ProductDetail({ product, related, pairs, reviews, bundle, whatsa
   return (
     <main className="mx-auto max-w-6xl px-5 py-8 md:py-12">
       <nav aria-label="Breadcrumb" className="mb-6 text-sm text-muted">
-        <Link href="/" className="hover:underline">Home</Link> / <Link href="/shop" className="hover:underline">Shop</Link> / <span className="text-ink">{product.name}</span>
+        <Link href="/" className="hover:underline">Home</Link> / <Link href="/shop" className="hover:underline">Shop</Link> / {category && <><Link href={`/category/${category.id}`} className="hover:underline">{category.label}</Link> / </>}<span className="text-ink">{product.name}</span>
       </nav>
       <div className="grid gap-8 md:grid-cols-2 md:gap-14">
         <div className="md:sticky md:top-24 md:self-start">
@@ -40,11 +40,11 @@ export function ProductDetail({ product, related, pairs, reviews, bundle, whatsa
           <h1 className="font-display text-3xl font-semibold leading-tight md:text-4xl">{product.name}</h1>
           {product.tags.length > 0 && (
             <div className="mt-3 flex gap-1.5">
-              {product.tags.map((t) => <span key={t} className="rounded-full border border-line bg-surface px-3 py-1 text-xs capitalize text-muted">{t}</span>)}
+              {product.tags.map((t) => <span key={t} className="rounded-pill border border-line bg-surface px-3 py-1 text-xs capitalize text-muted">{t}</span>)}
             </div>
           )}
           <div className="mt-6"><ProductBuy product={product} colorIdx={colorIdx} onColor={setColorIdx} /></div>
-          {whatsapp && <a href={`https://wa.me/${whatsapp}?text=${encodeURIComponent(`Hi, I am interested in ${product.name}: ${SITE_URL}/product/${product.slug}`)}`} target="_blank" rel="noopener noreferrer" className="mt-4 block rounded-full border border-line py-3 text-center text-sm font-medium hover:bg-paper">Ask or order on WhatsApp</a>}
+          {whatsapp && <a href={`https://wa.me/${whatsapp}?text=${encodeURIComponent(`Hi, I am interested in ${product.name}: ${SITE_URL}/product/${product.slug}`)}`} target="_blank" rel="noopener noreferrer" className="mt-4 block rounded-pill border border-line py-3 text-center text-sm font-medium hover:bg-paper">Ask or order on WhatsApp</a>}
           <div className="mt-8 border-t border-line pt-6">
             <h2 className="text-sm font-medium">About this product</h2>
             <p className="mt-2 max-w-prose whitespace-pre-line text-sm leading-relaxed text-muted">{product.description}</p>

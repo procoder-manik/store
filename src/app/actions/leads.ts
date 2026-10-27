@@ -3,6 +3,8 @@
 import { z } from "zod";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { normalizePhone } from "@/lib/utils";
+import { sendAutoEmail } from "@/lib/auto-emails";
+import { getPublicSettings } from "@/lib/settings";
 import { clientIp, rateLimit } from "@/lib/ratelimit";
 
 type R = { ok: boolean; message: string };
@@ -18,6 +20,7 @@ export async function subscribe(input: unknown): Promise<R> {
     if (error && error.code !== "23505") return { ok: false, message: "Could not save your email. Please try again." };
     await db.from("leads").update({ unsubscribed: false }).eq("email", p.data.email);
     await db.from("email_optouts").delete().eq("email", p.data.email);
+    await welcome(p.data.email);
     return { ok: true, message: "Thanks, you are on the list." };
   } catch {
     return { ok: false, message: "Sign up is not available right now." };
@@ -57,9 +60,26 @@ export async function sendContact(input: unknown): Promise<R> {
     const row = { name: p.data.name, phone, source: "contact", notes: p.data.message };
     let { error } = await db.from("leads").insert({ ...row, email: p.data.email || null });
     if (error?.code === "23505") ({ error } = await db.from("leads").insert(row)); // that email is already a lead
-    if (error) return { ok: false, message: "Could not send your message. Please try again." };
+    if (error) return { ok: false, message: process.env.NODE_ENV !== "production" ? `Could not save: ${error.message}. Open Admin, Health check.` : "Could not send your message. Please try again." };
+    await notifyContact({ name: p.data.name, phone, email: p.data.email, message: p.data.message });
     return { ok: true, message: "Thank you. We will get back to you soon." };
-  } catch {
-    return { ok: false, message: "Messages are not available right now. Please call us." };
+  } catch (e) {
+    return { ok: false, message: process.env.NODE_ENV !== "production" ? `${(e as Error).message}. Open Admin, Health check.` : "Messages are not available right now. Please call us." };
   }
+}
+
+/** Thanks the sender and tells the store about the message, in the wording set under Email marketing, Automatic emails. */
+async function notifyContact(m: { name: string; phone: string; email: string; message: string }) {
+  try {
+    const { contact } = await getPublicSettings();
+    const vars = { name: m.name.split(" ")[0] || "there", phone: m.phone, email: m.email || "not given", message: m.message };
+    if (m.email) await sendAutoEmail("contact_received", m.email, vars);
+    if (contact.email) await sendAutoEmail("contact_alert", contact.email, { ...vars, name: m.name });
+  } catch (e) {
+    console.error("[email] contact email failed:", (e as Error).message);
+  }
+}
+
+async function welcome(email: string) {
+  try { await sendAutoEmail("welcome", email, {}); } catch (e) { console.error("[email] welcome email failed:", (e as Error).message); }
 }

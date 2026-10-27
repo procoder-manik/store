@@ -27,7 +27,7 @@ export default async function ThankYou({ params }: { params: Promise<{ id: strin
       <PurchaseEvent orderNo={Number(o.order_no)} total={Number(o.total)} />
       <h1 className="font-display text-3xl font-semibold">Thank you, {String(o.guest_name).split(" ")[0]}.</h1>
       <p className="mt-3 text-sm text-muted">Order #{o.order_no} is received. {o.payment_status === "paid" ? "Your online payment is received and we will confirm your order shortly." : o.payment_method === "sslcommerz" ? "It is waiting for your online payment." : `We will call you shortly to confirm it. Pay in cash when it arrives${addr?.district ? ` in ${addr.district}` : ""}.`}</p>
-      {o.payment_method === "sslcommerz" && o.payment_status !== "paid" && o.status === "pending" && <Link href={`/pay/${id}`} className="mt-3 inline-block rounded-full bg-accent px-5 py-2.5 text-sm font-semibold text-accent-ink">Complete payment</Link>}
+      {o.payment_method === "sslcommerz" && o.payment_status !== "paid" && o.status === "pending" && <Link href={`/pay/${id}`} className="mt-3 inline-block rounded-pill bg-accent px-5 py-2.5 text-sm font-semibold text-accent-ink">Complete payment</Link>}
       <div className="mt-6 rounded-xl border border-line bg-surface p-5">
         <ul className="divide-y divide-line text-sm">
           {items.map((i) => (
@@ -41,8 +41,9 @@ export default async function ThankYou({ params }: { params: Promise<{ id: strin
           <div className="flex justify-between text-base font-semibold"><dt>Total</dt><dd>{formatPrice(Number(o.total))}</dd></div>
         </dl>
       </div>
+      <a href={`/invoice/${id}`} target="_blank" className="mt-5 inline-block rounded-pill border border-line px-5 py-2.5 text-sm font-medium hover:bg-surface">View or download your invoice</a>
       <p className="mt-6 text-sm text-muted">Keep your order number <span className="font-medium text-ink">#{o.order_no}</span>. You can follow it any time on the <Link href="/track" className="underline">tracking page</Link>.</p>
-      <Link href="/" className="mt-4 inline-block rounded-full bg-accent px-6 py-3 text-sm font-semibold text-accent-ink">Keep shopping</Link>
+      <Link href="/" className="mt-4 inline-block rounded-pill bg-accent px-6 py-3 text-sm font-semibold text-accent-ink">Keep shopping</Link>
     </main>
   );
 }

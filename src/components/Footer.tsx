@@ -8,7 +8,7 @@ export function Footer({ categories, brand, footer, contact }: { categories: Cat
   const cols = footer.columns.length
     ? footer.columns
     : [
-        { title: "Shop", links: [{ label: "All products", href: "/shop" }, ...categories.map((c) => ({ label: c.label, href: `/shop?cat=${c.id}` }))] },
+        { title: "Shop", links: [{ label: "All products", href: "/shop" }, ...categories.map((c) => ({ label: c.label, href: `/category/${c.id}` }))] },
         { title: "Help", links: [{ label: "Track your order", href: "/track" }, { label: "Delivery", href: "/shipping" }, { label: "Returns and exchanges", href: "/returns" }, { label: "Size guide", href: "/size-guide" }, { label: "Questions", href: "/faq" }, { label: "Contact us", href: "/contact" }] },
         { title: "Company", links: [{ label: "About us", href: "/about" }, { label: "My account", href: "/account" }, { label: "Privacy policy", href: "/privacy" }, { label: "Terms of service", href: "/terms" }] },
       ];

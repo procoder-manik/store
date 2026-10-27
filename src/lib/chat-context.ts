@@ -49,7 +49,7 @@ export async function buildChatContext(question: string): Promise<string> {
     `STORE: ${settings.brand.name}. ${settings.brand.tagline}.`,
     `PAYMENT: Cash on delivery. Customers can also track orders at /track and see everything at /shop.`,
     `DELIVERY: ${delivery}`,
-    `CATEGORIES: ${categories.map((c) => `${c.label} (/shop?cat=${c.id})`).join(", ") || "none yet"}`,
+    `CATEGORIES: ${categories.map((c) => `${c.label} (/category/${c.id})`).join(", ") || "none yet"}`,
     `RELEVANT PRODUCTS:\n${picks.length ? picks.map(line).join("\n") : "No products match."}`,
     settings.chat.knowledge ? `STORE NOTES FROM THE OWNER:\n${settings.chat.knowledge.slice(0, 3000)}` : "",
   ].filter(Boolean).join("\n\n");

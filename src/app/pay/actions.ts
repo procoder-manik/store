@@ -22,6 +22,6 @@ export async function switchToCod(orderId: string): Promise<{ ok: boolean; error
   const { data } = await db.from("orders").update({ payment_method: "cod" }).eq("id", id.data).eq("payment_method", "sslcommerz").eq("payment_status", "unpaid").eq("status", "pending").select("order_no, total, guest_name, guest_email, order_items(name_snapshot, qty)").maybeSingle();
   if (!data) return { ok: false, error: "This order can no longer be changed." };
   await db.from("payments").update({ status: "cancelled", updated_at: new Date().toISOString() }).eq("order_id", id.data).eq("status", "initiated");
-  if (data.guest_email) await sendOrderEmail("placed", { email: data.guest_email as string, name: data.guest_name as string, orderNo: Number(data.order_no), total: Number(data.total), items: (data.order_items as { name_snapshot: string; qty: number }[]).map((i) => `${i.name_snapshot} x ${i.qty}`) });
+  if (data.guest_email) await sendOrderEmail("placed", { email: data.guest_email as string, name: data.guest_name as string, orderId: id.data, orderNo: Number(data.order_no), total: Number(data.total), items: (data.order_items as { name_snapshot: string; qty: number }[]).map((i) => `${i.name_snapshot} x ${i.qty}`) });
   return { ok: true };
 }

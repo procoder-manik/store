@@ -1,19 +1,6 @@
 import Link from "next/link";
 import { INFO_SLUGS, INFO_TITLES } from "@/lib/info-pages";
-
-function Rich({ text }: { text: string }) {
-  return (
-    <>
-      {text.split(/\n{2,}/).map((p, i) => {
-        const lines = p.split("\n").map((l) => l.trim()).filter(Boolean);
-        if (lines.length && lines.every((l) => l.startsWith("- "))) return <ul key={i} className="grid gap-2 pl-5 [&>li]:list-disc">{lines.map((l) => <li key={l}>{l.slice(2)}</li>)}</ul>;
-        const bullets = lines.filter((l) => l.startsWith("- "));
-        if (bullets.length) return <div key={i} className="grid gap-2">{lines.filter((l) => !l.startsWith("- ")).map((l) => <p key={l}>{l}</p>)}<ul className="grid gap-2 pl-5 [&>li]:list-disc">{bullets.map((l) => <li key={l}>{l.slice(2)}</li>)}</ul></div>;
-        return <p key={i}>{lines.join(" ")}</p>;
-      })}
-    </>
-  );
-}
+import { Rich } from "./Rich";
 
 export function InfoPage({ title, intro, sections, faq, current, wide = false, children }: {
   wide?: boolean;

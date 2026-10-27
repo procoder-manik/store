@@ -5,6 +5,7 @@ import { z } from "zod";
 import { requireAdmin } from "@/lib/admin";
 import { normalizePhone } from "@/lib/utils";
 import { isPalette } from "@/lib/palettes";
+import { isTheme } from "@/lib/themes";
 
 function parse<T extends z.ZodType>(schema: T, data: unknown): z.infer<T> {
   const r = schema.safeParse(data);
@@ -94,7 +95,11 @@ export async function saveContact(fd: FormData) {
 }
 
 export async function saveAppearance(fd: FormData) {
-  const palette = String(fd.get("palette") ?? "");
-  if (!isPalette(palette)) throw new Error("Choose one of the color sets");
-  await save("appearance", { palette, visitorPicker: on(fd.get("visitorPicker")) });
+  const theme = String(fd.get("theme") ?? "");
+  const accent = String(fd.get("accent") ?? "");
+  const mode = String(fd.get("mode") ?? "light");
+  if (!isTheme(theme)) throw new Error("Choose one of the themes");
+  if (accent && !isPalette(accent)) throw new Error("Choose one of the accent colors");
+  if (!["light", "dark", "system"].includes(mode)) throw new Error("Choose a mode");
+  await save("appearance", { theme, accent, mode, visitorPicker: on(fd.get("visitorPicker")) });
 }

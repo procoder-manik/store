@@ -23,7 +23,7 @@ export function SeoTable({ rows }: { rows: SeoRow[] }) {
   return (
     <>
       <div className="mt-5 flex flex-wrap items-center gap-3">
-        <button disabled={pending || missing === 0} onClick={() => { setMsg(""); start(async () => { const r = await bulkSeo(); setMsg(r.error ? `Stopped: ${r.error}` : `Filled ${r.done}. ${r.remaining} still missing${r.remaining ? ", click again to continue." : "."}`); router.refresh(); }); }} className="rounded-full bg-accent px-5 py-2.5 text-sm font-semibold text-accent-ink disabled:opacity-50">{pending ? "Writing..." : `Fill missing listings (${missing})`}</button>
+        <button disabled={pending || missing === 0} onClick={() => { setMsg(""); start(async () => { const r = await bulkSeo(); setMsg(r.error ? `Stopped: ${r.error}` : `Filled ${r.done}. ${r.remaining} still missing${r.remaining ? ", click again to continue." : "."}`); router.refresh(); }); }} className="rounded-pill bg-accent px-5 py-2.5 text-sm font-semibold text-accent-ink disabled:opacity-50">{pending ? "Writing..." : `Fill missing listings (${missing})`}</button>
         {msg && <p role="status" className="text-sm text-muted">{msg}</p>}
       </div>
       <div className="mt-5 overflow-x-auto rounded-xl border border-line bg-surface">
@@ -38,7 +38,7 @@ export function SeoTable({ rows }: { rows: SeoRow[] }) {
                   <td className="max-w-md p-3"><p>{r.title || <span className="text-muted">No title</span>}<span className="text-xs text-muted"> ({r.title.length}/60)</span></p><p className="mt-1 text-muted">{r.description || "No description"}<span className="text-xs"> ({r.description.length}/160)</span></p>
                     {prompts[r.id] && <pre className="mt-2 whitespace-pre-wrap rounded-lg bg-paper p-3 font-body text-xs">{prompts[r.id]}</pre>}
                   </td>
-                  <td className="p-3"><span className={`rounded-full px-2.5 py-0.5 text-xs ${g.cls}`}>{g.label}</span></td>
+                  <td className="p-3"><span className={`rounded-pill px-2.5 py-0.5 text-xs ${g.cls}`}>{g.label}</span></td>
                   <td className="p-3">
                     <div className="grid gap-1.5 text-xs">
                       <button disabled={busy !== null} onClick={async () => { setBusy(r.id); setMsg(""); const x = await generateSeoFor(r.id); setBusy(null); if (x.ok) router.refresh(); else setMsg(x.error); }} className="text-left font-medium text-accent underline disabled:opacity-50">{busy === r.id ? "Writing..." : "Write with AI"}</button>

@@ -61,7 +61,7 @@ export default function MfaSetup() {
             <label htmlFor="code" className="font-medium">2. Enter the 6 digit code</label>
             <input id="code" inputMode="numeric" autoComplete="one-time-code" pattern="\d{6}" maxLength={6} required value={code} onChange={(e) => setCode(e.target.value.replace(/\D/g, ""))} className="w-40 rounded-xl border border-line bg-surface px-4 py-3 text-center text-lg tracking-widest" />
             {error && <p role="alert" className="text-sm text-red-600">{error}</p>}
-            <button disabled={busy || !factorId || code.length !== 6} className="w-fit rounded-full bg-accent px-7 py-3 text-sm font-semibold text-accent-ink disabled:opacity-50">{busy ? "Checking..." : "Turn on verification"}</button>
+            <button disabled={busy || !factorId || code.length !== 6} className="w-fit rounded-pill bg-accent px-7 py-3 text-sm font-semibold text-accent-ink disabled:opacity-50">{busy ? "Checking..." : "Turn on verification"}</button>
           </form>
         </li>
       </ol>

@@ -22,3 +22,13 @@ export function normalizePhone(raw: string): string | null {
   else if (d.startsWith("880")) d = "0" + d.slice(3);
   return /^01[3-9]\d{8}$/.test(d) ? d : null;
 }
+
+/** A logo may come from our own storage or from the free photo sites. */
+export function isLogoUrl(u: string) {
+  try {
+    const x = new URL(u);
+    return x.protocol === "https:" && (IMAGE_HOSTS.includes(x.hostname) || x.hostname.endsWith(".supabase.co"));
+  } catch {
+    return false;
+  }
+}

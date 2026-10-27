@@ -19,7 +19,7 @@ export function ContactForm() {
       <textarea name="message" required minLength={10} maxLength={1000} rows={5} placeholder="How can we help? Include your order number if you have one." className={input} />
       <input name="website" tabIndex={-1} autoComplete="off" aria-hidden className="hidden" />
       {msg && !msg.ok && <p role="alert" className="text-sm text-red-600">{msg.text}</p>}
-      <button disabled={pending} className="w-fit rounded-full bg-accent px-8 py-3 text-sm font-semibold text-accent-ink transition hover:-translate-y-0.5 disabled:opacity-50">{pending ? "Sending..." : "Send message"}</button>
+      <button disabled={pending} className="w-fit rounded-pill bg-accent px-8 py-3 text-sm font-semibold text-accent-ink transition hover:-translate-y-0.5 disabled:opacity-50">{pending ? "Sending..." : "Send message"}</button>
     </form>
   );
 }

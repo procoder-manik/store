@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
-import { notFound } from "next/navigation";
+import { notFound, permanentRedirect } from "next/navigation";
+import { findRedirect } from "@/lib/redirects";
 import { cache } from "react";
 import { getCatalog } from "@/lib/catalog";
 import { blocksSchema, type Block } from "@/lib/blocks";
@@ -30,7 +31,11 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
 export default async function CustomPage({ params }: Params) {
   const { slug } = await params;
   const p = await load(slug);
-  if (!p) notFound();
+  if (!p) {
+    const to = await findRedirect(`/p/${slug}`);
+    if (to) permanentRedirect(to);
+    notFound();
+  }
   const { products, categories } = await getCatalog();
 
   const faqs = p.blocks.flatMap((b) => (b.type === "faq" ? b.items.filter((i) => i.q && i.a) : []));

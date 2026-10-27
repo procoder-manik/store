@@ -27,7 +27,7 @@ export async function changeStatus(formData: FormData) {
   if (d.courier || d.tracking) await db.from("orders").update({ ...(d.courier ? { courier: d.courier } : {}), ...(d.tracking ? { tracking_code: d.tracking } : {}) }).eq("id", d.id);
   if (d.status === "shipped" || d.status === "delivered") {
     const { data: o } = await db.from("orders").select("order_no, guest_name, guest_email, total, payment_status, courier, tracking_code").eq("id", d.id).maybeSingle();
-    if (o?.guest_email) await sendOrderEmail(d.status, { email: o.guest_email as string, name: o.guest_name as string, orderNo: Number(o.order_no), total: Number(o.total), paid: o.payment_status === "paid", courier: (o.courier as string) ?? undefined, trackingCode: (o.tracking_code as string) ?? undefined });
+    if (o?.guest_email) await sendOrderEmail(d.status, { orderId: d.id, email: o.guest_email as string, name: o.guest_name as string, orderNo: Number(o.order_no), total: Number(o.total), paid: o.payment_status === "paid", courier: (o.courier as string) ?? undefined, trackingCode: (o.tracking_code as string) ?? undefined });
   }
   revalidatePath("/admin/orders");
   revalidatePath(`/admin/orders/${d.id}`);

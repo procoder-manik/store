@@ -1,7 +1,8 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { requireAdmin, slugify } from "@/lib/admin";
+import { requireAdmin } from "@/lib/admin";
+import { makeSlug } from "@/lib/slug";
 import { productSchema } from "@/lib/validators";
 
 type Result = { ok: true; id: string } | { ok: false; error: string };
@@ -20,7 +21,7 @@ export async function saveProduct(input: unknown): Promise<Result> {
 
   const row = {
     name: d.name,
-    slug: d.slug || slugify(d.name),
+    slug: makeSlug(d.slug, d.name, "product"),
     kind: d.kind,
     category_id: d.categoryId,
     description: d.description,
@@ -34,12 +35,19 @@ export async function saveProduct(input: unknown): Promise<Result> {
 
   let id = d.id;
   if (id) {
+    const { data: before } = await supabase.from("products").select("slug").eq("id", id).maybeSingle();
     const { error } = await supabase.from("products").update(row).eq("id", id);
     if (error) return { ok: false, error: dbError(error) };
+    // A renamed address keeps working: the old one sends visitors and search engines to the new one.
+    if (before?.slug && before.slug !== row.slug) {
+      await supabase.from("redirects").delete().eq("from_path", `/product/${row.slug}`);
+      await supabase.from("redirects").upsert({ from_path: `/product/${before.slug}`, to_path: `/product/${row.slug}` }, { onConflict: "from_path" });
+    }
   } else {
-    const { data, error } = await supabase.from("products").insert(row).select("id").single();
-    if (error || !data) return { ok: false, error: error ? dbError(error) : "Could not create product" };
-    id = data.id as string;
+    let ins = await supabase.from("products").insert(row).select("id").single();
+    if (ins.error?.code === "23505" && !d.slug) ins = await supabase.from("products").insert({ ...row, slug: `${row.slug}-${Math.random().toString(36).slice(2, 6)}` }).select("id").single(); // same name already used
+    if (ins.error || !ins.data) return { ok: false, error: ins.error ? dbError(ins.error) : "Could not create product" };
+    id = ins.data.id as string;
   }
 
   // Variants: remove deleted, update existing, insert new.

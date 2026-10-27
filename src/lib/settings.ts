@@ -10,8 +10,8 @@ export type Settings = {
   bump: { enabled: boolean; variantId: string; headline: string; text: string; price: number | null };
   chat: { enabled: boolean; name: string; greeting: string; knowledge: string };
   contact: { phone: string; whatsapp: string; email: string; address: string; hours: string };
-  appearance: { palette: string; visitorPicker: boolean };
-  brand: { name: string; tagline: string };
+  appearance: { theme: string; accent: string; visitorPicker: boolean; mode: "light" | "dark" | "system" };
+  brand: { name: string; tagline: string; logo: string };
   header: { links: { label: string; href: string }[] };
   footer: { about: string; columns: { title: string; links: { label: string; href: string }[] }[]; copyright: string; newsletter: boolean };
 };
@@ -24,8 +24,8 @@ export const DEFAULTS: Settings = {
   bump: { enabled: false, variantId: "", headline: "Add this to your order", text: "", price: null },
   chat: { enabled: false, name: "Shopping assistant", greeting: "Hi! Ask me about products, sizes, delivery or your order.", knowledge: "" },
   contact: { phone: "", whatsapp: "", email: "", address: "", hours: "" },
-  appearance: { palette: "tide", visitorPicker: true },
-  brand: { name: BRAND.name, tagline: BRAND.tagline },
+  appearance: { theme: "studio", accent: "", visitorPicker: true, mode: "light" },
+  brand: { name: BRAND.name, tagline: BRAND.tagline, logo: "" },
   header: { links: [{ label: "Shop", href: "/shop" }] },
   footer: { about: "", columns: [], copyright: "", newsletter: true },
 };
@@ -41,7 +41,12 @@ export function mergeSettings(rows: { key: string; value: unknown }[]): Settings
     if (r.key === "bump") out.bump = { ...out.bump, ...v };
     if (r.key === "chat") out.chat = { ...out.chat, ...v };
     if (r.key === "contact") out.contact = { ...out.contact, ...v };
-    if (r.key === "appearance") out.appearance = { ...out.appearance, ...v };
+    if (r.key === "appearance") {
+      const a = v as { palette?: string; theme?: string };
+      out.appearance = { ...out.appearance, ...v };
+      // Older stores saved only a color. Keep it as the accent on top of the default theme.
+      if (a.palette && !a.theme && a.palette !== "tide") out.appearance.accent = a.palette;
+    }
     if (r.key === "brand") out.brand = { ...out.brand, ...v };
     if (r.key === "header") out.header = { ...out.header, ...v };
     if (r.key === "footer") out.footer = { ...out.footer, ...v };

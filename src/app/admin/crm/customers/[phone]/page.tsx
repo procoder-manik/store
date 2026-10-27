@@ -31,7 +31,7 @@ export default async function Customer({ params }: { params: Promise<{ phone: st
         </section>
         <section className="rounded-xl border border-line bg-surface p-5">
           <h2 className="font-display text-base font-semibold">Notes</h2>
-          <form action={addNote} className="mt-3 grid gap-2"><input type="hidden" name="phone" value={phone} /><textarea name="note" required maxLength={1000} rows={2} placeholder="Add a note about this customer" className="rounded-xl border border-line bg-paper px-3 py-2 text-sm" /><button className="w-fit rounded-full bg-accent px-5 py-2 text-sm font-semibold text-accent-ink">Save note</button></form>
+          <form action={addNote} className="mt-3 grid gap-2"><input type="hidden" name="phone" value={phone} /><textarea name="note" required maxLength={1000} rows={2} placeholder="Add a note about this customer" className="rounded-xl border border-line bg-paper px-3 py-2 text-sm" /><button className="w-fit rounded-pill bg-accent px-5 py-2 text-sm font-semibold text-accent-ink">Save note</button></form>
           <ul className="mt-4 grid gap-3 text-sm">
             {(notes ?? []).length === 0 && <li className="text-muted">No notes yet.</li>}
             {(notes ?? []).map((n) => <li key={n.id}><p className="whitespace-pre-line">{n.note}</p><p className="text-xs text-muted">{new Date(n.created_at).toLocaleString("en-GB", { dateStyle: "medium", timeStyle: "short" })}</p></li>)}

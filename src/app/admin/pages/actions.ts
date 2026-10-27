@@ -12,6 +12,7 @@ const schema = z.object({
   description: z.string().trim().max(170),
   status: z.enum(["draft", "active"]),
   blocks: blocksSchema,
+  kind: z.enum(["page", "landing"]).default("page"),
 });
 
 export async function savePage(input: unknown): Promise<{ ok: true; id: string } | { ok: false; error: string }> {
@@ -20,12 +21,21 @@ export async function savePage(input: unknown): Promise<{ ok: true; id: string }
   const d = p.data;
   let ctx;
   try { ctx = await requireAdmin("page.save"); } catch (e) { return { ok: false, error: (e as Error).message }; }
-  const row = { slug: d.slug, title: d.title, description: d.description || null, status: d.status, blocks: d.blocks, updated_at: new Date().toISOString() };
+  let oldSlug: string | undefined;
+  if (d.id) oldSlug = (await ctx.supabase.from("pages").select("slug").eq("id", d.id).maybeSingle()).data?.slug as string | undefined;
+  // The kind column comes from supabase-0012. Normal pages keep working without it.
+  const row = { slug: d.slug, title: d.title, description: d.description || null, status: d.status, blocks: d.blocks, updated_at: new Date().toISOString(), ...(d.kind === "landing" ? { kind: "landing" } : {}) };
+  const base = d.kind === "landing" ? "/lp/" : "/p/";
   const q = ctx.supabase.from("pages");
   const { data, error } = d.id ? await q.update(row).eq("id", d.id).select("id").single() : await q.insert(row).select("id").single();
   if (error || !data) return { ok: false, error: error?.code === "23505" ? "That page address is already used." : error?.message ?? "Could not save" };
+  if (oldSlug && oldSlug !== d.slug) {
+    await ctx.supabase.from("redirects").delete().eq("from_path", `${base}${d.slug}`);
+    await ctx.supabase.from("redirects").upsert({ from_path: `${base}${oldSlug}`, to_path: `${base}${d.slug}` }, { onConflict: "from_path" });
+  }
   revalidatePath("/admin/pages");
-  revalidatePath(`/p/${d.slug}`);
+  revalidatePath(`${base}${d.slug}`);
+  revalidatePath(`/${d.slug}`);
   revalidatePath("/", "layout");
   return { ok: true, id: data.id as string };
 }

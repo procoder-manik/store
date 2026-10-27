@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
+import type { Kind } from "@/lib/demo-products";
 
 export type CartItem = {
   key: string;
@@ -10,6 +11,9 @@ export type CartItem = {
   size: string;
   price: number;
   qty: number;
+  image?: string;
+  kind?: Kind;
+  hex?: string;
 };
 
 type CartState = {

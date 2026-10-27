@@ -1,12 +1,13 @@
 import { createClient } from "@/lib/supabase/server";
 import { mergeSettings } from "@/lib/settings";
 import { PALETTES } from "@/lib/palettes";
+import { THEMES } from "@/lib/themes";
 import { saveAnnouncement, saveBump, saveAppearance, saveChat, saveContact, savePopup, saveProof, saveTracking } from "./actions";
 
 const input = "w-full rounded-xl border border-line bg-surface px-3 py-2 text-sm";
 const card = "rounded-xl border border-line bg-surface p-5";
 const label = "mb-1 block text-xs font-medium text-muted";
-const save = "rounded-full bg-accent px-6 py-2.5 text-sm font-semibold text-accent-ink";
+const save = "rounded-pill bg-accent px-6 py-2.5 text-sm font-semibold text-accent-ink";
 
 export default async function Settings() {
   const supabase = await createClient();
@@ -21,20 +22,42 @@ export default async function Settings() {
     <>
       <h1 className="font-display text-2xl font-semibold">Settings</h1>
       <div className="mt-6 grid max-w-3xl gap-5">
-        <form action={saveAppearance} className={`${card} grid gap-4`}>
-          <h2 className="font-display text-base font-semibold">Colors</h2>
-          <p className="text-xs text-muted">The main color of your store, buttons and highlights. Each set has a matching dark mode.</p>
-          <div className="grid grid-cols-3 gap-2 sm:grid-cols-5">
-            {PALETTES.map((p) => (
-              <label key={p.id} className="flex cursor-pointer flex-col items-center gap-2 rounded-xl border border-line p-3 text-xs has-[:checked]:border-ink">
-                <input type="radio" name="palette" value={p.id} defaultChecked={s.appearance.palette === p.id} className="sr-only" />
-                <span className="flex"><span style={{ background: p.light }} className="h-7 w-7 rounded-full border border-line" /><span style={{ background: p.dark }} className="-ml-2 h-7 w-7 rounded-full border border-line" /></span>
-                {p.name}
+        <form action={saveAppearance} className={`${card} grid gap-5`}>
+          <div><h2 className="font-display text-base font-semibold">Theme</h2><p className="mt-1 text-xs text-muted">A theme changes everything at once: colors, backgrounds, text, heading and body fonts, and how rounded buttons and cards are. Dark mode has its own matching colors.</p></div>
+          <div className="grid gap-3 sm:grid-cols-2">
+            {THEMES.map((t) => (
+              <label key={t.id} className="group relative cursor-pointer overflow-hidden rounded-xl border border-line has-[:checked]:border-ink has-[:checked]:ring-2 has-[:checked]:ring-ink/20">
+                <input type="radio" name="theme" value={t.id} defaultChecked={s.appearance.theme === t.id} className="sr-only" />
+                <span className="flex items-stretch">
+                  <span style={{ background: t.light.paper, color: t.light.ink }} className="flex-1 p-4">
+                    <span style={{ fontFamily: `var(${t.display}), system-ui` }} className="block text-lg font-semibold">{t.name}</span>
+                    <span style={{ fontFamily: `var(${t.body}), system-ui`, opacity: 0.7 }} className="mt-1 block text-xs">{t.about}</span>
+                    <span className="mt-3 flex items-center gap-1.5"><span style={{ background: t.light.accent }} className="h-5 w-12 rounded" /><span style={{ background: t.light.surface, borderColor: t.light.ink + "22" }} className="h-5 w-5 rounded border" /></span>
+                  </span>
+                  <span style={{ background: t.dark.paper, color: t.dark.ink }} className="grid w-16 content-center justify-items-center gap-2 p-2">
+                    <span style={{ background: t.dark.accent }} className="h-5 w-10 rounded" /><span className="text-[10px] opacity-70">Dark</span>
+                  </span>
+                </span>
               </label>
             ))}
           </div>
-          <label className="flex items-center gap-2 text-sm"><input type="checkbox" name="visitorPicker" defaultChecked={s.appearance.visitorPicker} /> Let visitors pick their own color set from the header</label>
-          <button className={`${save} w-fit`}>Save colors</button>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div>
+              <label className={label}>Accent color (optional, overrides the theme color)</label>
+              <select name="accent" defaultValue={s.appearance.accent} className={input}>
+                <option value="">Use the theme color</option>
+                {PALETTES.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
+              </select>
+            </div>
+            <div>
+              <label className={label}>Light or dark by default</label>
+              <select name="mode" defaultValue={s.appearance.mode} className={input}>
+                <option value="light">Light</option><option value="dark">Dark</option><option value="system">Follow the visitor&apos;s device</option>
+              </select>
+            </div>
+          </div>
+          <label className="flex items-center gap-2 text-sm"><input type="checkbox" name="visitorPicker" defaultChecked={s.appearance.visitorPicker} /> Let visitors switch the theme from the header</label>
+          <button className={`${save} w-fit`}>Save theme</button>
         </form>
 
         <form action={saveAnnouncement} className={`${card} grid gap-4`}>
