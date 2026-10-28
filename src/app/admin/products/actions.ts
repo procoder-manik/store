@@ -22,6 +22,7 @@ export async function saveProduct(input: unknown): Promise<Result> {
   const row = {
     name: d.name,
     slug: makeSlug(d.slug, d.name, "product"),
+    offer_ends_at: d.offerEndsAt ? new Date(d.offerEndsAt).toISOString() : null,
     kind: d.kind,
     category_id: d.categoryId,
     description: d.description,

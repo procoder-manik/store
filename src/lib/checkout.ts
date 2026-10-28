@@ -4,7 +4,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 export type CartInput = { productId: string; variantId?: string; qty: number }[];
 export type Line = { productId: string; variantId: string | null; name: string; unitPrice: number; qty: number };
 export type Priced =
-  | { ok: true; lines: Line[]; subtotal: number; shipping: number; discount: number; bundleDiscount: number; total: number; couponCode: string | null; couponError?: string; zoneName: string }
+  | { ok: true; lines: Line[]; subtotal: number; shipping: number; discount: number; bundleDiscount: number; total: number; couponCode: string | null; couponError?: string; zoneName: string; creditUsed?: number; creditBalance?: number }
   | { ok: false; error: string };
 
 type Prod = { name: string; base_price: number | string; status: string };

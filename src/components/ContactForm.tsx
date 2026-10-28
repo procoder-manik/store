@@ -15,7 +15,7 @@ export function ContactForm() {
         <input name="name" required placeholder="Your name" autoComplete="name" className={input} />
         <input name="phone" required inputMode="tel" placeholder="Mobile number" autoComplete="tel" className={input} />
       </div>
-      <input name="email" type="email" placeholder="Email (optional)" autoComplete="email" className={input} />
+      <input name="email" type="email" required placeholder="Email, we send a confirmation here" autoComplete="email" className={input} />
       <textarea name="message" required minLength={10} maxLength={1000} rows={5} placeholder="How can we help? Include your order number if you have one." className={input} />
       <input name="website" tabIndex={-1} autoComplete="off" aria-hidden className="hidden" />
       {msg && !msg.ok && <p role="alert" className="text-sm text-red-600">{msg.text}</p>}

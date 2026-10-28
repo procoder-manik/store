@@ -1,3 +1,4 @@
+import { ProductHero } from "@/components/ProductHero";
 import { Storefront } from "@/components/Storefront";
 import { HomeSections } from "@/components/HomeSections";
 import { getCatalog } from "@/lib/catalog";
@@ -31,7 +32,8 @@ export default async function Home() {
         <BlockRenderer blocks={blocks} products={products} categories={categories} banners={banners} />
       ) : (
         <>
-          <Storefront products={products} categories={categories} />
+          <ProductHero products={products} categories={categories} eyebrow="New season" heading="Stand out without trying" sub="Clothing, bedding and home decor made to last, delivered across Bangladesh. Pay in cash when it arrives." button="Get the look" tagline="Comfort, wrapped in good design" autoplay={5} />
+          <Storefront products={products} categories={categories} heading="Browse the rail." sub="Drag to explore, then tap anything to see it up close." level="h2" />
           <HomeSections products={products} categories={categories} banners={banners} />
         </>
       )}

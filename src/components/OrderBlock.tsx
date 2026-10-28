@@ -108,7 +108,7 @@ export function OrderBlock({ block, products, zones, slug, preview = false }: { 
                           <p className="font-medium">{p.name}</p>
                           <div className="flex flex-wrap items-center gap-3">
                             {p.hasColors !== false && <div className="flex gap-2">{p.colors.map((c) => <button type="button" key={c.name} aria-label={c.name} aria-pressed={pk.color === c.name} onClick={() => set({ color: c.name })} style={{ background: c.hex }} className={`h-8 w-8 rounded-full border border-line ${pk.color === c.name ? "ring-2 ring-ink ring-offset-2 ring-offset-surface" : ""}`} />)}</div>}
-                            {p.sizes.length > 0 && <div className="flex flex-wrap gap-1.5">{p.sizes.map((s) => <button type="button" key={s} aria-pressed={pk.size === s} onClick={() => set({ size: s })} className={`h-9 min-w-10 rounded-lg border px-3 text-xs ${pk.size === s ? "border-ink bg-ink text-paper" : "border-line"} ${ok(pk.color, s) ? "" : "line-through opacity-45"}`}>{s}</button>)}</div>}
+                            {p.sizes.length > 0 && <div className="flex flex-wrap gap-1.5">{p.sizes.map((s) => <button type="button" key={s} aria-pressed={pk.size === s} onClick={() => set({ size: s })} className={`h-9 min-w-10 rounded-pill border px-3 text-xs ${pk.size === s ? "border-ink bg-ink text-paper" : "border-line"} ${ok(pk.color, s) ? "" : "line-through opacity-45"}`}>{s}</button>)}</div>}
                           </div>
                         </div>
                       );

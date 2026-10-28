@@ -46,7 +46,7 @@ export async function sendContact(input: unknown): Promise<R> {
   const p = z.object({
     name: z.string().trim().min(2, "Enter your name").max(80),
     phone: z.string().trim().max(20),
-    email: z.union([z.literal(""), z.string().trim().toLowerCase().email("Enter a valid email").max(120)]),
+    email: z.string().trim().toLowerCase().email("Enter a valid email so we can confirm your message").max(120),
     message: z.string().trim().min(10, "Write a few words so we can help").max(1000),
     website: z.string(),
   }).safeParse(input);
@@ -57,9 +57,9 @@ export async function sendContact(input: unknown): Promise<R> {
   if (!(await rateLimit(`contact:${await clientIp()}`, 4, 600))) return { ok: false, message: "Too many messages. Please wait a few minutes." };
   try {
     const db = createAdminClient();
-    const row = { name: p.data.name, phone, source: "contact", notes: p.data.message };
-    let { error } = await db.from("leads").insert({ ...row, email: p.data.email || null });
-    if (error?.code === "23505") ({ error } = await db.from("leads").insert(row)); // that email is already a lead
+    let { error } = await db.from("leads").insert({ name: p.data.name, phone, email: p.data.email, source: "contact", notes: p.data.message });
+    // The same person can write more than once. If their email is already saved as a lead, keep the message and put the email in the notes.
+    if (error?.code === "23505") ({ error } = await db.from("leads").insert({ name: p.data.name, phone, source: "contact", notes: `Email: ${p.data.email}\n${p.data.message}` }));
     if (error) return { ok: false, message: process.env.NODE_ENV !== "production" ? `Could not save: ${error.message}. Open Admin, Health check.` : "Could not send your message. Please try again." };
     await notifyContact({ name: p.data.name, phone, email: p.data.email, message: p.data.message });
     return { ok: true, message: "Thank you. We will get back to you soon." };

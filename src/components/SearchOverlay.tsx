@@ -10,7 +10,7 @@ import { ProductArt } from "./ProductArt";
 
 type Hit = { name: string; slug: string; price: number; image: string; kind: Kind; color: string };
 
-export function SearchOverlay() {
+export function SearchOverlay({ bar = false }: { bar?: boolean }) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [q, setQ] = useState("");
@@ -39,7 +39,11 @@ export function SearchOverlay() {
   const close = () => { setOpen(false); setQ(""); };
   return (
     <>
-      <button aria-label="Search products" onClick={() => setOpen(true)} className="grid h-10 w-10 place-items-center rounded-full transition hover:bg-surface"><Search size={18} /></button>
+      {bar ? (
+        <button type="button" aria-label="Search products" onClick={() => setOpen(true)} className="flex h-11 w-full items-center gap-2 rounded-pill border border-line bg-surface px-4 text-left text-sm text-muted transition hover:border-ink/40"><Search size={16} /> Search products</button>
+      ) : (
+        <button aria-label="Search products" onClick={() => setOpen(true)} className="grid h-10 w-10 place-items-center rounded-full transition hover:bg-surface"><Search size={18} /></button>
+      )}
       {open && (
         <div role="dialog" aria-modal="true" aria-label="Search" onClick={close} className="fixed inset-0 z-[60] bg-black/40 px-4 pt-[12vh] backdrop-blur-sm">
           <div onClick={(e) => e.stopPropagation()} className="pop-in mx-auto max-w-xl overflow-hidden rounded-3xl border border-line bg-surface shadow-2xl">

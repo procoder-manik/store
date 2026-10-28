@@ -134,3 +134,41 @@ body { @apply bg-paper font-body text-ink antialiased; }
 .lift { transition: transform 0.35s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.35s; }
 .lift:hover { transform: translateY(-6px); box-shadow: 0 18px 40px -18px rgba(0, 0, 0, 0.3); }
 @media (prefers-reduced-motion: reduce) { .animate-marquee, .animate-aurora-a, .animate-aurora-b, .animate-floaty, .kenburns, .shine::after { animation: none; } }
+
+/* Product showcase hero */
+@keyframes hero-float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-14px); } }
+@keyframes hero-fade { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+.hero-float { animation: hero-float 6.5s ease-in-out infinite; }
+.hero-fade { animation: hero-fade 0.7s cubic-bezier(0.2, 0.8, 0.2, 1) both; }
+@media (prefers-reduced-motion: reduce) { .hero-float, .hero-fade { animation: none; } }
+
+/* Button shape chosen in Admin, Settings. "Follow the theme" leaves each theme's own corners. */
+[data-buttons="round"] { --r-pill: 9999px; }
+[data-buttons="soft"] { --r-pill: 0.75rem; }
+[data-buttons="square"] { --r-pill: 0; }
+
+/* Scroll bars: slim and quiet everywhere. Tab rows and panels hide them completely with .no-scrollbar. */
+* { scrollbar-width: thin; scrollbar-color: color-mix(in srgb, var(--muted) 35%, transparent) transparent; }
+*::-webkit-scrollbar { width: 6px; height: 6px; }
+*::-webkit-scrollbar-track { background: transparent; }
+*::-webkit-scrollbar-thumb { background: color-mix(in srgb, var(--muted) 35%, transparent); border-radius: 9999px; }
+*::-webkit-scrollbar-thumb:hover { background: color-mix(in srgb, var(--muted) 60%, transparent); }
+.no-scrollbar { scrollbar-width: none !important; -ms-overflow-style: none; }
+.no-scrollbar::-webkit-scrollbar { display: none !important; width: 0; height: 0; }
+
+
+/* Heading text chosen per section in the page builder.
+   "Match the tag" gives each heading level its own size. "Custom" uses the size typed in (smaller on phones).
+   Weight and case apply to every heading in the section. These beat the sizes written into each section's design. */
+[data-hsize="tag"] [data-heading] { line-height: 1.12; letter-spacing: -0.01em; }
+[data-hsize="tag"] [data-heading][data-lv="h1"] { font-size: clamp(2.25rem, 1.4rem + 3.6vw, 3.75rem); }
+[data-hsize="tag"] [data-heading][data-lv="h2"] { font-size: clamp(1.75rem, 1.2rem + 2.2vw, 2.5rem); }
+[data-hsize="tag"] [data-heading][data-lv="h3"] { font-size: clamp(1.5rem, 1.15rem + 1.4vw, 1.875rem); }
+[data-hsize="tag"] [data-heading][data-lv="h4"] { font-size: clamp(1.25rem, 1.1rem + 0.8vw, 1.5rem); }
+[data-hsize="tag"] [data-heading][data-lv="h5"] { font-size: 1.25rem; }
+[data-hsize="tag"] [data-heading][data-lv="h6"] { font-size: 1rem; }
+[data-hsize="tag"] [data-heading][data-lv="p"] { font-size: 1rem; line-height: 1.6; letter-spacing: 0; }
+[data-hsize="custom"] [data-heading] { font-size: var(--h-size-m); line-height: 1.12; }
+@media (min-width: 768px) { [data-hsize="custom"] [data-heading] { font-size: var(--h-size); } }
+[data-hweight] [data-heading] { font-weight: var(--h-weight); }
+[data-hcase] [data-heading] { text-transform: var(--h-case); }

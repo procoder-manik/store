@@ -4,7 +4,7 @@ import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowDown, ArrowUp, ChevronDown, ChevronRight, ExternalLink, GripVertical, Plus, Trash2 } from "lucide-react";
 import { deletePage, savePage } from "@/app/admin/pages/actions";
-import { ANIMATIONS, BLOCK_GROUPS, BLOCK_LABELS, HEADING_LEVELS, RAIL_STYLES, SLIDER_STYLES, newBlock, type Block, type BlockType } from "@/lib/blocks";
+import { ANIMATIONS, BLOCK_GROUPS, BLOCK_LABELS, FONT_WEIGHTS, HEADING_LEVELS, HEADING_LEVEL_LABEL, RAIL_STYLES, SLIDER_STYLES, TAG_SIZE_PX, TEXT_CASES, newBlock, type Block, type BlockType, type HeadingLevel } from "@/lib/blocks";
 import type { Product } from "@/lib/demo-products";
 import type { Cat } from "@/lib/catalog";
 import { formatPrice } from "@/lib/config";
@@ -16,7 +16,7 @@ const EMPTY: PageInitial = { slug: "", title: "", description: "", status: "draf
 const input = "w-full rounded-xl border border-line bg-surface px-3 py-2 text-sm";
 const label = "mb-1 block text-xs font-medium text-muted";
 const ALL = BLOCK_GROUPS.flatMap((g) => g.types);
-const LANDING: BlockType[] = ["hero", "slider", "spotlight", "text", "image", "features", "faq", "cta", "banner", "products", "newsletter", "order", "marquee", "stats", "countdown", "gallery", "testimonials"];
+const LANDING: BlockType[] = ["hero", "slider", "spotlight", "richtext", "text", "image", "features", "faq", "cta", "banner", "products", "newsletter", "order", "marquee", "stats", "countdown", "gallery", "testimonials"];
 
 function F({ l, children }: { l: string; children: React.ReactNode }) { return <div><label className={label}>{l}</label>{children}</div>; }
 type Setter = (p: Record<string, unknown>) => void;
@@ -70,13 +70,51 @@ function OffersEditor({ b, set, products }: { b: OrderB; set: Setter; products: 
   );
 }
 
+/** Blocks that have no heading text, so there is nothing to style. */
+const NO_HEADING: BlockType[] = ["marquee", "image", "banner"];
+const num = (v: string, min: number, max: number) => (v === "" ? undefined : Math.min(max, Math.max(min, Math.round(Number(v)) || min)));
+
 function StyleRow({ b, set }: { b: Block; set: Setter }) {
+  const hasHeading = !NO_HEADING.includes(b.type);
+  const mode = b.hsize ?? "design";
+  const tagPx = TAG_SIZE_PX[b.level as HeadingLevel];
   return (
-    <div className="mt-1 grid grid-cols-2 gap-3 border-t border-line pt-3">
-      {b.type !== "marquee" ? (
-        <F l="Heading tag (for search engines)"><select className={input} value={b.level} onChange={(e) => set({ level: e.target.value })}>{HEADING_LEVELS.map((h) => <option key={h} value={h}>{h.toUpperCase()}{h === "h1" ? " (use once per page)" : ""}</option>)}</select></F>
-      ) : <div />}
-      <F l="When it appears"><select className={input} value={b.anim} onChange={(e) => set({ anim: e.target.value })}>{ANIMATIONS.map((a) => <option key={a.id} value={a.id}>{a.name}</option>)}</select></F>
+    <div className="mt-1 grid gap-3 border-t border-line pt-3">
+      {hasHeading && (
+        <>
+          <p className="text-xs font-medium">Heading text</p>
+          <div className="grid grid-cols-2 gap-3">
+            <F l="Tag (what search engines read)">
+              {/* Picking a tag also switches the size to that tag's own size, unless you typed a custom size. */}
+              <select className={input} value={b.level} onChange={(e) => set({ level: e.target.value, ...(mode === "custom" ? {} : { hsize: "tag" }) })}>
+                {HEADING_LEVELS.map((h) => <option key={h} value={h}>{HEADING_LEVEL_LABEL[h]}</option>)}
+              </select>
+            </F>
+            <F l="Size">
+              <select className={input} value={mode} onChange={(e) => { const v = e.target.value; set({ hsize: v, ...(v === "custom" && !b.hpx ? { hpx: tagPx } : {}) }); }}>
+                <option value="design">Keep this section&apos;s own design size</option>
+                <option value="tag">Match the tag ({b.level === "p" ? "paragraph" : b.level.toUpperCase()} = {tagPx}px)</option>
+                <option value="custom">Custom size</option>
+              </select>
+            </F>
+          </div>
+          {mode === "custom" && (
+            <div className="grid grid-cols-2 gap-3">
+              <F l="Size on computers (px)"><input type="number" min={10} max={200} className={input} value={b.hpx ?? ""} onChange={(e) => set({ hpx: num(e.target.value, 10, 200) })} /></F>
+              <F l="Size on phones (px, blank = automatic)"><input type="number" min={10} max={120} className={input} placeholder={String(Math.max(14, Math.round((b.hpx ?? tagPx) * 0.65)))} value={b.hpxm ?? ""} onChange={(e) => set({ hpxm: num(e.target.value, 10, 120) })} /></F>
+            </div>
+          )}
+          <div className="grid grid-cols-2 gap-3">
+            <F l="Thickness (font weight)"><select className={input} value={b.hweight ?? ""} onChange={(e) => set({ hweight: e.target.value || undefined })}><option value="">Keep the design&apos;s weight</option>{FONT_WEIGHTS.map((w) => <option key={w.id} value={w.id}>{w.name}</option>)}</select></F>
+            <F l="Letters"><select className={input} value={b.hcase ?? ""} onChange={(e) => set({ hcase: e.target.value || undefined })}><option value="">Keep the design&apos;s style</option>{TEXT_CASES.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}</select></F>
+          </div>
+          {b.level === "h1" && <p className="-mt-1 text-xs text-muted">Use Heading 1 only once on a page. It is the main title search engines look for.</p>}
+          {b.level === "p" && <p className="-mt-1 text-xs text-muted">A paragraph tag is plain text. Search engines will not treat it as a heading.</p>}
+        </>
+      )}
+      <div className="grid grid-cols-2 gap-3">
+        <F l="When it appears"><select className={input} value={b.anim} onChange={(e) => set({ anim: e.target.value })}>{ANIMATIONS.map((a) => <option key={a.id} value={a.id}>{a.name}</option>)}</select></F>
+      </div>
     </div>
   );
 }
@@ -87,15 +125,25 @@ function Fields({ b, set, cats, products }: { b: Block; set: Setter; cats: Cat[]
   const source = (x: { source: string; category: string; tag: string }) => <>
     <F l="Show"><select className={input} value={x.source} onChange={(e) => set({ source: e.target.value })}><option value="all">All products</option><option value="category">One category</option><option value="tag">A tag</option></select></F>
     {x.source === "category" && <F l="Category"><select className={input} value={x.category} onChange={(e) => set({ category: e.target.value })}><option value="">Choose</option>{cats.map((c) => <option key={c.id} value={c.id}>{c.label}</option>)}</select></F>}
-    {x.source === "tag" && <F l="Tag"><select className={input} value={x.tag} onChange={(e) => set({ tag: e.target.value })}>{["new", "hot", "featured", "sale"].map((v) => <option key={v}>{v}</option>)}</select></F>}
+    {x.source === "tag" && <F l="Tag"><select className={input} value={x.tag} onChange={(e) => set({ tag: e.target.value })}>{["new", "hot", "bestseller", "featured", "sale"].map((v) => <option key={v}>{v}</option>)}</select></F>}
   </>;
   switch (b.type) {
     case "hero": return <>{t("heading", b.heading, "Heading", 120)}{t("sub", b.sub, "Sub text", 240)}{t("image", b.image, "Image link (Pexels, Unsplash or Pixabay)", 500)}{pair("button", b.button, "Button text", "link", b.link, "Button link")}
       <F l="Layout"><select className={input} value={b.variant} onChange={(e) => set({ variant: e.target.value })}><option value="overlay">Image behind the text, text on the left</option><option value="center">Image behind the text, centered</option><option value="split">Text on one side, image on the other</option><option value="aurora">Moving glow, centered (modern)</option><option value="bold">Giant bold type with floating shapes</option></select></F></>;
+    case "showcase": return <>{t("eyebrow", b.eyebrow, "Small label, top left", 40)}{t("heading", b.heading, "Heading", 120)}<F l="Text under the heading"><textarea className={input} rows={3} maxLength={300} value={b.sub} onChange={(e) => set({ sub: e.target.value })} /></F>{t("button", b.button, "Button text (opens the product on show)", 30)}{t("tagline", b.tagline, "Line at the bottom", 100)}
+      {source(b)}
+      <div className="grid grid-cols-2 gap-3">
+        <F l="Change product every (seconds, 0 = never)"><input type="number" min={0} max={20} className={input} value={b.autoplay} onChange={(e) => set({ autoplay: Math.min(20, Math.max(0, Number(e.target.value) || 0)) })} /></F>
+        <F l="Product pictures"><select className={input} value={b.fit} onChange={(e) => set({ fit: e.target.value })}><option value="cutout">Floating, no frame (best with transparent PNG)</option><option value="card">Framed photo</option></select></F>
+      </div>
+      <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={b.showNav} onChange={(e) => set({ showNav: e.target.checked })} /> Show the category buttons at the top</label>
+      <p className="text-xs text-muted">Social links shown at the bottom left. Leave any empty to hide it.</p>
+      {t("facebook", b.facebook, "Facebook link", 300)}{t("instagram", b.instagram, "Instagram link", 300)}{t("youtube", b.youtube, "YouTube link", 300)}{t("whatsapp", b.whatsapp, "WhatsApp link, like https://wa.me/8801712345678", 300)}</>;
     case "rail3d": return <>{t("heading", b.heading, "Heading", 120)}{t("sub", b.sub, "Sub text (blank = automatic)", 240)}{pair("button", b.button, "Button text", "link", b.link, "Button link")}{pair("button2", b.button2, "Second button text", "link2", b.link2, "Second button link")}
-      <F l="3D style"><select className={input} value={b.style} onChange={(e) => set({ style: e.target.value })}>{RAIL_STYLES.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}</select></F>
+      <F l="3D style"><select className={input} value={b.style} onChange={(e) => set({ style: e.target.value })}>{[...new Set(RAIL_STYLES.map((s) => s.group))].map((g) => <optgroup key={g} label={g}>{RAIL_STYLES.filter((s) => s.group === g).map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}</optgroup>)}</select></F>
       <p className="-mt-1 text-xs text-muted">Hanger rail shows clothes on hangers. The other styles show your product photos as cards, so they suit real photos best.</p>
-      {source(b)}<label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={b.showHero} onChange={(e) => set({ showHero: e.target.checked })} /> Show the heading and buttons above the slider</label></>;
+      {source(b)}<F l="Start as"><select className={input} value={b.defaultView} onChange={(e) => set({ defaultView: e.target.value })}><option value="3d">3D slider (visitors can switch to a grid)</option><option value="grid">A plain product grid (visitors can switch to 3D)</option></select></F>
+      <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={b.showHero} onChange={(e) => set({ showHero: e.target.checked })} /> Show the heading and buttons above the slider</label></>;
     case "slider": return <><F l="Slider style"><select className={input} value={b.style} onChange={(e) => set({ style: e.target.value })}>{SLIDER_STYLES.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}</select></F>{b.slides.map((s, i) => <div key={i} className="grid gap-2 rounded-xl border border-line p-3">
         <div className="flex gap-2"><input aria-label="Slide title" placeholder="Title" maxLength={80} className={input} value={s.title} onChange={(e) => set({ slides: b.slides.map((x, j) => (j === i ? { ...x, title: e.target.value } : x)) })} />{b.slides.length > 1 && <button type="button" aria-label="Remove slide" onClick={() => set({ slides: b.slides.filter((_, j) => j !== i) })} className="px-2"><Trash2 size={14} /></button>}</div>
         <input aria-label="Slide text" placeholder="Text" maxLength={160} className={input} value={s.sub} onChange={(e) => set({ slides: b.slides.map((x, j) => (j === i ? { ...x, sub: e.target.value } : x)) })} />
@@ -105,6 +153,32 @@ function Fields({ b, set, cats, products }: { b: Block; set: Setter; cats: Cat[]
     case "spotlight": return <>{t("heading", b.heading, "Small heading above the name", 80)}<F l="Product"><ProductSelect products={products} value={b.productId} onChange={(id) => set({ productId: id })} empty="First product" /></F>{t("button", b.button, "Button text", 30)}</>;
     case "pagehead": return <>{t("title", b.title, "Title", 120)}<F l="Intro text"><textarea className={input} rows={3} maxLength={400} value={b.intro} onChange={(e) => set({ intro: e.target.value })} /></F></>;
     case "text": return <>{t("heading", b.heading, "Heading (optional)", 120)}<F l="Text (blank line between paragraphs, start a line with - for a bullet)"><textarea className={input} rows={7} maxLength={4000} value={b.body} onChange={(e) => set({ body: e.target.value })} /></F></>;
+    case "richtext": {
+      const parts = b.parts;
+      const setPart = (i: number, patch: Record<string, unknown>) => set({ parts: parts.map((x, j) => (j === i ? { ...x, ...patch } : x)) });
+      const addPart = (kind: string) => set({ parts: [...parts, kind === "heading" ? { t: "heading", text: "A heading", level: "h2" } : kind === "paragraph" ? { t: "paragraph", text: "" } : kind === "list" ? { t: "list", items: [""] } : kind === "link" ? { t: "link", text: "Read more", href: "/shop", style: "link" } : kind === "quote" ? { t: "quote", text: "", by: "" } : { t: "divider" }] });
+      return <>
+        <F l="Width"><select className={input} value={b.width} onChange={(e) => set({ width: e.target.value })}><option value="narrow">Narrow, easy to read</option><option value="wide">Full width</option></select></F>
+        {parts.map((x, i) => (
+          <div key={i} className="grid gap-2 rounded-xl border border-line p-3">
+            <div className="flex items-center justify-between gap-2 text-xs text-muted">
+              <span className="capitalize">{x.t}</span>
+              <span className="flex gap-1">
+                <button type="button" aria-label="Move up" onClick={() => { if (i === 0) return; const c = [...parts]; [c[i - 1], c[i]] = [c[i], c[i - 1]]; set({ parts: c }); }}><ArrowUp size={13} /></button>
+                <button type="button" aria-label="Move down" onClick={() => { if (i === parts.length - 1) return; const c = [...parts]; [c[i + 1], c[i]] = [c[i], c[i + 1]]; set({ parts: c }); }}><ArrowDown size={13} /></button>
+                <button type="button" aria-label="Remove" onClick={() => set({ parts: parts.filter((_, j) => j !== i) })}><Trash2 size={13} /></button>
+              </span>
+            </div>
+            {x.t === "heading" && <div className="grid grid-cols-[1fr_90px] gap-2"><input className={input} maxLength={160} value={x.text} onChange={(e) => setPart(i, { text: e.target.value })} /><select className={input} value={x.level} onChange={(e) => setPart(i, { level: e.target.value })}>{HEADING_LEVELS.map((h) => <option key={h} value={h}>{h === "p" ? "P (text)" : h.toUpperCase()}</option>)}</select></div>}
+            {x.t === "paragraph" && <textarea className={input} rows={4} maxLength={2000} value={x.text} onChange={(e) => setPart(i, { text: e.target.value })} />}
+            {x.t === "list" && <textarea className={input} rows={4} placeholder="One item per line" value={x.items.join("\n")} onChange={(e) => setPart(i, { items: e.target.value.split("\n").map((v) => v.slice(0, 300)).slice(0, 12) })} />}
+            {x.t === "quote" && <><textarea className={input} rows={3} maxLength={400} value={x.text} onChange={(e) => setPart(i, { text: e.target.value })} /><input className={input} maxLength={60} placeholder="Who said it" value={x.by} onChange={(e) => setPart(i, { by: e.target.value })} /></>}
+            {x.t === "link" && <div className="grid gap-2 sm:grid-cols-3"><input className={input} maxLength={80} placeholder="Link text" value={x.text} onChange={(e) => setPart(i, { text: e.target.value })} /><input className={input} maxLength={300} placeholder="/shop or https://" value={x.href} onChange={(e) => setPart(i, { href: e.target.value })} /><select className={input} value={x.style} onChange={(e) => setPart(i, { style: e.target.value })}><option value="link">Plain link</option><option value="button">Filled button</option><option value="outline">Outlined button</option></select></div>}
+          </div>
+        ))}
+        {parts.length < 40 && <div className="flex flex-wrap gap-2">{["heading", "paragraph", "list", "link", "quote", "divider"].map((k) => <button key={k} type="button" onClick={() => addPart(k)} className="rounded-pill border border-line px-3 py-1.5 text-xs capitalize hover:border-ink">Add {k}</button>)}</div>}
+      </>;
+    }
     case "products": return <>{t("title", b.title, "Title", 80)}{source(b)}<F l="How many (2 to 12)"><input type="number" min={2} max={12} className={input} value={b.count} onChange={(e) => set({ count: Math.min(12, Math.max(2, Number(e.target.value) || 4)) })} /></F></>;
     case "categories": return t("title", b.title, "Title", 80);
     case "banners": return <>{t("title", b.title, "Title (optional)", 80)}<p className="text-xs text-muted">Shows the banners you manage under Banners.</p></>;

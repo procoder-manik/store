@@ -3,8 +3,8 @@ import { getCatalog } from "@/lib/catalog";
 import { getPublicSettings } from "@/lib/settings";
 import { createAdminClient } from "@/lib/supabase/admin";
 
-export const dynamic = "force-static";
-export const revalidate = 120;
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
 const NAMES = ["Rahim", "Karim", "Sumaiya", "Nusrat", "Tanvir", "Mitu", "Arif", "Farhana", "Imran", "Sadia", "Rifat", "Jannat", "Hasan", "Tania", "Shakib", "Mim"];
 const CITIES = ["Dhaka", "Chattogram", "Rangpur", "Sylhet", "Khulna", "Rajshahi", "Barishal", "Cumilla", "Gazipur", "Mymensingh", "Bogura", "Narayanganj"];
@@ -40,20 +40,34 @@ export async function GET() {
       .from("orders")
       .select("guest_name, shipping_address, created_at, order_items(name_snapshot, unit_price)")
       .not("status", "in", "(cancelled,returned)")
+      .gte("created_at", new Date(Date.now() - 14 * 864e5).toISOString())
       .order("created_at", { ascending: false })
-      .limit(10);
-    // Only a first name, the district, the product and the price are ever exposed.
+      .limit(20);
+    // Only a first name, the district, the product and the price are ever exposed, and only when the name looks real.
     const items = ((data ?? []) as unknown as OrderRow[])
-      .filter((o) => o.order_items?.length)
+      .filter((o) => o.order_items?.length && realName(o.guest_name))
       .map((o) => ({
-        name: String(o.guest_name).split(" ")[0].slice(0, 20),
+        name: String(o.guest_name).trim().split(/\s+/)[0].slice(0, 20),
         city: o.shipping_address?.district ?? "Bangladesh",
         product: o.order_items[0].name_snapshot.replace(/ \(.*\)$/, ""),
         price: Number(o.order_items[0].unit_price),
         ago: ago(o.created_at),
-      }));
-    return NextResponse.json({ items });
+      }))
+      .slice(0, 10);
+    return NextResponse.json({ items }, { headers: { "cache-control": "no-store" } });
   } catch {
     return NextResponse.json({ items: [] });
   }
+}
+
+/** Keeps out test entries and gibberish, so only real-looking names are shown to visitors. */
+function realName(raw: string) {
+  const name = String(raw ?? "").trim();
+  const first = name.split(/\s+/)[0] ?? "";
+  if (first.length < 3 || first.length > 20) return false;
+  if (!/^[\p{L}][\p{L}.'-]*$/u.test(first)) return false;              // letters only
+  if (/(.)\1{2,}/u.test(first)) return false;                           // aaaa
+  if (/^(test|testing|demo|asdf|qwer|abc|xyz|nnn|aaa|customer|user|name|na)$/i.test(first)) return false;
+  if (/^[a-z]+$/.test(first) && !/[aeiou]/i.test(first)) return false;  // no vowels at all
+  return true;
 }

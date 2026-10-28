@@ -16,7 +16,7 @@ export function SocialProof() {
 
   useEffect(() => {
     try { if (sessionStorage.getItem("proof-off")) setOff(true); } catch { /* storage blocked */ }
-    fetch("/api/social-proof").then((r) => r.json()).then((d) => setItems(d.items ?? [])).catch(() => {});
+    fetch("/api/social-proof", { cache: "no-store" }).then((r) => r.json()).then((d) => setItems(d.items ?? [])).catch(() => {});
   }, []);
 
   useEffect(() => {

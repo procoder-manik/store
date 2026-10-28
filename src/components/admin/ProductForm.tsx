@@ -4,6 +4,7 @@ import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { Sparkles, Star, Trash2 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
+import { TAG_INFO } from "@/lib/tags";
 import { SITE_URL } from "@/lib/config";
 import { imageUrl as publicUrl, isAllowedImageUrl, slugify } from "@/lib/utils";
 import { deleteProduct, duplicateProduct, saveProduct } from "@/app/admin/products/actions";
@@ -13,15 +14,15 @@ type V = { id?: string; sku: string; colorName: string; colorHex: string; size: 
 type Img = { path: string; alt: string };
 export type ProductInitial = {
   id?: string; name: string; slug: string; kind: string; categoryId: string; description: string;
-  basePrice: string; compareAtPrice: string; tags: string[]; status: string;
+  basePrice: string; compareAtPrice: string; offerEndsAt: string; tags: string[]; status: string;
   seoTitle: string; seoDescription: string; variants: V[]; images: Img[]; relatedIds: string[];
 };
 
 const EMPTY: ProductInitial = {
-  name: "", slug: "", kind: "tee", categoryId: "", description: "", basePrice: "", compareAtPrice: "",
+  name: "", slug: "", kind: "tee", categoryId: "", description: "", basePrice: "", compareAtPrice: "", offerEndsAt: "",
   tags: [], status: "draft", seoTitle: "", seoDescription: "", variants: [], images: [], relatedIds: [],
 };
-const TAGS = ["new", "hot", "featured", "sale"] as const;
+const TAGS = ["new", "hot", "bestseller", "featured", "sale"] as const;
 const MIME: Record<string, string> = { "image/jpeg": "jpg", "image/png": "png", "image/webp": "webp", "image/avif": "avif" };
 type FieldKey = "description" | "seoTitle" | "seoDescription" | "slug" | "colors" | "sizes";
 const input = "w-full rounded-xl border border-line bg-surface px-3 py-2 text-sm";
@@ -137,6 +138,7 @@ export function ProductForm({ categories, initial = EMPTY, allProducts = [] }: {
       description: f.description,
       basePrice: Number(f.basePrice),
       compareAtPrice: f.compareAtPrice === "" ? null : Number(f.compareAtPrice),
+      offerEndsAt: f.offerEndsAt,
       tags: f.tags,
       status: f.status,
       seoTitle: f.seoTitle,
@@ -179,6 +181,14 @@ export function ProductForm({ categories, initial = EMPTY, allProducts = [] }: {
           <div className="grid grid-cols-2 gap-4">
             <div><label className={label}>Price (BDT)</label><input className={input} type="number" min={0} step="0.01" required value={f.basePrice} onChange={(e) => set("basePrice", e.target.value)} /></div>
             <div><label className={label}>Compare-at price</label><input className={input} type="number" min={0} step="0.01" value={f.compareAtPrice} onChange={(e) => set("compareAtPrice", e.target.value)} /></div>
+            <div className="sm:col-span-2">
+              <label className={label}>Offer countdown ends (optional)</label>
+              <div className="flex gap-2">
+                <input className={input} type="datetime-local" value={f.offerEndsAt} onChange={(e) => set("offerEndsAt", e.target.value)} data-no-ai />
+                {f.offerEndsAt && <button type="button" onClick={() => set("offerEndsAt", "")} className="shrink-0 rounded-xl border border-line px-4 text-sm">Clear</button>}
+              </div>
+              <p className="mt-1 text-xs text-muted">A live timer appears on this product and on its card until this moment passes. Leave it empty for no timer.</p>
+            </div>
           </div>
         </section>
 
@@ -285,7 +295,7 @@ export function ProductForm({ categories, initial = EMPTY, allProducts = [] }: {
             <span className={label}>Tags</span>
             <div className="flex flex-wrap gap-2">
               {TAGS.map((t) => (
-                <button key={t} type="button" aria-pressed={f.tags.includes(t)} onClick={() => set("tags", f.tags.includes(t) ? f.tags.filter((x) => x !== t) : [...f.tags, t])} className={`rounded-pill border px-3 py-1 text-xs capitalize ${f.tags.includes(t) ? "border-accent bg-accent text-accent-ink" : "border-line"}`}>{t}</button>
+                <button key={t} type="button" aria-pressed={f.tags.includes(t)} onClick={() => set("tags", f.tags.includes(t) ? f.tags.filter((x) => x !== t) : [...f.tags, t])} className={`inline-flex items-center rounded-full border px-3.5 py-1.5 text-xs font-semibold transition ${f.tags.includes(t) ? `border-transparent ${TAG_INFO[t].className} shadow` : "border-line text-muted hover:border-ink hover:text-ink"}`}>{TAG_INFO[t].label}</button>
               ))}
             </div>
           </div>

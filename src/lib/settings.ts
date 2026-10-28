@@ -1,6 +1,8 @@
 import { cache } from "react";
 import { createPublicClient } from "@/lib/supabase/public";
 import { BRAND } from "@/lib/config";
+import { DEFAULT_PAYMENTS, mergePayments, type PaymentsSettings } from "@/lib/payments";
+import { DEFAULT_FOOTER_STYLE, DEFAULT_HEADER_STYLE, mergeFooterStyle, mergeHeaderStyle, type FooterStyleCfg, type HeaderStyleCfg } from "@/lib/layout-styles";
 
 export type Settings = {
   announcement: { enabled: boolean; text: string; link: string };
@@ -10,10 +12,13 @@ export type Settings = {
   bump: { enabled: boolean; variantId: string; headline: string; text: string; price: number | null };
   chat: { enabled: boolean; name: string; greeting: string; knowledge: string };
   contact: { phone: string; whatsapp: string; email: string; address: string; hours: string };
-  appearance: { theme: string; accent: string; visitorPicker: boolean; mode: "light" | "dark" | "system" };
+  appearance: { theme: string; accent: string; visitorPicker: boolean; mode: "light" | "dark" | "system"; buttons: "round" | "soft" | "square" | "theme" };
   brand: { name: string; tagline: string; logo: string };
   header: { links: { label: string; href: string }[] };
   footer: { about: string; columns: { title: string; links: { label: string; href: string }[] }[]; copyright: string; newsletter: boolean };
+  payments: PaymentsSettings;
+  headerStyle: HeaderStyleCfg;
+  footerStyle: FooterStyleCfg;
 };
 
 export const DEFAULTS: Settings = {
@@ -24,14 +29,17 @@ export const DEFAULTS: Settings = {
   bump: { enabled: false, variantId: "", headline: "Add this to your order", text: "", price: null },
   chat: { enabled: false, name: "Shopping assistant", greeting: "Hi! Ask me about products, sizes, delivery or your order.", knowledge: "" },
   contact: { phone: "", whatsapp: "", email: "", address: "", hours: "" },
-  appearance: { theme: "studio", accent: "", visitorPicker: true, mode: "light" },
+  appearance: { theme: "studio", accent: "", visitorPicker: true, mode: "light", buttons: "round" },
   brand: { name: BRAND.name, tagline: BRAND.tagline, logo: "" },
   header: { links: [{ label: "Shop", href: "/shop" }] },
   footer: { about: "", columns: [], copyright: "", newsletter: true },
+  payments: DEFAULT_PAYMENTS,
+  headerStyle: DEFAULT_HEADER_STYLE,
+  footerStyle: DEFAULT_FOOTER_STYLE,
 };
 
 export function mergeSettings(rows: { key: string; value: unknown }[]): Settings {
-  const out: Settings = { announcement: { ...DEFAULTS.announcement }, tracking: { ...DEFAULTS.tracking }, popup: { ...DEFAULTS.popup }, proof: { ...DEFAULTS.proof }, bump: { ...DEFAULTS.bump }, chat: { ...DEFAULTS.chat }, contact: { ...DEFAULTS.contact }, appearance: { ...DEFAULTS.appearance }, brand: { ...DEFAULTS.brand }, header: { ...DEFAULTS.header }, footer: { ...DEFAULTS.footer } };
+  const out: Settings = { announcement: { ...DEFAULTS.announcement }, tracking: { ...DEFAULTS.tracking }, popup: { ...DEFAULTS.popup }, proof: { ...DEFAULTS.proof }, bump: { ...DEFAULTS.bump }, chat: { ...DEFAULTS.chat }, contact: { ...DEFAULTS.contact }, appearance: { ...DEFAULTS.appearance }, brand: { ...DEFAULTS.brand }, header: { ...DEFAULTS.header }, footer: { ...DEFAULTS.footer }, payments: DEFAULTS.payments, headerStyle: DEFAULTS.headerStyle, footerStyle: DEFAULTS.footerStyle };
   for (const r of rows) {
     const v = (r.value ?? {}) as object;
     if (r.key === "announcement") out.announcement = { ...out.announcement, ...v };
@@ -50,6 +58,9 @@ export function mergeSettings(rows: { key: string; value: unknown }[]): Settings
     if (r.key === "brand") out.brand = { ...out.brand, ...v };
     if (r.key === "header") out.header = { ...out.header, ...v };
     if (r.key === "footer") out.footer = { ...out.footer, ...v };
+    if (r.key === "payments") out.payments = mergePayments(v);
+    if (r.key === "header_style") out.headerStyle = mergeHeaderStyle(v);
+    if (r.key === "footer_style") out.footerStyle = mergeFooterStyle(v);
   }
   return out;
 }

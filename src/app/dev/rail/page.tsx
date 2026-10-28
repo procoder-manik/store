@@ -7,6 +7,6 @@ export default async function RailPreview({ searchParams }: { searchParams: Prom
   if (process.env.NODE_ENV === "production") notFound();
   const { v } = await searchParams;
   const { products, categories } = await getCatalog();
-  const variant = (["hanger", "arc", "coverflow", "diagonal", "stack", "wave"].includes(v ?? "") ? v : "arc") as RailVariant;
+  const variant = (["hanger", "hanger-wire", "hanger-gold", "hanger-velvet", "arc", "coverflow", "diagonal", "stack", "wave"].includes(v ?? "") ? v : "arc") as RailVariant;
   return <Storefront products={products} categories={categories} variant={variant} />;
 }

@@ -56,6 +56,20 @@ export default async function Settings() {
               </select>
             </div>
           </div>
+          <div>
+            <label className={label}>Button shape</label>
+            <div className="flex flex-wrap gap-2">
+              {([["round", "Fully round", "9999px"], ["soft", "Softly rounded", "0.75rem"], ["square", "Square corners", "0"], ["theme", "Follow the theme", "0.5rem"]] as const).map(([v, name, r]) => (
+                <label key={v} className="cursor-pointer">
+                  <input type="radio" name="buttons" value={v} defaultChecked={(s.appearance.buttons ?? "round") === v} className="peer sr-only" />
+                  <span className="flex items-center gap-3 rounded-xl border border-line px-3 py-2 text-sm peer-checked:border-ink peer-checked:ring-2 peer-checked:ring-ink/20">
+                    <span style={{ borderRadius: r }} className="h-6 w-14 bg-ink" />{name}
+                  </span>
+                </label>
+              ))}
+            </div>
+            <p className="mt-1.5 text-xs text-muted">Changes every button on your store at once.</p>
+          </div>
           <label className="flex items-center gap-2 text-sm"><input type="checkbox" name="visitorPicker" defaultChecked={s.appearance.visitorPicker} /> Let visitors switch the theme from the header</label>
           <button className={`${save} w-fit`}>Save theme</button>
         </form>

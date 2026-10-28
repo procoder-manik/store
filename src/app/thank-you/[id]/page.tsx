@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { formatPrice } from "@/lib/config";
 import { PurchaseEvent } from "@/components/PurchaseEvent";
+import { catalogItem, paymentLabel } from "@/lib/payments";
 
 export const metadata: Metadata = { title: "Order received", robots: { index: false } };
 
@@ -26,7 +27,7 @@ export default async function ThankYou({ params }: { params: Promise<{ id: strin
     <main className="mx-auto max-w-xl px-5 py-12">
       <PurchaseEvent orderNo={Number(o.order_no)} total={Number(o.total)} />
       <h1 className="font-display text-3xl font-semibold">Thank you, {String(o.guest_name).split(" ")[0]}.</h1>
-      <p className="mt-3 text-sm text-muted">Order #{o.order_no} is received. {o.payment_status === "paid" ? "Your online payment is received and we will confirm your order shortly." : o.payment_method === "sslcommerz" ? "It is waiting for your online payment." : `We will call you shortly to confirm it. Pay in cash when it arrives${addr?.district ? ` in ${addr.district}` : ""}.`}</p>
+      <p className="mt-3 text-sm text-muted">Order #{o.order_no} is received. {o.payment_status === "paid" ? "Your online payment is received and we will confirm your order shortly." : o.payment_method === "sslcommerz" ? "It is waiting for your online payment." : catalogItem(String(o.payment_method))?.manual ? `We will check your ${paymentLabel(o.payment_method as string)} payment and then confirm your order. We may call you if we cannot find it.` : `We will call you shortly to confirm it. Pay in cash when it arrives${addr?.district ? ` in ${addr.district}` : ""}.`}</p>
       {o.payment_method === "sslcommerz" && o.payment_status !== "paid" && o.status === "pending" && <Link href={`/pay/${id}`} className="mt-3 inline-block rounded-pill bg-accent px-5 py-2.5 text-sm font-semibold text-accent-ink">Complete payment</Link>}
       <div className="mt-6 rounded-xl border border-line bg-surface p-5">
         <ul className="divide-y divide-line text-sm">

@@ -98,8 +98,10 @@ export async function saveAppearance(fd: FormData) {
   const theme = String(fd.get("theme") ?? "");
   const accent = String(fd.get("accent") ?? "");
   const mode = String(fd.get("mode") ?? "light");
+  const buttons = String(fd.get("buttons") ?? "round");
+  if (!["round", "soft", "square", "theme"].includes(buttons)) throw new Error("Choose a button shape");
   if (!isTheme(theme)) throw new Error("Choose one of the themes");
   if (accent && !isPalette(accent)) throw new Error("Choose one of the accent colors");
   if (!["light", "dark", "system"].includes(mode)) throw new Error("Choose a mode");
-  await save("appearance", { theme, accent, mode, visitorPicker: on(fd.get("visitorPicker")) });
+  await save("appearance", { theme, accent, mode, buttons, visitorPicker: on(fd.get("visitorPicker")) });
 }

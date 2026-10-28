@@ -3,7 +3,7 @@
 Work through this top to bottom before you share the store link. Items marked **you** need a setting in a dashboard. Everything else is already in the code.
 
 ## 1. Database (Supabase)
-Run these files in the SQL Editor, in order, once each: `0001_init`, `0002_storage`, `0003_orders`, `0004_dashboard`, `0005_customer_selling`, `0006_crm_email_chat`, `0007_pages_bundles`, `0008_indexes`, `0009_payments`, `0010_shipping_extras`, `0011_permalinks`, `0012_landing_builder`, `0013_email_log`.
+Run these files in the SQL Editor, in order, once each: `0001_init`, `0002_storage`, `0003_orders`, `0004_dashboard`, `0005_customer_selling`, `0006_crm_email_chat`, `0007_pages_bundles`, `0008_indexes`, `0009_payments`, `0010_shipping_extras`, `0011_permalinks`, `0012_landing_builder`, `0013_email_log`, `0014_credit_refunds_offers`, `0015_flexible_status`, `0016_leads_repeat_contacts`.
 
 ## 2. Supabase settings (you)
 | Where | Setting |

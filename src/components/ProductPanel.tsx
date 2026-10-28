@@ -11,7 +11,7 @@ const sum = "flex cursor-pointer list-none items-center justify-between py-3 tex
 
 export function ProductPanel({ product, colorIdx, onColor, onClose }: Props) {
   return (
-    <section aria-label={product.name} className="panel-in absolute inset-x-2 bottom-2 z-20 max-h-[63%] overflow-y-auto rounded-3xl border border-line bg-surface/[0.97] p-5 shadow-2xl backdrop-blur-xl md:inset-x-auto md:bottom-5 md:right-5 md:top-5 md:max-h-none md:w-[380px] md:p-6">
+    <section aria-label={product.name} className="panel-in absolute inset-x-2 bottom-2 z-20 max-h-[63%] no-scrollbar overflow-y-auto rounded-[28px] border border-white/60 bg-white/55 p-5 shadow-[0_30px_80px_-20px_rgba(0,0,0,0.45)] backdrop-blur-2xl dark:border-white/15 dark:bg-[#12151a]/60 md:inset-x-auto md:bottom-5 md:right-5 md:top-5 md:max-h-none md:w-[380px] md:p-6">
       <div className="flex items-start justify-between gap-3">
         <h2 className="font-display text-2xl font-semibold leading-tight">{product.name}</h2>
         <button aria-label="Close" onClick={onClose} className="grid h-9 w-9 shrink-0 place-items-center rounded-full hover:bg-paper"><X size={18} /></button>

@@ -23,6 +23,7 @@ export default async function EditProduct({ params }: { params: Promise<{ id: st
     description: p.description ?? "",
     basePrice: String(p.base_price),
     compareAtPrice: p.compare_at_price == null ? "" : String(p.compare_at_price),
+    offerEndsAt: p.offer_ends_at ? new Date(p.offer_ends_at).toISOString().slice(0, 16) : "",
     tags: p.tags ?? [],
     status: p.status,
     seoTitle: p.seo?.title ?? "",

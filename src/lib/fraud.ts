@@ -2,7 +2,8 @@ import "server-only";
 import { createAdminClient } from "@/lib/supabase/admin";
 
 type Input = { phone: string; ip: string; email: string; total: number };
-export type FraudResult = { block: boolean; score: number };
+export type FraudReason = "blacklist" | "phone_velocity" | "ip_velocity";
+export type FraudResult = { block: boolean; score: number; reason?: FraudReason };
 
 const since = (ms: number) => new Date(Date.now() - ms).toISOString();
 
@@ -31,7 +32,10 @@ export async function checkFraud({ phone, ip, email, total }: Input): Promise<Fr
     count("guest_phone", phone, 365 * 24 * 3600e3, ["delivered"]),
   ]);
 
-  if (bPhone || bIp || bEmail || phone24 >= 3 || ip1h >= 8) return { block: true, score: 100 };
+  // Say which rule fired so the server log (and a signed-in staff member testing the store) can see why.
+  if (bPhone || bIp || bEmail) return { block: true, score: 100, reason: "blacklist" };
+  if (phone24 >= 3) return { block: true, score: 100, reason: "phone_velocity" };
+  if (ip1h >= 8) return { block: true, score: 100, reason: "ip_velocity" };
 
   let score = 0;
   if (bad >= 2) score += 40;

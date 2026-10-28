@@ -27,10 +27,11 @@ export async function sendEmails(msgs: Outgoing[], kind = "other"): Promise<{ se
   for (let i = 0; i < msgs.length; i += 100) {
     const chunk = msgs.slice(i, i + 100);
     try {
-      const res = await fetch("https://api.resend.com/emails/batch", {
+      const payload = chunk.map((m) => ({ from: process.env.EMAIL_FROM, to: [m.to], subject: m.subject, html: m.html, text: m.text }));
+      const res = await fetch(payload.length === 1 ? "https://api.resend.com/emails" : "https://api.resend.com/emails/batch", {
         method: "POST",
         headers: { "content-type": "application/json", authorization: `Bearer ${process.env.RESEND_API_KEY}` },
-        body: JSON.stringify(chunk.map((m) => ({ from: process.env.EMAIL_FROM, to: [m.to], subject: m.subject, html: m.html, text: m.text }))),
+        body: JSON.stringify(payload.length === 1 ? payload[0] : payload),
       });
       if (res.ok) { sent += chunk.length; await log(chunk, kind, "sent"); }
       else {

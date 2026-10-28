@@ -15,9 +15,12 @@ const damp = THREE.MathUtils.damp;
 
 /* ---------- shared textures and materials ---------- */
 
+export type HangerStyle = "wood" | "wire" | "gold" | "velvet";
+
 type Shared = {
   weave: THREE.CanvasTexture; folds: THREE.CanvasTexture; quilt: THREE.CanvasTexture; glass: THREE.CanvasTexture;
   wood: THREE.MeshStandardMaterial; metal: THREE.MeshStandardMaterial; dark: THREE.MeshStandardMaterial;
+  gold: THREE.MeshStandardMaterial; wire: THREE.MeshStandardMaterial; velvet: THREE.MeshStandardMaterial;
   paper: THREE.MeshStandardMaterial; string: THREE.MeshStandardMaterial; glassMat: THREE.MeshBasicMaterial;
 };
 
@@ -70,6 +73,9 @@ function makeShared(): Shared {
   return {
     weave, folds, quilt, glass,
     wood: new THREE.MeshStandardMaterial({ color: "#b48a60", roughness: 0.55 }),
+    gold: new THREE.MeshStandardMaterial({ color: "#c9a227", metalness: 0.85, roughness: 0.28 }),
+    wire: new THREE.MeshStandardMaterial({ color: "#cfd4db", metalness: 0.9, roughness: 0.2 }),
+    velvet: new THREE.MeshStandardMaterial({ color: "#2f3340", roughness: 0.95 }),
     metal: new THREE.MeshStandardMaterial({ color: "#9aa0aa", metalness: 0.7, roughness: 0.35 }),
     dark: new THREE.MeshStandardMaterial({ color: "#2b2d31", roughness: 0.5, metalness: 0.3 }),
     paper: new THREE.MeshStandardMaterial({ color: "#f4f1ea", roughness: 0.9 }),
@@ -170,9 +176,9 @@ function Thread({ a, b }: { a: [number, number]; b: [number, number] }) {
 
 /* ---------- one product on the rail ---------- */
 
-type ItemProps = { p: Product; i: number; selected: boolean; dim: boolean; colorHex: string; onSelect: (id: string) => void; sh: Shared; rot: MutableRefObject<number>; narrow: boolean };
+type ItemProps = { p: Product; i: number; selected: boolean; dim: boolean; colorHex: string; onSelect: (id: string) => void; sh: Shared; rot: MutableRefObject<number>; narrow: boolean; style: HangerStyle };
 
-function Item({ p, i, selected, dim, colorHex, onSelect, sh, rot, narrow }: ItemProps) {
+function Item({ p, i, selected, dim, colorHex, onSelect, sh, rot, narrow, style }: ItemProps) {
   const swing = useRef<THREE.Group>(null);
   const tagRef = useRef<THREE.Group>(null);
   const hover = useRef(false);
@@ -249,27 +255,44 @@ function Item({ p, i, selected, dim, colorHex, onSelect, sh, rot, narrow }: Item
   };
 
   const decor = mode === "decor";
+  const armMat = style === "gold" ? sh.gold : style === "wire" ? sh.wire : style === "velvet" ? sh.velvet : sh.wood;
+  const hookMat = style === "gold" ? sh.gold : sh.metal;
+  const hookR = style === "wire" || style === "gold" ? 0.007 : 0.009;
   const anchor: [number, number] = decor ? [0.386, -0.45] : [0.47, -0.31];
   const hole: [number, number] = [anchor[0] + 0.03, anchor[1] - 0.3];
 
   return (
     <group position={[i * SPACING, 0, 0]}>
       <group ref={swing} position={[0, RAIL_Y, 0]}>
-        <mesh rotation={[0, Math.PI / 2, 0]} material={sh.metal}><torusGeometry args={[0.045, 0.009, 8, 24]} /></mesh>
-        <mesh position={[0, -0.09, 0]} material={sh.metal}><cylinderGeometry args={[0.009, 0.009, 0.14, 8]} /></mesh>
+        <mesh rotation={[0, Math.PI / 2, 0]} material={hookMat}><torusGeometry args={[0.045, hookR, 8, 24]} /></mesh>
+        <mesh position={[0, -0.09, 0]} material={hookMat}><cylinderGeometry args={[hookR, hookR, 0.14, 8]} /></mesh>
 
-        {!decor && (
+        {!decor && (style === "wire" ? (
           <>
-            <mesh position={[-0.22, -0.228, 0]} rotation={[0, 0, 0.3]} material={sh.wood} castShadow><boxGeometry args={[0.46, 0.026, 0.03]} /></mesh>
-            <mesh position={[0.22, -0.228, 0]} rotation={[0, 0, -0.3]} material={sh.wood} castShadow><boxGeometry args={[0.46, 0.026, 0.03]} /></mesh>
+            {/* A thin wire hanger. A cylinder stands along Y, so a sloping arm adds a quarter turn to its angle. */}
+            <mesh position={[-0.22, -0.228, 0]} rotation={[0, 0, Math.PI / 2 + 0.3]} material={sh.wire} castShadow><cylinderGeometry args={[0.013, 0.013, 0.47, 10]} /></mesh>
+            <mesh position={[0.22, -0.228, 0]} rotation={[0, 0, Math.PI / 2 - 0.3]} material={sh.wire} castShadow><cylinderGeometry args={[0.013, 0.013, 0.47, 10]} /></mesh>
+            <mesh position={[0, -0.295, 0]} rotation={[0, 0, Math.PI / 2]} material={sh.wire} castShadow><cylinderGeometry args={[0.012, 0.012, 0.86, 10]} /></mesh>
           </>
-        )}
+        ) : style === "velvet" ? (
+          <>
+            {/* A soft velvet hanger: slim, matte and with a trouser bar. */}
+            <mesh position={[-0.21, -0.232, 0]} rotation={[0, 0, 0.28]} material={sh.velvet} castShadow><boxGeometry args={[0.44, 0.034, 0.038]} /></mesh>
+            <mesh position={[0.21, -0.232, 0]} rotation={[0, 0, -0.28]} material={sh.velvet} castShadow><boxGeometry args={[0.44, 0.034, 0.038]} /></mesh>
+            <mesh position={[0, -0.3, 0]} material={sh.velvet} castShadow><boxGeometry args={[0.88, 0.028, 0.034]} /></mesh>
+          </>
+        ) : (
+          <>
+            <mesh position={[-0.22, -0.228, 0]} rotation={[0, 0, 0.3]} material={armMat} castShadow><boxGeometry args={[0.46, style === "gold" ? 0.02 : 0.026, style === "gold" ? 0.022 : 0.03]} /></mesh>
+            <mesh position={[0.22, -0.228, 0]} rotation={[0, 0, -0.3]} material={armMat} castShadow><boxGeometry args={[0.46, style === "gold" ? 0.02 : 0.026, style === "gold" ? 0.022 : 0.03]} /></mesh>
+          </>
+        ))}
 
         {(mode === "card" || mode === "cover") && (
           <>
-            <mesh position={[0, -0.31, 0]} material={sh.wood} castShadow><boxGeometry args={[0.96, 0.03, 0.035]} /></mesh>
-            <mesh position={[-0.3, -0.345, 0]} material={sh.dark} castShadow><boxGeometry args={[0.07, 0.1, 0.06]} /></mesh>
-            <mesh position={[0.3, -0.345, 0]} material={sh.dark} castShadow><boxGeometry args={[0.07, 0.1, 0.06]} /></mesh>
+            <mesh position={[0, -0.31, 0]} material={armMat} castShadow><boxGeometry args={[0.96, 0.03, 0.035]} /></mesh>
+            <mesh position={[-0.3, -0.345, 0]} material={style === "gold" ? sh.gold : sh.dark} castShadow><boxGeometry args={[0.07, 0.1, 0.06]} /></mesh>
+            <mesh position={[0.3, -0.345, 0]} material={style === "gold" ? sh.gold : sh.dark} castShadow><boxGeometry args={[0.07, 0.1, 0.06]} /></mesh>
           </>
         )}
 
@@ -373,10 +396,10 @@ function Controls({ target, max, rot, locked, dragged }: { target: Ref<number>; 
 export type Nudge = { n: number; dir: 1 | -1 };
 type Props = {
   products: Product[]; selectedId: string | null; colorHex: string; onSelect: (id: string | null) => void;
-  dark: boolean; nudge: Nudge; onIndex: (i: number) => void;
+  dark: boolean; nudge: Nudge; onIndex: (i: number) => void; style?: HangerStyle;
 };
 
-function Track({ products, selectedId, colorHex, onSelect, nudge, onIndex, sh, dragged }: Omit<Props, "dark"> & { sh: Shared; dragged: Ref<boolean> }) {
+function Track({ products, selectedId, colorHex, onSelect, nudge, onIndex, sh, dragged, style = "wood" }: Omit<Props, "dark"> & { sh: Shared; dragged: Ref<boolean> }) {
   const group = useRef<THREE.Group>(null);
   const target = useRef(0);
   const rot = useRef(0);
@@ -418,7 +441,7 @@ function Track({ products, selectedId, colorHex, onSelect, nudge, onIndex, sh, d
       <Controls target={target} max={max} rot={rot} locked={locked} dragged={dragged} />
       <group ref={group}>
         {products.map((p, i) => (
-          <Item key={p.id} p={p} i={i} selected={p.id === selectedId} dim={!!selectedId && p.id !== selectedId} colorHex={colorHex} onSelect={onSelect} sh={sh} rot={rot} narrow={width < 700} />
+          <Item key={p.id} p={p} i={i} selected={p.id === selectedId} dim={!!selectedId && p.id !== selectedId} colorHex={colorHex} onSelect={onSelect} sh={sh} rot={rot} narrow={width < 700} style={style} />
         ))}
       </group>
     </>
@@ -434,8 +457,17 @@ function CameraRig() {
   return null;
 }
 
+const RAILS: Record<HangerStyle, { light: string; dark: string; r: number; metalness: number; roughness: number }> = {
+  wood: { light: "#b5bbc6", dark: "#59606c", r: 0.028, metalness: 0.6, roughness: 0.35 },
+  wire: { light: "#c8cdd5", dark: "#6c737e", r: 0.02, metalness: 0.95, roughness: 0.15 },
+  gold: { light: "#c9a227", dark: "#b08f22", r: 0.022, metalness: 0.9, roughness: 0.25 },
+  velvet: { light: "#3b404d", dark: "#2a2e38", r: 0.03, metalness: 0.3, roughness: 0.8 },
+};
+
 function Scene({ dark, dragged, ...rest }: Props & { dragged: Ref<boolean> }) {
   const sh = useShared();
+  const r = RAILS[rest.style ?? "wood"];
+  const rail = { color: dark ? r.dark : r.light, r: r.r, metalness: r.metalness, roughness: r.roughness };
   return (
     <>
       <ambientLight intensity={dark ? 0.55 : 0.85} />
@@ -447,8 +479,8 @@ function Scene({ dark, dragged, ...rest }: Props & { dragged: Ref<boolean> }) {
       />
       <CameraRig />
       <mesh position={[0, RAIL_Y, 0]} rotation={[0, 0, Math.PI / 2]} castShadow>
-        <cylinderGeometry args={[0.028, 0.028, 300, 16]} />
-        <meshStandardMaterial color={dark ? "#59606c" : "#b5bbc6"} metalness={0.6} roughness={0.35} />
+        <cylinderGeometry args={[rail.r, rail.r, 300, 16]} />
+        <meshStandardMaterial color={rail.color} metalness={rail.metalness} roughness={rail.roughness} />
       </mesh>
       <mesh position={[0, 0.4, -0.95]} receiveShadow>
         <planeGeometry args={[60, 12]} />

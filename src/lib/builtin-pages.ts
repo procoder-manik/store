@@ -15,15 +15,17 @@ export const BUILTIN: { slug: string; title: string; path: string }[] = [
 /** The built-in version of a page as blocks, so it can be edited, reordered and extended. */
 export function defaultBlocks(slug: string, brand: string, email: string): Block[] {
   if (slug === "home") {
+    const show = newBlock("showcase");
+    show.level = "h1"; // the home page keeps one main heading
     const rail = newBlock("rail3d");
-    rail.level = "h1"; // the home page keeps one main heading
+    if (rail.type === "rail3d") Object.assign(rail, { heading: "Browse the rail.", sub: "Drag to explore, then tap anything to see it up close." });
     const cats = newBlock("categories");
     const banners = newBlock("banners");
     const hot = newBlock("products");
     const fresh = newBlock("products");
     if (hot.type === "products") Object.assign(hot, { title: "Popular right now", source: "tag", tag: "hot", count: 4 });
     if (fresh.type === "products") Object.assign(fresh, { title: "Just in", source: "tag", tag: "new", count: 4 });
-    return [rail, cats, banners, hot, fresh];
+    return [show, rail, cats, banners, hot, fresh];
   }
   const d = infoDefault(slug as InfoSlug, brand, email);
   const out: Block[] = [];

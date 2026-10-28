@@ -8,16 +8,19 @@ import { ProductArt } from "./ProductArt";
 import { formatPrice } from "@/lib/config";
 import { placeOrder, quoteOrder } from "@/app/checkout/actions";
 import { captureCart } from "@/app/checkout/capture";
+import { readRef } from "./RefCapture";
+import { PaymentPicker } from "./PaymentPicker";
+import type { PublicMethod } from "@/lib/payments";
 
 export type Zone = { id: string; name: string; fee: number; freeOver: number | null };
 export type BumpInfo = { headline: string; text: string; name: string; price: number; normalPrice: number };
 export type Prefill = { name: string; phone: string; email: string; district: string; address: string };
-type Quote = { subtotal: number; shipping: number; discount: number; bundleDiscount: number; total: number; couponError?: string };
+type Quote = { subtotal: number; shipping: number; discount: number; bundleDiscount: number; total: number; couponError?: string; creditUsed?: number; creditBalance?: number };
 
 const input = "w-full rounded-xl border border-line bg-surface px-3 py-2.5 text-sm";
 const label = "mb-1 block text-xs font-medium text-muted";
 
-export function CheckoutForm({ zones, bump = null, prefill = null, onlineEnabled = false }: { zones: Zone[]; bump?: BumpInfo | null; prefill?: Prefill | null; onlineEnabled?: boolean }) {
+export function CheckoutForm({ zones, bump = null, prefill = null, methods = [] }: { zones: Zone[]; bump?: BumpInfo | null; prefill?: Prefill | null; methods?: PublicMethod[] }) {
   const router = useRouter();
   const { items, clear } = useCart();
   const [mounted, setMounted] = useState(false);
@@ -25,7 +28,10 @@ export function CheckoutForm({ zones, bump = null, prefill = null, onlineEnabled
   const [couponInput, setCouponInput] = useState("");
   const [coupon, setCoupon] = useState("");
   const [bumpOn, setBumpOn] = useState(false);
-  const [online, setOnline] = useState(false);
+  const [method, setMethod] = useState<string>(methods[0]?.id ?? "");
+  const picked = methods.find((m) => m.id === method);
+  const online = method === "sslcommerz";
+  const [useCredit, setUseCredit] = useState(true);
   const [quote, setQuote] = useState<Quote | null>(null);
   const [error, setError] = useState("");
   const [pending, start] = useTransition();
@@ -39,14 +45,14 @@ export function CheckoutForm({ zones, bump = null, prefill = null, onlineEnabled
   useEffect(() => {
     if (!mounted || !zoneId || items.length === 0) return;
     let live = true;
-    quoteOrder({ items: JSON.parse(cartKey), zoneId, coupon, bump: bumpOn }).then((r) => {
+    quoteOrder({ items: JSON.parse(cartKey), zoneId, coupon, bump: bumpOn, useCredit }).then((r) => {
       if (!live) return;
       if (!r.ok) { setQuote(null); setError(r.error); return; }
       setError("");
-      setQuote({ subtotal: r.subtotal, shipping: r.shipping, discount: r.discount, bundleDiscount: r.bundleDiscount, total: r.total, couponError: r.couponError });
+      setQuote({ subtotal: r.subtotal, shipping: r.shipping, discount: r.discount, bundleDiscount: r.bundleDiscount, total: r.total, couponError: r.couponError, creditUsed: r.creditUsed, creditBalance: r.creditBalance });
     });
     return () => { live = false; };
-  }, [mounted, cartKey, zoneId, coupon, items.length, bumpOn]);
+  }, [mounted, cartKey, zoneId, coupon, items.length, bumpOn, useCredit]);
 
   function capture() {
     const el = formRef.current;
@@ -67,7 +73,7 @@ export function CheckoutForm({ zones, bump = null, prefill = null, onlineEnabled
     const payload = {
       name: String(f.get("name")), phone: String(f.get("phone")), email: String(f.get("email") ?? ""),
       zoneId, district: String(f.get("district")), address: String(f.get("address")), note: String(f.get("note") ?? ""),
-      coupon, bump: bumpOn, paymentMethod: online ? ("online" as const) : ("cod" as const), website: String(f.get("website") ?? ""), items: cartInput,
+      coupon, bump: bumpOn, useCredit, ref: readRef(), paymentMethod: method, payerNumber: String(f.get("payer") ?? ""), trxId: String(f.get("trxId") ?? ""), website: String(f.get("website") ?? ""), items: cartInput,
     };
     start(async () => {
       const r = await placeOrder(payload);
@@ -121,14 +127,7 @@ export function CheckoutForm({ zones, bump = null, prefill = null, onlineEnabled
           )}
 
           <h2 className="mt-2 font-display text-lg font-semibold">Payment</h2>
-          <div className="grid gap-2 text-sm">
-            <label className={`flex cursor-pointer items-center gap-3 rounded-xl border bg-surface p-3 ${!online ? "border-accent" : "border-line"}`}><input type="radio" name="pay" checked={!online} onChange={() => setOnline(false)} /> Cash on delivery</label>
-            {onlineEnabled ? (
-              <label className={`flex cursor-pointer items-start gap-3 rounded-xl border bg-surface p-3 ${online ? "border-accent" : "border-line"}`}><input type="radio" name="pay" checked={online} onChange={() => setOnline(true)} className="mt-1" /><span>Pay online<span className="block text-xs text-muted">bKash, Nagad, Rocket, cards and bank. You will be taken to a secure payment page.</span></span></label>
-            ) : (
-              <p className="rounded-xl border border-line p-3 text-muted">Online payment is coming soon.</p>
-            )}
-          </div>
+          <PaymentPicker methods={methods} value={method} onChange={setMethod} amount={quote?.total} />
         </div>
 
         <aside className="h-fit rounded-xl border border-line bg-surface p-5 lg:sticky lg:top-20">
@@ -156,12 +155,21 @@ export function CheckoutForm({ zones, bump = null, prefill = null, onlineEnabled
               <div className="flex justify-between"><dt className="text-muted">Delivery</dt><dd>{quote.shipping === 0 ? "Free" : formatPrice(quote.shipping)}</dd></div>
               {quote.bundleDiscount > 0 && <div className="flex justify-between"><dt className="text-muted">Bundle savings</dt><dd>-{formatPrice(quote.bundleDiscount)}</dd></div>}
               {quote.discount - quote.bundleDiscount > 0 && <div className="flex justify-between"><dt className="text-muted">Coupon discount</dt><dd>-{formatPrice(quote.discount - quote.bundleDiscount)}</dd></div>}
-              <div className="flex justify-between border-t border-line pt-3 text-base font-semibold"><dt>Total</dt><dd>{formatPrice(quote.total)}</dd></div>
+              {(quote.creditBalance ?? 0) > 0 && (
+                <div className="flex items-start justify-between gap-3 rounded-xl bg-accent/10 p-3">
+                  <label className="flex cursor-pointer items-start gap-2 text-xs">
+                    <input type="checkbox" checked={useCredit} onChange={(e) => setUseCredit(e.target.checked)} className="mt-0.5" />
+                    <span>Use my store credit<span className="block text-muted">Balance {formatPrice(quote.creditBalance ?? 0)}</span></span>
+                  </label>
+                  {(quote.creditUsed ?? 0) > 0 && <dd className="text-xs font-medium text-accent">-{formatPrice(quote.creditUsed ?? 0)}</dd>}
+                </div>
+              )}
+              <div className="flex justify-between border-t border-line pt-3 text-base font-semibold"><dt>Total</dt><dd className="tabular-nums">{formatPrice(quote.total)}</dd></div>
             </dl>
           )}
           {error && <p role="alert" className="mt-3 text-sm text-red-600">{error}</p>}
-          <button disabled={pending || !quote} className="mt-5 w-full rounded-pill bg-accent py-3 text-sm font-semibold text-accent-ink disabled:opacity-50">{pending ? "Placing order..." : online ? "Continue to payment" : "Place order"}</button>
-          <p className="mt-3 text-center text-xs text-muted">We will call you to confirm. {online ? "Your payment is processed on a secure page." : "You pay in cash when it arrives."}</p>
+          <button disabled={pending || !quote || !picked} className="mt-5 w-full rounded-pill bg-accent py-3 text-sm font-semibold text-accent-ink disabled:opacity-50">{pending ? "Placing order..." : online ? "Continue to payment" : "Place order"}</button>
+          <p className="mt-3 text-center text-xs text-muted">We will call you to confirm. {online ? "Your payment is processed on a secure page." : picked?.manual ? "We check your payment before we send the order." : "You pay in cash when it arrives."}</p>
         </aside>
       </form>
     </main>

@@ -1,5 +1,7 @@
 "use client";
 
+import type { HeadingLevel } from "@/lib/blocks";
+import { Heading } from "./Heading";
 import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -18,15 +20,14 @@ const HangerRail = dynamic(() => import("./3d/HangerRail"), {
   loading: () => <div className="absolute inset-0 grid place-items-center text-sm text-muted"><span className="animate-pulse">Hanging the rail...</span></div>,
 });
 
-export type RailVariant = "hanger" | "arc" | "coverflow" | "diagonal" | "stack" | "wave";
+export type RailVariant = "hanger" | "hanger-wire" | "hanger-gold" | "hanger-velvet" | "arc" | "coverflow" | "diagonal" | "stack" | "wave";
 export type StorefrontProps = {
   products: Product[]; categories: Cat[];
   variant?: RailVariant; showHero?: boolean; heading?: string; sub?: string;
-  button?: string; link?: string; button2?: string; link2?: string; level?: "h1" | "h2" | "h3" | "h4" | "h5" | "h6";
+  button?: string; link?: string; button2?: string; link2?: string; defaultView?: "3d" | "grid"; level?: HeadingLevel;
 };
 
-export function Storefront({ products, categories, variant = "hanger", showHero = true, heading = "Pick it off the rail.", sub, button = "Shop everything", link = "/shop", button2 = "New in", link2 = "/shop?tag=new", level = "h1" }: StorefrontProps) {
-  const Head = level;
+export function Storefront({ products, categories, variant = "hanger", showHero = true, heading = "Pick it off the rail.", sub, button = "Shop everything", link = "/shop", button2 = "New in", link2 = "/shop?tag=new", defaultView = "3d", level = "h1" }: StorefrontProps) {
   const { resolvedTheme } = useTheme();
   const [category, setCategory] = useState("all");
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -39,7 +40,7 @@ export function Storefront({ products, categories, variant = "hanger", showHero 
   useEffect(() => {
     const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
     const weak = (navigator.hardwareConcurrency ?? 4) <= 2;
-    setView(reduced || weak ? "2d" : "3d");
+    setView(reduced || weak || defaultView === "grid" ? "2d" : "3d");
   }, []);
 
   const list = useMemo(() => (category === "all" ? products : products.filter((p) => p.category === category)), [products, category]);
@@ -73,12 +74,12 @@ export function Storefront({ products, categories, variant = "hanger", showHero 
 
   const arrow = "absolute top-1/2 z-10 hidden h-12 w-12 -translate-y-1/2 place-items-center rounded-full border border-line bg-surface/80 shadow-lg backdrop-blur-xl transition hover:bg-surface md:grid";
   const pills = (
-    <div className="flex max-w-full items-center gap-1 overflow-x-auto rounded-pill border border-line bg-surface/85 p-1.5 shadow-lg backdrop-blur-xl">
-      {[{ id: "all", label: "All" }, ...categories].map((c) => (
-        <button key={c.id} onClick={() => pick(c.id)} aria-pressed={category === c.id} className={`shrink-0 rounded-pill px-4 py-2 text-sm transition ${category === c.id ? "bg-ink text-paper" : "text-muted hover:text-ink"}`}>{c.label}</button>
+    <div className="no-scrollbar flex max-w-full items-center gap-1 overflow-x-auto rounded-full border border-white/55 bg-white/30 p-1.5 shadow-[0_10px_40px_-10px_rgba(0,0,0,0.35)] backdrop-blur-xl dark:border-white/15 dark:bg-white/10">
+      {[{ id: "all", label: "All products" }, ...categories].map((c) => (
+        <button key={c.id} onClick={() => pick(c.id)} aria-pressed={category === c.id} className={`shrink-0 rounded-full px-4 py-2 text-[13px] font-medium transition ${category === c.id ? "bg-black/45 text-white shadow-inner backdrop-blur-md" : "text-ink/75 hover:bg-white/35 hover:text-ink dark:text-white/75 dark:hover:text-white"}`}>{c.label}</button>
       ))}
-      {view === "3d" && list.length > 0 && <span aria-live="polite" className="shrink-0 border-l border-line px-3 text-sm tabular-nums text-muted">{Math.min(idx + 1, list.length)} / {list.length}</span>}
-      {view && <button onClick={() => { setSelectedId(null); setView(view === "3d" ? "2d" : "3d"); }} className="shrink-0 rounded-pill px-3 py-2 text-sm text-muted hover:text-ink">{view === "3d" ? "Grid" : "3D"}</button>}
+      {view === "3d" && list.length > 0 && <span aria-live="polite" className="shrink-0 px-3 text-[13px] tabular-nums text-ink/60 dark:text-white/60">{Math.min(idx + 1, list.length)} / {list.length}</span>}
+      {view && <button onClick={() => { setSelectedId(null); setView(view === "3d" ? "2d" : "3d"); }} className="shrink-0 rounded-full px-3.5 py-2 text-[13px] font-medium text-ink/75 transition hover:bg-white/35 hover:text-ink dark:text-white/75">{view === "3d" ? "Grid" : "3D"}</button>}
     </div>
   );
   const panel = selected && <ProductPanel key={selected.id} product={selected} colorIdx={colorIdx} onColor={setColorIdx} onClose={() => select(null)} />;
@@ -86,14 +87,23 @@ export function Storefront({ products, categories, variant = "hanger", showHero 
   return (
     <>
       {showHero && (
-        <section className="mx-auto flex max-w-7xl flex-col gap-6 px-5 pb-6 pt-10 md:flex-row md:items-end md:justify-between md:px-10 md:pb-8 md:pt-14">
-          <div className="max-w-2xl">
-            <Head className="hero-in font-display text-4xl font-semibold leading-[1.05] tracking-tight md:text-6xl">{heading}</Head>
-            <p className="hero-in-2 mt-3 max-w-lg text-sm leading-relaxed text-muted md:text-base">{sub ?? `${products.length} pieces for you, your bed and your home. Drag the rail, then tap anything to see it up close.`}</p>
-          </div>
-          <div className="hero-in-3 flex flex-wrap gap-2">
-            {button && link && <Link href={link} className="rounded-pill bg-ink px-6 py-3 text-sm font-semibold text-paper shadow-lg transition hover:-translate-y-0.5">{button}</Link>}
-            {button2 && link2 && <Link href={link2} className="rounded-pill border border-line bg-surface px-6 py-3 text-sm font-medium transition hover:-translate-y-0.5">{button2}</Link>}
+        <section className="mx-auto max-w-7xl px-5 pb-4 pt-7 md:px-10 md:pb-5 md:pt-10">
+          <div className="grid gap-5 md:grid-cols-[minmax(0,1fr)_auto] md:items-end">
+            <div className="max-w-2xl">
+              <p className="hero-in flex items-center gap-2 text-xs font-medium uppercase tracking-[0.18em] text-muted">
+                <span className="h-px w-8 bg-accent" />{products.length} pieces in store
+              </p>
+              <Heading as={level} className="hero-in mt-3 font-display text-[clamp(2.2rem,5.2vw,3.8rem)] font-semibold leading-[0.98] tracking-tight">{heading}</Heading>
+              <p className="hero-in-2 mt-3 max-w-md text-base leading-relaxed text-muted">{sub ?? "Clothing, bedding and home decor, delivered across Bangladesh. Drag the rail, then tap anything to see it up close."}</p>
+              <div className="hero-in-3 mt-5 flex flex-wrap items-center gap-3">
+                {button && link && <Link href={link} className="rounded-pill bg-ink px-7 py-3.5 text-sm font-semibold text-paper shadow-lg transition hover:-translate-y-0.5">{button}</Link>}
+                {button2 && link2 && <Link href={link2} className="group inline-flex items-center gap-1.5 rounded-pill border border-line bg-surface px-6 py-3.5 text-sm font-medium transition hover:-translate-y-0.5">{button2}<span aria-hidden className="transition group-hover:translate-x-0.5">&rarr;</span></Link>}
+              </div>
+            </div>
+            <ul className="hero-in-3 hidden shrink-0 gap-5 border-l border-line pl-7 text-sm md:grid">
+              <li><span className="block font-display text-xl font-semibold">Cash on delivery</span><span className="text-muted">Check it, then pay</span></li>
+              <li><span className="block font-display text-xl font-semibold">All 64 districts</span><span className="text-muted">Inside and outside Dhaka</span></li>
+            </ul>
           </div>
         </section>
       )}
@@ -120,13 +130,13 @@ export function Storefront({ products, categories, variant = "hanger", showHero 
         </section>
       ) : (
         <div className="px-3 pb-6 md:px-8 md:pb-10">
-          <div ref={stageRef} className="stage relative mx-auto scroll-mt-20 h-[78dvh] min-h-[460px] max-h-[680px] max-w-7xl overflow-hidden rounded-3xl border border-line shadow-sm md:h-[clamp(440px,calc(100dvh-21rem),660px)]">
+          <div ref={stageRef} className="stage relative mx-auto scroll-mt-20 h-[78dvh] min-h-[460px] max-h-[680px] max-w-7xl overflow-hidden rounded-3xl border border-line shadow-sm md:h-[clamp(430px,calc(100dvh-19rem),640px)]">
             <div className="grain pointer-events-none absolute inset-0" />
             <div aria-hidden className={`pointer-events-none absolute inset-0 z-[5] transition-opacity duration-500 ${selected ? "opacity-100" : "opacity-0"}`} style={{ background: "radial-gradient(55% 80% at 36% 52%, transparent 30%, rgba(8,10,14,0.38) 100%)" }} />
-            {view === "3d" && list.length > 0 && (variant === "hanger" ? (
-              <HangerRail products={list} selectedId={selectedId} colorHex={selected?.colors[colorIdx]?.hex ?? "#ffffff"} onSelect={select} dark={resolvedTheme === "dark"} nudge={nudge} onIndex={setIdx} />
+            {view === "3d" && list.length > 0 && (variant.startsWith("hanger") ? (
+              <HangerRail products={list} selectedId={selectedId} colorHex={selected?.colors[colorIdx]?.hex ?? "#ffffff"} onSelect={select} dark={resolvedTheme === "dark"} nudge={nudge} onIndex={setIdx} style={variant === "hanger-wire" ? "wire" : variant === "hanger-gold" ? "gold" : variant === "hanger-velvet" ? "velvet" : "wood"} />
             ) : (
-              <CardCarousel layout={variant} products={list} selectedId={selectedId} colorHex="#ffffff" onSelect={select} dark={resolvedTheme === "dark"} nudge={nudge} onIndex={setIdx} />
+              <CardCarousel layout={variant as "arc" | "coverflow" | "diagonal" | "stack" | "wave"} products={list} selectedId={selectedId} colorHex="#ffffff" onSelect={select} dark={resolvedTheme === "dark"} nudge={nudge} onIndex={setIdx} />
             ))}
             {list.length === 0 && <p className="absolute inset-0 grid place-items-center text-sm text-muted">No products here yet.</p>}
             {view === "3d" && list.length > 1 && !selected && (

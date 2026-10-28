@@ -14,12 +14,12 @@ export function CartDrawer() {
   return (
     <>
       <div onClick={() => setOpen(false)} className={`fixed inset-0 z-40 bg-black/40 backdrop-blur-[2px] transition-opacity ${open ? "opacity-100" : "pointer-events-none opacity-0"}`} />
-      <aside aria-hidden={!open} aria-label="Cart" className={`fixed right-0 top-0 z-50 flex h-dvh w-full max-w-md flex-col border-l border-line bg-surface shadow-2xl transition-transform duration-300 ${open ? "translate-x-0" : "translate-x-full"}`}>
+      <aside aria-hidden={!open} aria-label="Cart" className={`fixed right-0 top-0 z-50 flex h-dvh w-full max-w-md flex-col border-l border-white/30 bg-surface/90 shadow-[-30px_0_80px_-30px_rgba(0,0,0,0.5)] backdrop-blur-2xl transition-transform duration-300 ${open ? "translate-x-0" : "translate-x-full"}`}>
         <div className="flex h-16 items-center justify-between border-b border-line px-5">
           <h2 className="font-display text-lg font-semibold">Your cart{count > 0 && <span className="ml-2 text-sm font-normal text-muted">{count} {count === 1 ? "item" : "items"}</span>}</h2>
           <button aria-label="Close cart" onClick={() => setOpen(false)} className="grid h-9 w-9 place-items-center rounded-full hover:bg-paper"><X size={18} /></button>
         </div>
-        <div className="flex-1 overflow-y-auto px-5">
+        <div className="no-scrollbar flex-1 overflow-y-auto px-5">
           {items.length === 0 ? (
             <div className="grid place-items-center gap-3 py-20 text-center">
               <span className="grid h-14 w-14 place-items-center rounded-full bg-paper text-muted"><ShoppingBag size={24} /></span>

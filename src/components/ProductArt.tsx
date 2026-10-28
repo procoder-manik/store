@@ -8,13 +8,13 @@ function shade(hex: string, amt: number) {
 }
 
 /** Clean illustrated stand-in for products that do not have a photo yet. */
-export function ProductArt({ kind, color, className = "" }: { kind: Kind; color: string; className?: string }) {
+export function ProductArt({ kind, color, className = "", bare = false }: { kind: Kind; color: string; className?: string; bare?: boolean }) {
   const dark = shade(color, -30);
   const light = shade(color, 24);
   const gid = `g${color.slice(1)}${kind}`;
   return (
-    <div className={`grid place-items-center bg-gradient-to-b from-surface to-paper ${className}`}>
-      <svg viewBox="0 0 200 250" role="img" aria-hidden className="h-auto w-4/5 drop-shadow-[0_12px_14px_rgba(0,0,0,0.14)]">
+    <div className={`grid place-items-center ${bare ? "" : "bg-gradient-to-b from-surface to-paper"} ${className}`}>
+      <svg viewBox="0 0 200 250" role="img" aria-hidden className={`h-auto ${bare ? "w-full" : "w-4/5"} drop-shadow-[0_12px_14px_rgba(0,0,0,0.14)]`}>
         {kind === "tee" && (
           <>
             <path d="M68 36 Q100 62 132 36 L176 56 L196 104 L162 118 L150 96 L150 216 Q100 226 50 216 L50 96 L38 118 L4 104 L24 56 Z" fill={color} />

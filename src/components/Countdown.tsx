@@ -16,7 +16,7 @@ export function Countdown({ endsAt }: { endsAt: string }) {
   return (
     <div role="timer" aria-label="Time left" className="flex justify-center gap-3 md:gap-4">
       {cells.map(([l, v]) => (
-        <div key={l} className="min-w-16 rounded-2xl bg-white/12 px-3 py-3 text-center backdrop-blur md:min-w-24 md:px-5 md:py-4">
+        <div key={l} className="min-w-16 rounded-2xl bg-white/10 px-3 py-3 text-center backdrop-blur md:min-w-24 md:px-5 md:py-4">
           <p className="font-display text-3xl font-semibold tabular-nums md:text-5xl">{pad(v)}</p>
           <p className="mt-1 text-[11px] uppercase tracking-wider opacity-75 md:text-xs">{l}</p>
         </div>

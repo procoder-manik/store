@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import {
   Boxes, FileText, HeartPulse, Link2, FolderTree, GalleryHorizontal, LayoutDashboard, Mail, Menu, Package, PanelsTopLeft, Rocket, ScrollText,
-  Receipt, Search, Settings, ShieldAlert, ShoppingBag, ShoppingCart, Sparkles, Star, Store, TicketPercent, Truck, Users, X,
+  Receipt, Search, Settings, CreditCard, PanelTop, ShieldAlert, ShoppingBag, ShoppingCart, Sparkles, Star, Store, TicketPercent, Truck, Users, X,
 } from "lucide-react";
 import { SignOutButton } from "@/components/SignOutButton";
 
@@ -18,6 +18,7 @@ const GROUPS = [
     { href: "/admin/coupons", label: "Coupons", icon: TicketPercent },
     { href: "/admin/bundles", label: "Bundles", icon: Boxes },
     { href: "/admin/shipping", label: "Shipping", icon: Truck },
+    { href: "/admin/payments", label: "Payment methods", icon: CreditCard },
     { href: "/admin/fraud", label: "Fraud protection", icon: ShieldAlert },
   ] },
   { title: "Catalog", items: [
@@ -34,6 +35,7 @@ const GROUPS = [
   ] },
   { title: "Website", items: [
     { href: "/admin/pages", label: "Pages", icon: FileText },
+    { href: "/admin/header-footer", label: "Header and footer", icon: PanelTop },
     { href: "/admin/menus", label: "Site and menu", icon: PanelsTopLeft },
     { href: "/admin/permalinks", label: "URLs and search", icon: Link2 },
     { href: "/admin/settings", label: "Settings", icon: Settings },

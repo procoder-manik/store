@@ -12,6 +12,7 @@ import { Reveal } from "./Reveal";
 import { OrderBlock, type Zone } from "./OrderBlock";
 import { ProductArt } from "./ProductArt";
 import { ProductCard } from "./ProductCard";
+import { ProductHero } from "./ProductHero";
 import { Rich } from "./Rich";
 import { SliderBlock } from "./SliderBlock";
 import { Storefront } from "./Storefront";
@@ -94,9 +95,13 @@ export function BlockView({ b, ctx }: { b: Block; ctx: BlockCtx }) {
         </section>
       );
     }
+    case "showcase": {
+      const list = pick(products, b.source, b.category, b.tag);
+      return <ProductHero products={list.length ? list : products} categories={categories} eyebrow={b.eyebrow} heading={b.heading} sub={b.sub} button={b.button} tagline={b.tagline} level={b.level} autoplay={b.autoplay} fit={b.fit} showNav={b.showNav} social={{ facebook: b.facebook, instagram: b.instagram, youtube: b.youtube, whatsapp: b.whatsapp }} />;
+    }
     case "rail3d": {
       const list = pick(products, b.source, b.category, b.tag);
-      return <Storefront products={list.length ? list : products} categories={categories} variant={b.style} showHero={b.showHero} heading={b.heading} sub={b.sub || undefined} button={b.button} link={b.link} button2={b.button2} link2={b.link2} level={b.level} />;
+      return <Storefront products={list.length ? list : products} categories={categories} variant={b.style} showHero={b.showHero} heading={b.heading} sub={b.sub || undefined} button={b.button} link={b.link} button2={b.button2} link2={b.link2} defaultView={b.defaultView} level={b.level} />;
     }
     case "slider":
       return <SliderBlock slides={b.slides} style={b.style} level={b.level} />;
@@ -137,6 +142,24 @@ export function BlockView({ b, ctx }: { b: Block; ctx: BlockCtx }) {
           </div>
         </section>
       );
+    case "richtext": {
+      const btn2 = "inline-block rounded-pill px-6 py-3 text-sm font-semibold transition hover:-translate-y-0.5";
+      return (
+        <section className={wrap}>
+          <div className={`grid gap-4 ${b.width === "narrow" ? "max-w-3xl" : ""}`}>
+            {b.parts.map((x, i) => {
+              if (x.t === "heading") return <Heading key={i} as={x.level} className={`font-display font-semibold tracking-tight ${x.level === "h1" ? "text-4xl md:text-5xl" : x.level === "h2" ? "text-2xl md:text-3xl" : "text-xl md:text-2xl"} ${i > 0 ? "mt-4" : ""}`}>{x.text}</Heading>;
+              if (x.t === "paragraph") return <p key={i} className="text-[15px] leading-relaxed text-muted md:text-base">{x.text}</p>;
+              if (x.t === "list") return <ul key={i} className="grid gap-2 pl-5 text-[15px] leading-relaxed text-muted [&>li]:list-disc">{x.items.map((l, k) => <li key={k}>{l}</li>)}</ul>;
+              if (x.t === "quote") return <blockquote key={i} className="border-l-4 border-accent pl-5 text-lg italic leading-relaxed">{x.text}{x.by && <footer className="mt-2 text-sm not-italic text-muted">{x.by}</footer>}</blockquote>;
+              if (x.t === "divider") return <hr key={i} className="my-2 border-line" />;
+              if (!x.href) return null;
+              return <p key={i}><Link href={x.href} className={x.style === "button" ? `${btn2} bg-accent text-accent-ink` : x.style === "outline" ? `${btn2} border border-line` : "font-medium text-accent underline underline-offset-4"}>{x.text}</Link></p>;
+            })}
+          </div>
+        </section>
+      );
+    }
     case "products": {
       const list = pick(products, b.source, b.category, b.tag).slice(0, b.count);
       return (
@@ -170,7 +193,7 @@ export function BlockView({ b, ctx }: { b: Block; ctx: BlockCtx }) {
       return (
         <section className={wrap}>
           {b.title && <Heading as={b.level} className="mb-6 font-display text-2xl font-semibold md:text-3xl">{b.title}</Heading>}
-          <div className="flex snap-x snap-mandatory gap-4 overflow-x-auto pb-2">
+          <div className="flex snap-x snap-mandatory gap-4 no-scrollbar overflow-x-auto pb-2">
             {banners.map((x) => {
               const inner = (
                 <>
@@ -317,11 +340,28 @@ export function BlockView({ b, ctx }: { b: Block; ctx: BlockCtx }) {
   }
 }
 
+/**
+ * Applies a section's heading size, weight and case. A section with none of these set is left untouched,
+ * so every existing page keeps its look. `display: contents` means this wrapper never changes the layout.
+ */
+function TypoScope({ b, children }: { b: Block; children: React.ReactNode }) {
+  const size = b.hsize && b.hsize !== "design" ? b.hsize : undefined;
+  if (!size && !b.hweight && !b.hcase) return <>{children}</>;
+  const style: Record<string, string> = {};
+  if (size === "custom" && b.hpx) {
+    style["--h-size"] = `${b.hpx}px`;
+    style["--h-size-m"] = `${b.hpxm ?? Math.max(14, Math.round(b.hpx * 0.65))}px`;
+  }
+  if (b.hweight) style["--h-weight"] = b.hweight;
+  if (b.hcase) style["--h-case"] = b.hcase;
+  return <div className="contents" data-hsize={size === "custom" && !b.hpx ? undefined : size} data-hweight={b.hweight ? "" : undefined} data-hcase={b.hcase ? "" : undefined} style={style as React.CSSProperties}>{children}</div>;
+}
+
 export function BlockRenderer({ blocks, ...ctx }: { blocks: Block[] } & BlockCtx) {
   return (
     <>
       {blocks.map((b, i) => {
-        const el = <BlockView b={b} ctx={ctx} />;
+        const el = <TypoScope b={b}><BlockView b={b} ctx={ctx} /></TypoScope>;
         // The first section is already on screen, and the ready-made 3D slider handles its own entrance.
         if (b.anim === "none" || i === 0 || b.type === "rail3d") return <div key={b.id}>{el}</div>;
         return <Reveal key={b.id} anim={b.anim}>{el}</Reveal>;

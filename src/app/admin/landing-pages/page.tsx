@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
+import { setPageStatus } from "@/app/admin/products/quick-actions";
 
 type L = { id: string; slug: string; title: string; status: string; offers: { qty: number; price: number }[]; products: { name: string } | { name: string }[] | null };
 const row = "flex items-center justify-between gap-3 rounded-xl border border-line bg-surface p-4 text-sm";
@@ -24,7 +25,10 @@ export default async function LandingPages() {
         {(built.data ?? []).map((r) => (
           <li key={r.id} className={row}>
             <span><Link href={`/admin/landing-pages/builder/${r.id}`} className="font-medium hover:underline">{r.title}</Link><span className="block text-xs text-muted">{(r.blocks as unknown[]).length} sections</span></span>
-            <span className="text-right text-xs"><span className={r.status === "active" ? "font-medium text-accent" : "text-muted"}>{r.status === "active" ? "Live" : "Draft"}</span><Link href={`/lp/${r.slug}`} className="block underline" target="_blank">/lp/{r.slug}</Link></span>
+            <span className="flex items-center gap-4 text-right text-xs">
+              <form action={setPageStatus}><input type="hidden" name="id" value={r.id} /><input type="hidden" name="status" value={r.status === "active" ? "draft" : "active"} /><button className="underline">{r.status === "active" ? "Unpublish" : "Publish"}</button></form>
+              <span><span className={r.status === "active" ? "font-medium text-accent" : "text-muted"}>{r.status === "active" ? "Live" : "Draft"}</span><Link href={`/lp/${r.slug}`} className="block underline" target="_blank">/lp/{r.slug}</Link></span>
+            </span>
           </li>
         ))}
       </ul>

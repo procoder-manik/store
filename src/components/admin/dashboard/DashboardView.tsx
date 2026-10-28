@@ -2,7 +2,7 @@ import Link from "next/link";
 import { AlertTriangle, ArrowDownRight, ArrowUpRight, Boxes, ShoppingBag, ShoppingCart, Star } from "lucide-react";
 import { formatPrice } from "@/lib/config";
 import { Donut, RevenueChart, Sparkline, type Pt } from "./charts";
-import { statusColor } from "./status-colors";
+import { statusColor, statusLabel } from "@/lib/order-status";
 
 export type DashData = {
   name: string;
@@ -147,7 +147,7 @@ export function DashboardView(d: DashData) {
                 <tr key={o.id} className="border-b border-line last:border-0 transition hover:bg-paper">
                   <td className="px-5 py-3"><Link href={`/admin/orders/${o.id}`} className="font-medium hover:underline">#{o.order_no}</Link></td>
                   <td className="px-3 py-3">{o.name}</td>
-                  <td className="px-3 py-3"><span className="inline-flex items-center gap-2 capitalize"><span style={{ background: statusColor(o.status) }} className="h-2 w-2 rounded-full" />{o.status}{o.paid && <span className="rounded-pill bg-accent/10 px-2 py-0.5 text-xs normal-case text-accent">Paid</span>}</span></td>
+                  <td className="px-3 py-3"><span className="inline-flex items-center gap-2 capitalize"><span style={{ background: statusColor(o.status) }} className="h-2 w-2 rounded-full" />{statusLabel(o.status)}{o.paid && <span className="rounded-pill bg-accent/10 px-2 py-0.5 text-xs normal-case text-accent">Paid</span>}</span></td>
                   <td className="px-3 py-3 text-right font-medium tabular-nums">{formatPrice(o.total)}</td>
                   <td className="px-5 py-3 text-right text-muted">{new Date(o.created_at).toLocaleString("en-GB", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}</td>
                 </tr>

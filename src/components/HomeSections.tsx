@@ -12,7 +12,7 @@ export function HomeSections({ products, categories, banners = [] }: { products:
   return (
     <div className="mx-auto max-w-6xl px-5">
       {banners.length > 0 && (
-        <section aria-label="Offers" className="flex snap-x snap-mandatory gap-4 overflow-x-auto pt-10 pb-2">
+        <section aria-label="Offers" className="flex snap-x snap-mandatory gap-4 no-scrollbar overflow-x-auto pt-10 pb-2">
           {banners.map((b) => {
             const inner = (
               <>

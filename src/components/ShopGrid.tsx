@@ -43,7 +43,7 @@ export function ShopGrid({ products, categories, active = "all", title = "Shop",
           <option value="new">Newest</option><option value="low">Price, low to high</option><option value="high">Price, high to low</option>
         </select>
         <select aria-label="Filter by tag" value={tag} onChange={(e) => setTag(e.target.value)} className={field}>
-          <option value="all">All products</option><option value="new">New</option><option value="hot">Popular</option><option value="featured">Featured</option><option value="sale">On sale</option>
+          <option value="all">All products</option><option value="new">New</option><option value="hot">Hot</option><option value="bestseller">Best sellers</option><option value="featured">Featured</option><option value="sale">On sale</option>
         </select>
         <label className="flex items-center gap-2 text-sm text-muted"><input type="checkbox" checked={inStock} onChange={(e) => setInStock(e.target.checked)} /> In stock only</label>
         <p className="ml-auto text-sm text-muted">{list.length} {list.length === 1 ? "product" : "products"}</p>

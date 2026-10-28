@@ -2,6 +2,7 @@ import Link from "next/link";
 import { ExternalLink } from "lucide-react";
 import { BUILTIN } from "@/lib/builtin-pages";
 import { createClient } from "@/lib/supabase/server";
+import { setPageStatus } from "@/app/admin/products/quick-actions";
 
 const row = "flex items-center justify-between gap-3 rounded-xl border border-line bg-surface p-4 text-sm";
 
@@ -28,7 +29,7 @@ export default async function Pages() {
           return (
             <li key={b.slug} className={row}>
               <span><Link href={`/admin/pages/builtin/${b.slug}`} className="font-medium hover:underline">{b.title}</Link><span className="block text-xs text-muted">{live ? `Your version is live, ${(p!.blocks as unknown[]).length} sections` : p ? "Your draft is saved. The built-in version is still showing." : "Built-in version. Open it to edit."}</span></span>
-              <span className="flex items-center gap-4 text-xs"><Link href={b.path} target="_blank" className="flex items-center gap-1 underline">{b.path} <ExternalLink size={11} /></Link><Link href={`/admin/pages/builtin/${b.slug}`} className="rounded-pill border border-line px-3 py-1.5 font-medium hover:bg-paper">Edit</Link></span>
+              <span className="flex items-center gap-4 text-xs">{p && <form action={setPageStatus}><input type="hidden" name="id" value={p.id} /><input type="hidden" name="status" value={live ? "draft" : "active"} /><button className="underline">{live ? "Use built-in" : "Use mine"}</button></form>}<Link href={b.path} target="_blank" className="flex items-center gap-1 underline">{b.path} <ExternalLink size={11} /></Link><Link href={`/admin/pages/builtin/${b.slug}`} className="rounded-pill border border-line px-3 py-1.5 font-medium hover:bg-paper">Edit</Link></span>
             </li>
           );
         })}
@@ -44,7 +45,10 @@ export default async function Pages() {
         {custom.map((p) => (
           <li key={p.id} className={row}>
             <span><Link href={`/admin/pages/${p.id}`} className="font-medium hover:underline">{p.title}</Link><span className="block text-xs text-muted">{(p.blocks as unknown[]).length} sections</span></span>
-            <span className="text-right text-xs"><span className={p.status === "active" ? "font-medium text-accent" : "text-muted"}>{p.status === "active" ? "Live" : "Draft"}</span><Link href={`/p/${p.slug}`} target="_blank" className="block underline">/p/{p.slug}</Link></span>
+            <span className="flex items-center gap-4 text-right text-xs">
+              <form action={setPageStatus}><input type="hidden" name="id" value={p.id} /><input type="hidden" name="status" value={p.status === "active" ? "draft" : "active"} /><button className="underline">{p.status === "active" ? "Unpublish" : "Publish"}</button></form>
+              <span><span className={p.status === "active" ? "font-medium text-accent" : "text-muted"}>{p.status === "active" ? "Live" : "Draft"}</span><Link href={`/p/${p.slug}`} target="_blank" className="block underline">/p/{p.slug}</Link></span>
+            </span>
           </li>
         ))}
       </ul>

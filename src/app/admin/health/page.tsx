@@ -11,7 +11,7 @@ const TABLES: [string, string][] = [
   ["shipping_zones", "0003"], ["fraud_blacklist", "0003"], ["order_events", "0003"],
   ["addresses", "0005"], ["reviews", "0005"], ["product_relations", "0005"], ["landing_pages", "0005"], ["banners", "0005"],
   ["crm_notes", "0006"], ["email_templates", "0006"], ["email_campaigns", "0006"], ["email_optouts", "0006"], ["abandoned_carts", "0006"],
-  ["pages", "0007"], ["bundles", "0007"], ["payments", "0009"], ["redirects", "0011"], ["email_log", "0013"],
+  ["pages", "0007"], ["bundles", "0007"], ["payments", "0009"], ["redirects", "0011"], ["email_log", "0013"], ["credit_ledger", "0014"], ["order_refunds", "0014"],
 ];
 
 export default async function Health() {
@@ -51,8 +51,8 @@ export default async function Health() {
         if (r.error) missing.push(`${t} (file ${m})`);
       }
       add({ name: "Database tables", ok: missing.length === 0, detail: missing.length ? `Missing: ${missing.join(", ")}` : `All ${TABLES.length} tables found`, fix: "Run the missing numbered SQL files in the Supabase SQL Editor, in order." });
-      const cols = await Promise.all([db.from("orders").select("courier, source").limit(1), db.from("categories").select("description").limit(1), db.from("pages").select("kind").limit(1)]);
-      add({ name: "Newer columns", ok: !cols[0].error && !cols[1].error && !cols[2].error, detail: cols[0].error ? "orders.courier missing (file 0010)" : cols[1].error ? "categories.description missing (file 0011)" : cols[2].error ? "pages.kind missing (file 0012)" : "Found", fix: "Run 0010, 0011 and 0012." });
+      const cols = await Promise.all([db.from("orders").select("courier, source").limit(1), db.from("categories").select("description").limit(1), db.from("pages").select("kind").limit(1), db.from("products").select("offer_ends_at").limit(1), db.from("profiles").select("referral_code").limit(1)]);
+      add({ name: "Newer columns", ok: cols.every((c) => !c.error), detail: cols[0].error ? "orders.courier missing (file 0010)" : cols[1].error ? "categories.description missing (file 0011)" : cols[2].error ? "pages.kind missing (file 0012)" : cols[3].error ? "products.offer_ends_at missing (file 0014)" : cols[4].error ? "profiles.referral_code missing (file 0014)" : "Found", fix: "Run the numbered SQL files you have not run yet, in order, up to 0014." });
       const fn = await Promise.all([db.rpc("crm_customers"), db.rpc("sales_series", { p_from: new Date(Date.now() - 864e5).toISOString(), p_to: new Date().toISOString(), p_bucket: "day" })]);
       add({ name: "Report functions", ok: !fn[0].error && !fn[1].error, detail: fn[1].error ? "sales_series missing (file 0004)" : fn[0].error ? "crm_customers missing (file 0006)" : "Found", fix: "Run 0004 and 0006." });
       const bucket = await db.storage.getBucket("product-images");

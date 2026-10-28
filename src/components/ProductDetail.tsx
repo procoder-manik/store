@@ -4,6 +4,8 @@ import Link from "next/link";
 import { useState } from "react";
 import { Banknote, RotateCcw, Truck } from "lucide-react";
 import type { Product } from "@/lib/demo-products";
+import { OfferCountdown } from "./OfferCountdown";
+import { TagBadge } from "./TagBadge";
 import { ProductBuy } from "./ProductBuy";
 import { ProductArt } from "./ProductArt";
 import { ProductCard } from "./ProductCard";
@@ -27,7 +29,7 @@ export function ProductDetail({ product, related, pairs, reviews, bundle, whatsa
             <ProductArt kind={product.kind} color={product.colors[colorIdx]?.hex ?? product.colors[0].hex} className="aspect-[4/5] w-full rounded-3xl border border-line" />
           )}
           {images.length > 1 && (
-            <div className="mt-3 flex gap-2 overflow-x-auto">
+            <div className="mt-3 flex gap-2 no-scrollbar overflow-x-auto">
               {images.map((im, i) => (
                 <button key={im.url} aria-label={`Image ${i + 1}`} aria-pressed={i === img} onClick={() => setImg(i)} className={`h-16 w-16 shrink-0 overflow-hidden rounded-xl border ${i === img ? "border-ink" : "border-line"}`}>
                   <img src={im.url} alt="" className="h-full w-full object-cover" />
@@ -40,9 +42,10 @@ export function ProductDetail({ product, related, pairs, reviews, bundle, whatsa
           <h1 className="font-display text-3xl font-semibold leading-tight md:text-4xl">{product.name}</h1>
           {product.tags.length > 0 && (
             <div className="mt-3 flex gap-1.5">
-              {product.tags.map((t) => <span key={t} className="rounded-pill border border-line bg-surface px-3 py-1 text-xs capitalize text-muted">{t}</span>)}
+              {product.tags.map((t) => <TagBadge key={t} tag={t} size="md" />)}
             </div>
           )}
+          {product.offerEndsAt && <div className="mt-5"><OfferCountdown endsAt={product.offerEndsAt} /></div>}
           <div className="mt-6"><ProductBuy product={product} colorIdx={colorIdx} onColor={setColorIdx} /></div>
           {whatsapp && <a href={`https://wa.me/${whatsapp}?text=${encodeURIComponent(`Hi, I am interested in ${product.name}: ${SITE_URL}/product/${product.slug}`)}`} target="_blank" rel="noopener noreferrer" className="mt-4 block rounded-pill border border-line py-3 text-center text-sm font-medium hover:bg-paper">Ask or order on WhatsApp</a>}
           <div className="mt-8 border-t border-line pt-6">

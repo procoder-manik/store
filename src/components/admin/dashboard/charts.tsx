@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { formatPrice } from "@/lib/config";
-import { statusColor } from "./status-colors";
+import { statusColor, statusLabel } from "@/lib/order-status";
 
 export type Pt = { label: string; value: number; orders: number };
 const compact = (v: number) => (v >= 100000 ? `${+(v / 100000).toFixed(1)}L` : v >= 1000 ? `${+(v / 1000).toFixed(1)}k` : String(Math.round(v)));
@@ -92,7 +92,7 @@ export function Donut({ items }: { items: { status: string; orders: number }[] }
       </svg>
       <ul className="grid min-w-0 flex-1 gap-1.5 text-sm">
         {items.length === 0 && <li className="text-muted">No orders in this period.</li>}
-        {items.map((i) => <li key={i.status} className="flex items-center justify-between gap-2"><span className="flex items-center gap-2 capitalize"><span style={{ background: statusColor(i.status) }} className="h-2.5 w-2.5 rounded-full" />{i.status}</span><span className="tabular-nums text-muted">{i.orders}</span></li>)}
+        {items.map((i) => <li key={i.status} className="flex items-center justify-between gap-2"><span className="flex items-center gap-2"><span style={{ background: statusColor(i.status) }} className="h-2.5 w-2.5 rounded-full" />{statusLabel(i.status)}</span><span className="tabular-nums text-muted">{i.orders}</span></li>)}
       </ul>
     </div>
   );

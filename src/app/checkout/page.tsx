@@ -3,6 +3,7 @@ import { createPublicClient } from "@/lib/supabase/public";
 import { createClient } from "@/lib/supabase/server";
 import { getPublicSettings } from "@/lib/settings";
 import { sslConfigured } from "@/lib/sslcommerz";
+import { availableMethods } from "@/lib/payments";
 import { CheckoutForm, type BumpInfo, type Prefill, type Zone } from "@/components/CheckoutForm";
 
 export const metadata: Metadata = { title: "Checkout", robots: { index: false } };
@@ -43,5 +44,5 @@ export default async function Checkout() {
     }
   }
 
-  return <CheckoutForm zones={zones} bump={bump} prefill={prefill} onlineEnabled={sslConfigured()} />;
+  return <CheckoutForm zones={zones} bump={bump} prefill={prefill} methods={availableMethods(settings.payments, { sslReady: sslConfigured() })} />;
 }

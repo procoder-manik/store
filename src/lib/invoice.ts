@@ -1,3 +1,4 @@
+import { paymentLabel } from "@/lib/payments";
 import { code128 } from "@/lib/barcode";
 import { formatPrice } from "@/lib/config";
 
@@ -42,7 +43,7 @@ table{width:100%;border-collapse:collapse}th{text-align:left;font-size:12px;colo
 <div class="row"><div>${logoTag(brand)}${brand.tagline ? `<p style="margin:6px 0 0;color:#6b7280">${esc(brand.tagline)}</p>` : ""}<p style="margin:10px 0 0;color:#6b7280;font-size:13px;line-height:1.5">${[c.address, c.phone, c.email].filter(Boolean).map(esc).join("<br>")}</p></div>
 <div class="r"><h2>Invoice</h2><strong style="font-size:20px">${esc(invoiceNo(o.order_no))}</strong><br>${esc(new Date(o.created_at).toLocaleDateString("en-GB", { dateStyle: "long" }))}<div style="margin-top:10px">${code128(invoiceNo(o.order_no), { height: 44, module: 1 })}</div></div></div>
 <div class="row"><div><h2>Bill to</h2><strong>${esc(o.guest_name)}</strong><br>${esc(o.guest_phone)}${o.guest_email ? `<br>${esc(o.guest_email)}` : ""}<br>${esc(a.address)}${a.district ? `, ${esc(a.district)}` : ""}</div>
-<div class="r"><h2>Payment</h2>${online ? "Paid online" : "Cash on delivery"}<br><span class="pill ${o.payment_status === "paid" ? "paid" : "cod"}">${o.payment_status === "paid" ? "PAID" : "TO PAY ON DELIVERY"}</span>${o.courier ? `<br><br><h2>Courier</h2>${esc(o.courier)}${o.tracking_code ? `<br>${esc(o.tracking_code)}` : ""}` : ""}</div></div>
+<div class="r"><h2>Payment</h2>${esc(online ? "Paid online" : paymentLabel(o.payment_method))}<br><span class="pill ${o.payment_status === "paid" ? "paid" : "cod"}">${o.payment_status === "paid" ? "PAID" : o.payment_method && o.payment_method !== "cod" && !online ? "PAYMENT BEING CHECKED" : "TO PAY ON DELIVERY"}</span>${o.courier ? `<br><br><h2>Courier</h2>${esc(o.courier)}${o.tracking_code ? `<br>${esc(o.tracking_code)}` : ""}` : ""}</div></div>
 <table><thead><tr><th>Item</th><th class="r">Price</th><th class="r">Qty</th><th class="r">Total</th></tr></thead><tbody>
 ${o.order_items.map((i) => `<tr><td>${esc(i.name_snapshot)}</td><td class="r">${money(i.unit_price)}</td><td class="r">${esc(i.qty)}</td><td class="r">${money(Number(i.unit_price) * i.qty)}</td></tr>`).join("")}
 </tbody></table>

@@ -12,12 +12,15 @@ type Row = {
   base_price: number | string; compare_at_price: number | string | null; tags: string[] | null;
   seo: { title?: string; description?: string } | null;
   updated_at?: string | null;
+  offer_ends_at?: string | null;
   categories: { slug: string } | { slug: string }[] | null;
   product_variants: VRow[]; product_images: IRow[];
 };
 
 const SELECT =
-  "id, slug, name, kind, description, base_price, compare_at_price, tags, seo, updated_at, categories(slug), product_variants(id, color_name, color_hex, size, price_delta, stock), product_images(path, alt, sort)";
+  "id, slug, name, kind, description, base_price, compare_at_price, tags, seo, updated_at, offer_ends_at, categories(slug), product_variants(id, color_name, color_hex, size, price_delta, stock), product_images(path, alt, sort)";
+// Older databases do not have offer_ends_at yet, so a failed query is retried without it.
+const SELECT_OLD = SELECT.replace(", offer_ends_at", "");
 
 function mapRow(r: Row): Product {
   const variants = (r.product_variants ?? []).map((v) => ({
@@ -63,6 +66,7 @@ function mapRow(r: Row): Product {
     images: imgs,
     seo: r.seo ?? {},
     updatedAt: r.updated_at ?? undefined,
+    offerEndsAt: r.offer_ends_at ?? undefined,
   };
 }
 
@@ -72,10 +76,11 @@ export const getCatalog = cache(async (): Promise<{ products: Product[]; categor
   const sb = createPublicClient();
   if (!sb) return { source: "demo", products: demo(), categories: CATEGORIES.filter((c) => c.id !== "all") };
 
-  const [prods, cats] = await Promise.all([
+  const [prodsFirst, cats] = await Promise.all([
     sb.from("products").select(SELECT).eq("status", "active").order("created_at", { ascending: false }),
     sb.from("categories").select("slug, name, description").eq("active", true).order("sort").order("name"),
   ]);
+  const prods = prodsFirst.error ? await sb.from("products").select(SELECT_OLD).eq("status", "active").order("created_at", { ascending: false }) : prodsFirst;
   const rel = await sb.from("product_relations").select("product_id, related_id").order("sort");
   const relMap = new Map<string, string[]>();
   for (const r of (rel.error ? [] : rel.data ?? []) as { product_id: string; related_id: string }[]) relMap.set(r.product_id, [...(relMap.get(r.product_id) ?? []), r.related_id]);
@@ -90,6 +95,7 @@ export const getCatalog = cache(async (): Promise<{ products: Product[]; categor
 export const getProduct = cache(async (slug: string): Promise<Product | null> => {
   const sb = createPublicClient();
   if (!sb) return demo().find((p) => p.slug === slug) ?? null;
-  const { data } = await sb.from("products").select(SELECT).eq("slug", slug).eq("status", "active").maybeSingle();
+  const first = await sb.from("products").select(SELECT).eq("slug", slug).eq("status", "active").maybeSingle();
+  const { data } = first.error ? await sb.from("products").select(SELECT_OLD).eq("slug", slug).eq("status", "active").maybeSingle() : first;
   return data ? mapRow(data as unknown as Row) : null;
 });
