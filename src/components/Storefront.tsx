@@ -34,6 +34,8 @@ export type StorefrontProps = {
   button?: string; link?: string; button2?: string; link2?: string; defaultView?: "3d" | "grid"; level?: HeadingLevel;
   /** Full width: one deep colour background that follows the product in front and fades as the rail moves. */
   full?: boolean;
+  /** "color": a deep background that follows the product in front. "wall": the original soft wall. */
+  bgMode?: "color" | "wall";
   /** Where the previous and next buttons sit. */
   arrows?: "sides" | "off" | "top-right" | "bottom-left" | "bottom-center" | "bottom-right";
   /** Where the category buttons sit along the bottom, or off. */
@@ -44,9 +46,12 @@ export type StorefrontProps = {
   textBgColor?: string;
 };
 
-export function Storefront({ products, categories, variant = "hanger", showHero = true, heading = "Pick it off the rail.", sub, button = "Shop everything", link = "/shop", button2 = "New in", link2 = "/shop?tag=new", defaultView = "3d", level = "h1", full = false, arrows: arrowsIn, pills: pillsIn, headAlign = "left", textBg = "none", textBgColor = "#1f6f78" }: StorefrontProps) {
+export function Storefront({ products, categories, variant = "hanger", showHero = true, heading = "Pick it off the rail.", sub, button = "Shop everything", link = "/shop", button2 = "New in", link2 = "/shop?tag=new", defaultView = "3d", level = "h1", full = false, bgMode = "color", arrows: arrowsIn, pills: pillsIn, headAlign = "left", textBg = "none", textBgColor = "#1f6f78" }: StorefrontProps) {
   const arrowsAt = arrowsIn ?? (full ? "bottom-right" : "sides");
-  const pillsAt = pillsIn ?? (full ? "left" : "center");
+  const pillsAt = pillsIn ?? "center";
+  // ui: the slider area is a deep colour (light buttons). headDark: the text above it also sits on that colour (only when full width).
+  const ui = bgMode !== "wall";
+  const headDark = full && ui;
   const { resolvedTheme } = useTheme();
   const [category, setCategory] = useState("all");
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -91,8 +96,8 @@ export function Storefront({ products, categories, variant = "hanger", showHero 
     return () => window.removeEventListener("keydown", key);
   });
 
-  const arrow = `absolute top-1/2 z-10 hidden h-12 w-12 -translate-y-1/2 place-items-center rounded-full border shadow-lg backdrop-blur-xl transition md:grid ${full ? "border-white/25 bg-white/10 text-white hover:bg-white/20" : "border-line bg-surface/80 hover:bg-surface"}`;
-  const small = `grid h-10 w-10 shrink-0 place-items-center rounded-full border shadow-lg backdrop-blur-xl transition disabled:opacity-30 ${full ? "border-white/25 bg-white/10 text-white hover:bg-white/20" : "border-line bg-surface/80 hover:bg-surface"}`;
+  const arrow = `absolute top-1/2 z-10 hidden h-12 w-12 -translate-y-1/2 place-items-center rounded-full border shadow-lg backdrop-blur-xl transition md:grid ${ui ? "border-white/25 bg-white/10 text-white hover:bg-white/20" : "border-line bg-surface/80 hover:bg-surface"}`;
+  const small = `grid h-10 w-10 shrink-0 place-items-center rounded-full border shadow-lg backdrop-blur-xl transition disabled:opacity-30 ${ui ? "border-white/25 bg-white/10 text-white hover:bg-white/20" : "border-line bg-surface/80 hover:bg-surface"}`;
   const arrowPair = view === "3d" && list.length > 1 && !selected && (
     <span className="flex gap-2">
       <button aria-label="Previous" onClick={() => go(-1)} disabled={idx === 0} className={small}><ChevronLeft size={18} /></button>
@@ -105,19 +110,19 @@ export function Storefront({ products, categories, variant = "hanger", showHero 
   const lum = (hex: string) => { const n = parseInt(hex.slice(1), 16); return (0.299 * (n >> 16) + 0.587 * ((n >> 8) & 255) + 0.114 * (n & 255)) / 255; };
   const box = textBg === "none" ? undefined : textBg === "theme" ? { background: "var(--accent)", color: "var(--accent-ink)" } : textBg === "gradient" ? { background: "linear-gradient(135deg, var(--accent) 0%, color-mix(in srgb, var(--accent) 35%, #0b0f14) 100%)", color: "#ffffff" } : { background: textBgColor, color: lum(textBgColor) > 0.6 ? "#15171c" : "#ffffff" };
   const pills = (
-    <div className={`no-scrollbar flex max-w-full items-center gap-1 overflow-x-auto rounded-full border p-1.5 shadow-[0_10px_40px_-10px_rgba(0,0,0,0.35)] backdrop-blur-xl ${full ? "border-white/20 bg-white/10" : "border-white/55 bg-white/30 dark:border-white/15 dark:bg-white/10"}`}>
+    <div className={`no-scrollbar flex max-w-full items-center gap-1 overflow-x-auto rounded-full border p-1.5 shadow-[0_10px_40px_-10px_rgba(0,0,0,0.35)] backdrop-blur-xl ${ui ? "border-white/20 bg-white/10" : "border-white/55 bg-white/30 dark:border-white/15 dark:bg-white/10"}`}>
       {[{ id: "all", label: "All products" }, ...categories].map((c) => (
-        <button key={c.id} onClick={() => pick(c.id)} aria-pressed={category === c.id} className={`shrink-0 rounded-full px-4 py-2 text-[13px] font-medium transition ${category === c.id ? "bg-black/45 text-white shadow-inner backdrop-blur-md" : (full ? "text-white/80 hover:text-white" : "text-ink/75 hover:bg-white/35 hover:text-ink dark:text-white/75 dark:hover:text-white")}`}>{c.label}</button>
+        <button key={c.id} onClick={() => pick(c.id)} aria-pressed={category === c.id} className={`shrink-0 rounded-full px-4 py-2 text-[13px] font-medium transition ${category === c.id ? "bg-black/45 text-white shadow-inner backdrop-blur-md" : (ui ? "text-white/80 hover:text-white" : "text-ink/75 hover:bg-white/35 hover:text-ink dark:text-white/75 dark:hover:text-white")}`}>{c.label}</button>
       ))}
-      {view === "3d" && list.length > 0 && <span aria-live="polite" className={`shrink-0 px-3 text-[13px] tabular-nums ${full ? "text-white/65" : "text-ink/60 dark:text-white/60"}`}>{Math.min(idx + 1, list.length)} / {list.length}</span>}
-      {view && <button onClick={() => { setSelectedId(null); setView(view === "3d" ? "2d" : "3d"); }} className={`shrink-0 rounded-full px-3.5 py-2 text-[13px] font-medium transition ${full ? "text-white/80 hover:text-white" : "text-ink/75 hover:bg-white/35 hover:text-ink dark:text-white/75"}`}>{view === "3d" ? "Grid" : "3D"}</button>}
+      {view === "3d" && list.length > 0 && <span aria-live="polite" className={`shrink-0 px-3 text-[13px] tabular-nums ${ui ? "text-white/65" : "text-ink/60 dark:text-white/60"}`}>{Math.min(idx + 1, list.length)} / {list.length}</span>}
+      {view && <button onClick={() => { setSelectedId(null); setView(view === "3d" ? "2d" : "3d"); }} className={`shrink-0 rounded-full px-3.5 py-2 text-[13px] font-medium transition ${ui ? "text-white/80 hover:text-white" : "text-ink/75 hover:bg-white/35 hover:text-ink dark:text-white/75"}`}>{view === "3d" ? "Grid" : "3D"}</button>}
     </div>
   );
   const panel = selected && <ProductPanel key={selected.id} product={selected} colorIdx={colorIdx} onColor={setColorIdx} onClose={() => select(null)} />;
 
   // Full width: a deep background in the colour of the product in front. Each product has its own layer, so the colour fades as the rail moves.
   const cur = selected ? Math.max(0, list.findIndex((p) => p.id === selectedId)) : Math.min(idx, Math.max(0, list.length - 1));
-  const bg = full && (
+  const bg = ui && (
     <>
       {list.map((q, i) => {
         const hex = (i === cur && selected ? selected.colors[colorIdx]?.hex : q.colors[0]?.hex) ?? "#334155";
@@ -133,17 +138,17 @@ export function Storefront({ products, categories, variant = "hanger", showHero 
         <section className={`mx-auto max-w-7xl pb-4 pt-7 md:pb-5 md:pt-10 ${full ? "px-3 md:px-8" : "px-5 md:px-10"}`}>
           <div style={box} className={`${box ? "rounded-3xl px-6 py-8 md:px-10 md:py-10 [&_.text-muted]:text-current [&_.text-muted]:opacity-80" : ""} ${headAlign === "center" ? "grid justify-items-center gap-6 text-center" : "grid gap-5 md:grid-cols-[minmax(0,1fr)_auto] md:items-end"}`}>
             <div className={headAlign === "center" ? "mx-auto max-w-3xl" : "max-w-2xl"}>
-              <p className={`hero-in flex items-center gap-2 text-xs font-medium uppercase tracking-[0.18em] ${headAlign === "center" ? "justify-center" : ""} ${box ? "opacity-80" : full ? "text-white/70" : "text-muted"}`}>
+              <p className={`hero-in flex items-center gap-2 text-xs font-medium uppercase tracking-[0.18em] ${headAlign === "center" ? "justify-center" : ""} ${box ? "opacity-80" : headDark ? "text-white/70" : "text-muted"}`}>
                 <span className="h-px w-8 bg-current opacity-60" />{products.length} pieces in store
               </p>
               <Heading as={level} className="hero-in mt-3 font-display text-[clamp(2rem,4.6vw,3.4rem)] font-semibold leading-[1.02] tracking-tight">{heading}</Heading>
-              <p className={`hero-in-2 mt-3 text-base leading-relaxed ${headAlign === "center" ? "mx-auto max-w-xl" : "max-w-md"} ${box ? "opacity-85" : full ? "text-white/80" : "text-muted"}`}>{sub ?? "Clothing, bedding and home decor, delivered across Bangladesh. Drag the rail, then tap anything to see it up close."}</p>
+              <p className={`hero-in-2 mt-3 text-base leading-relaxed ${headAlign === "center" ? "mx-auto max-w-xl" : "max-w-md"} ${box ? "opacity-85" : headDark ? "text-white/80" : "text-muted"}`}>{sub ?? "Clothing, bedding and home decor, delivered across Bangladesh. Drag the rail, then tap anything to see it up close."}</p>
               <div className={`hero-in-3 mt-5 flex flex-wrap items-center gap-3 ${headAlign === "center" ? "justify-center" : ""}`}>
-                {button && link && <Link href={link} className={`rounded-pill px-7 py-3.5 text-sm font-semibold shadow-lg transition hover:-translate-y-0.5 ${full || box ? "bg-white text-black" : "bg-ink text-paper"}`}>{button}</Link>}
-                {button2 && link2 && <Link href={link2} className={`group inline-flex items-center gap-1.5 rounded-pill border px-6 py-3.5 text-sm font-medium transition hover:-translate-y-0.5 ${full || box ? "border-current/30 bg-white/10" : "border-line bg-surface"}`}>{button2}<span aria-hidden className="transition group-hover:translate-x-0.5">&rarr;</span></Link>}
+                {button && link && <Link href={link} className={`rounded-pill px-7 py-3.5 text-sm font-semibold shadow-lg transition hover:-translate-y-0.5 ${headDark || box ? "bg-white text-black" : "bg-ink text-paper"}`}>{button}</Link>}
+                {button2 && link2 && <Link href={link2} className={`group inline-flex items-center gap-1.5 rounded-pill border px-6 py-3.5 text-sm font-medium transition hover:-translate-y-0.5 ${headDark || box ? "border-current/30 bg-white/10" : "border-line bg-surface"}`}>{button2}<span aria-hidden className="transition group-hover:translate-x-0.5">&rarr;</span></Link>}
               </div>
             </div>
-            <ul className={`hero-in-3 text-sm ${headAlign === "center" ? "flex flex-wrap justify-center gap-x-8 gap-y-2" : "hidden shrink-0 gap-5 border-l pl-7 md:grid"} ${headAlign === "left" ? (box || full ? "border-current/25" : "border-line") : ""} ${box ? "[&_.text-muted]:opacity-80" : full ? "[&_.text-muted]:text-white/70" : ""}`}>
+            <ul className={`hero-in-3 text-sm ${headAlign === "center" ? "flex flex-wrap justify-center gap-x-8 gap-y-2" : "hidden shrink-0 gap-5 border-l pl-7 md:grid"} ${headAlign === "left" ? (box || headDark ? "border-current/25" : "border-line") : ""} ${box ? "[&_.text-muted]:opacity-80" : headDark ? "[&_.text-muted]:text-white/70" : ""}`}>
               <li><span className="block font-display text-xl font-semibold">Cash on delivery</span><span className="text-muted">Check it, then pay</span></li>
               <li><span className="block font-display text-xl font-semibold">All 64 districts</span><span className="text-muted">Inside and outside Dhaka</span></li>
             </ul>
@@ -160,7 +165,7 @@ export function Storefront({ products, categories, variant = "hanger", showHero 
               <button key={p.id} onClick={() => select(p.id)} className="group text-left">
                 {p.image ? <img src={p.image} alt={p.name} loading="lazy" className="aspect-[4/5] w-full rounded-2xl border border-line object-cover transition group-hover:-translate-y-1" /> : <ProductArt kind={p.kind} color={p.colors[0].hex} className="aspect-[4/5] w-full rounded-2xl border border-line transition group-hover:-translate-y-1" />}
                 <p className="mt-3 text-sm font-medium">{p.name}</p>
-                <p className={`text-sm ${full ? "text-white/70" : "text-muted"}`}>{formatPrice(p.basePrice)}</p>
+                <p className={`text-sm ${headDark ? "text-white/70" : "text-muted"}`}>{formatPrice(p.basePrice)}</p>
               </button>
             ))}
           </div>
@@ -173,13 +178,14 @@ export function Storefront({ products, categories, variant = "hanger", showHero 
         </section>
       ) : (
         <div className={full ? "pb-6 md:pb-10" : "px-3 pb-6 md:px-8 md:pb-10"}>
-          <div ref={stageRef} className={`relative scroll-mt-20 h-[78dvh] min-h-[460px] max-h-[680px] overflow-hidden md:h-[clamp(430px,calc(100dvh-19rem),640px)] ${full ? "" : "stage mx-auto max-w-7xl rounded-3xl border border-line shadow-sm"}`}>
-            {!full && <div className="grain pointer-events-none absolute inset-0" />}
+          <div ref={stageRef} className={`relative isolate scroll-mt-20 h-[78dvh] min-h-[460px] max-h-[680px] overflow-hidden md:h-[clamp(430px,calc(100dvh-19rem),640px)] ${full ? (ui ? "" : "stage") : ui ? "mx-auto max-w-7xl rounded-3xl border border-white/10 shadow-sm" : "stage mx-auto max-w-7xl rounded-3xl border border-line shadow-sm"}`}>
+            {!full && bg}
+            {!full && !ui && <div className="grain pointer-events-none absolute inset-0" />}
             <div aria-hidden className={`pointer-events-none absolute inset-0 z-[5] transition-opacity duration-500 ${selected ? "opacity-100" : "opacity-0"}`} style={{ background: "radial-gradient(55% 80% at 36% 52%, transparent 30%, rgba(8,10,14,0.38) 100%)" }} />
             {view === "3d" && list.length > 0 && (variant.startsWith("hanger") ? (
-              <HangerRail products={list} selectedId={selectedId} colorHex={selected?.colors[colorIdx]?.hex ?? "#ffffff"} onSelect={select} dark={full || resolvedTheme === "dark"} nudge={nudge} onIndex={setIdx} style={variant === "hanger-wire" ? "wire" : variant === "hanger-gold" ? "gold" : variant === "hanger-velvet" ? "velvet" : "wood"} />
+              <HangerRail products={list} selectedId={selectedId} colorHex={selected?.colors[colorIdx]?.hex ?? "#ffffff"} onSelect={select} dark={ui || resolvedTheme === "dark"} nudge={nudge} onIndex={setIdx} style={variant === "hanger-wire" ? "wire" : variant === "hanger-gold" ? "gold" : variant === "hanger-velvet" ? "velvet" : "wood"} />
             ) : (
-              <CardCarousel layout={variant as "arc" | "coverflow" | "diagonal" | "stack" | "wave"} products={list} selectedId={selectedId} colorHex="#ffffff" onSelect={select} dark={full || resolvedTheme === "dark"} nudge={nudge} onIndex={setIdx} />
+              <CardCarousel layout={variant as "arc" | "coverflow" | "diagonal" | "stack" | "wave"} products={list} selectedId={selectedId} colorHex="#ffffff" onSelect={select} dark={ui || resolvedTheme === "dark"} nudge={nudge} onIndex={setIdx} />
             ))}
             {list.length === 0 && <p className="absolute inset-0 grid place-items-center text-sm text-muted">No products here yet.</p>}
             {view === "3d" && list.length > 1 && !selected && arrowsAt === "sides" && (
@@ -192,12 +198,20 @@ export function Storefront({ products, categories, variant = "hanger", showHero 
             {full ? <div className="pointer-events-none absolute inset-0 z-20 mx-auto max-w-7xl text-ink [&>*]:pointer-events-auto">{panel}</div> : panel}
             {(pillsAt !== "off" || (arrowsAt.startsWith("bottom") && arrowPair)) && (
               <div className={`absolute inset-x-0 bottom-4 z-10 flex items-center gap-3 px-3 transition-opacity duration-300 ${gutter.both} ${selected ? "pointer-events-none opacity-0" : "opacity-100"}`}>
-                {(["left", "center", "right"] as const).map((slot) => (
-                  <div key={slot} className={`flex min-w-0 items-center gap-2 ${slot === "left" ? "flex-1 justify-start" : slot === "center" ? "flex-none justify-center" : "flex-1 justify-end"}`}>
-                    {pillsAt === slot && pills}
-                    {arrowsAt === `bottom-${slot}` && arrowPair}
-                  </div>
-                ))}
+                {(["left", "center", "right"] as const).map((slot) => {
+                  const hasPills = pillsAt === slot;
+                  const hasArrows = arrowsAt === `bottom-${slot}` && !!arrowPair;
+                  // When the filter is centred, both ends reserve the same width so the filter stays exactly in the middle.
+                  const spacer = pillsAt === "center" && slot !== "center";
+                  const size = hasPills ? "min-w-0 flex-1" : spacer ? `w-[5.5rem] flex-none ${hasArrows ? "" : "max-md:hidden"}` : "flex-none";
+                  const align = slot === "left" ? "justify-start" : slot === "center" ? "justify-center" : "justify-end";
+                  return (
+                    <div key={slot} className={`flex items-center gap-2 ${size} ${hasPills && slot !== "center" ? align : hasPills ? "justify-center" : align}`}>
+                      {hasPills && pills}
+                      {hasArrows && arrowPair}
+                    </div>
+                  );
+                })}
               </div>
             )}
           </div>
@@ -206,5 +220,5 @@ export function Storefront({ products, categories, variant = "hanger", showHero 
     </>
   );
 
-  return full ? <div className="relative isolate overflow-hidden bg-[#10141b] text-white">{bg}{content}</div> : content;
+  return full && ui ? <div className="relative isolate overflow-hidden bg-[#10141b] text-white">{bg}{content}</div> : content;
 }

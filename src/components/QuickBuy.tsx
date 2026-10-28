@@ -86,7 +86,7 @@ export function QuickBuy({ product, zones, onClose }: { product: Product; zones:
   return (
     <div className="fixed inset-0 z-50 grid place-items-end sm:place-items-center">
       <div className="absolute inset-0 bg-black/55 backdrop-blur-md" onClick={onClose} />
-      <div role="dialog" aria-modal="true" aria-label={`Order ${product.name}`} className="panel-in relative grid max-h-[94dvh] w-full overflow-hidden rounded-t-[28px] border border-white/25 shadow-[0_30px_80px_-20px_rgba(0,0,0,0.6)] sm:max-w-3xl sm:rounded-[28px] md:grid-cols-[0.92fr_1.08fr]">
+      <div role="dialog" aria-modal="true" aria-label={`Order ${product.name}`} className="panel-in relative grid max-h-[94dvh] w-full overflow-y-auto overscroll-contain rounded-t-[28px] border border-white/25 shadow-[0_30px_80px_-20px_rgba(0,0,0,0.6)] sm:max-w-3xl sm:rounded-[28px] md:grid-cols-[0.92fr_1.08fr] md:overflow-hidden">
         <button aria-label="Close" onClick={onClose} className="absolute right-3.5 top-3.5 z-20 grid h-9 w-9 place-items-center rounded-full border border-white/30 bg-black/25 text-white backdrop-blur transition hover:bg-black/40"><X size={16} /></button>
 
         {/* The product side: its own colour, with white text */}
@@ -127,7 +127,7 @@ export function QuickBuy({ product, zones, onClose }: { product: Product; zones:
         </div>
 
         {/* The form side: frosted glass, with solid enough colour that every word stays easy to read */}
-        <form onSubmit={submit} className="no-scrollbar grid content-start gap-2.5 overflow-y-auto bg-white/85 p-5 backdrop-blur-2xl dark:bg-[#12151a]/88 md:max-h-[94dvh] md:p-7">
+        <form onSubmit={submit} className="no-scrollbar flex flex-col gap-2.5 overflow-y-auto bg-white/85 p-5 pb-8 backdrop-blur-2xl dark:bg-[#12151a]/88 md:max-h-[94dvh] md:p-7 md:pb-9 [&>*]:shrink-0">
           <p className="font-display text-lg font-semibold">Where should we deliver it?</p>
           <div className="grid gap-2.5 sm:grid-cols-2">
             <input name="name" required minLength={2} placeholder="Full name" autoComplete="name" className={field} />
@@ -137,7 +137,7 @@ export function QuickBuy({ product, zones, onClose }: { product: Product; zones:
             <select aria-label="Delivery area" value={zoneId} onChange={(e) => setZoneId(e.target.value)} className={field}>{zones.map((z) => <option key={z.id} value={z.id}>{z.name}</option>)}</select>
             <input name="district" required placeholder="District" className={field} />
           </div>
-          <textarea name="address" required minLength={6} rows={2} placeholder="Full address" autoComplete="street-address" className={field} />
+          <textarea name="address" required minLength={6} rows={3} placeholder="Full address" autoComplete="street-address" className={`${field} min-h-[96px] resize-none`} />
           <input name="email" type="email" placeholder="Email (optional, for your invoice)" autoComplete="email" className={field} />
           <input name="website" tabIndex={-1} autoComplete="off" aria-hidden className="hidden" />
           <p className="mt-1 text-sm font-medium">Payment</p>
@@ -149,8 +149,8 @@ export function QuickBuy({ product, zones, onClose }: { product: Product; zones:
             <div className="mt-1 flex justify-between border-t border-black/10 pt-2.5 text-base font-semibold dark:border-white/10"><dt>{method === "cod" ? "Pay on delivery" : "Total"}</dt><dd className="tabular-nums">{formatPrice(quote?.total ?? price * qty)}</dd></div>
           </dl>
           {error && <p role="alert" className="text-sm text-red-600">{error}</p>}
-          <button disabled={pending || stock <= 0 || !picked} className="shine mt-1 flex items-center justify-center gap-2 rounded-full bg-ink py-3.5 text-sm font-semibold text-paper shadow-lg transition hover:-translate-y-0.5 disabled:opacity-50">{pending ? "Placing order..." : <><Check size={16} /> {method === "cod" ? "Place order, pay on delivery" : method === "sslcommerz" ? "Continue to payment" : "Place order"}</>}</button>
-          <p className="text-center text-xs text-ink/60 dark:text-white/60">We will call you to confirm. {method === "cod" ? "You pay in cash when it arrives." : picked?.manual ? "We check your payment before we send the order." : ""}</p>
+          <button disabled={pending || stock <= 0 || !picked} className="shine mb-1 mt-3 flex min-h-[56px] items-center justify-center gap-2 rounded-full bg-ink px-6 py-4 text-[15px] font-semibold text-paper shadow-lg transition hover:-translate-y-0.5 disabled:opacity-50">{pending ? "Placing order..." : <><Check size={16} /> {method === "cod" ? "Place order, pay on delivery" : method === "sslcommerz" ? "Continue to payment" : "Place order"}</>}</button>
+          <p className="pb-1 text-center text-xs text-ink/60 dark:text-white/60">We will call you to confirm. {method === "cod" ? "You pay in cash when it arrives." : picked?.manual ? "We check your payment before we send the order." : ""}</p>
         </form>
       </div>
     </div>
