@@ -51,7 +51,7 @@ export async function sendContact(input: unknown): Promise<R> {
     website: z.string(),
   }).safeParse(input);
   if (!p.success) return { ok: false, message: p.error.issues[0].message };
-  if (p.data.website) return { ok: true, message: "Thank you. We will get back to you soon." };
+  if (p.data.website) { console.warn("[contact] ignored: the hidden field was filled in"); return { ok: true, message: "Thank you. We will get back to you soon." }; }
   const phone = normalizePhone(p.data.phone);
   if (!phone) return { ok: false, message: "Enter a valid mobile number, like 01712345678." };
   if (!(await rateLimit(`contact:${await clientIp()}`, 4, 600))) return { ok: false, message: "Too many messages. Please wait a few minutes." };

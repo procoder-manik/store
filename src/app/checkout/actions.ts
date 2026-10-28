@@ -67,7 +67,7 @@ export async function placeOrder(input: unknown): Promise<Placed> {
   const parsed = orderSchema.safeParse(input);
   if (!parsed.success) return { ok: false, error: parsed.error.issues[0].message };
   const d = parsed.data;
-  if (d.website) return { ok: false, error: GENERIC };
+  if (d.website) { console.warn("[order-blocked] reason=honeypot (a hidden form field was filled in, usually by a browser autofill)"); return { ok: false, error: GENERIC }; }
   if (!(await rateLimit(`order:${await clientIp()}`, 6, 600))) return { ok: false, error: "Too many orders from this connection. Please wait a few minutes or call us." };
 
   const phone = normalizePhone(d.phone);

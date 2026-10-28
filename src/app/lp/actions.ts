@@ -29,7 +29,7 @@ export async function placeLandingOrder(input: unknown): Promise<Placed> {
   const p = schema.safeParse(input);
   if (!p.success) return { ok: false, error: p.error.issues[0].message };
   const d = p.data;
-  if (d.website) return { ok: false, error: GENERIC };
+  if (d.website) { console.warn("[order-blocked] reason=honeypot"); return { ok: false, error: GENERIC }; }
   if (!(await rateLimit(`order:${await clientIp()}`, 6, 600))) return { ok: false, error: "Too many orders from this connection. Please wait a few minutes or call us." };
   const phone = normalizePhone(d.phone);
   if (!phone) return { ok: false, error: "Enter a valid Bangladeshi mobile number, like 01712345678." };

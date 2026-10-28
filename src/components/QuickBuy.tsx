@@ -66,7 +66,7 @@ export function QuickBuy({ product, zones, onClose }: { product: Product; zones:
       const r = await placeOrder({
         name: String(f.get("name")), phone: String(f.get("phone")), email: String(f.get("email") ?? ""),
         zoneId, district: String(f.get("district")), address: String(f.get("address")), note: "", coupon: "",
-        bump: false, useCredit: true, ref: readRef(), paymentMethod: method, payerNumber: String(f.get("payer") ?? ""), trxId: String(f.get("trxId") ?? ""), website: String(f.get("website") ?? ""),
+        bump: false, useCredit: true, ref: readRef(), paymentMethod: method, payerNumber: String(f.get("payer") ?? ""), trxId: String(f.get("trxId") ?? ""), website: String(f.get("qz_hp") ?? ""),
         items: [{ productId: product.id, variantId: variant?.id, qty }],
       });
       if (!r.ok) return setError(r.error);
@@ -139,7 +139,7 @@ export function QuickBuy({ product, zones, onClose }: { product: Product; zones:
           </div>
           <textarea name="address" required minLength={6} rows={3} placeholder="Full address" autoComplete="street-address" className={`${field} min-h-[96px] resize-none`} />
           <input name="email" type="email" placeholder="Email (optional, for your invoice)" autoComplete="email" className={field} />
-          <input name="website" tabIndex={-1} autoComplete="off" aria-hidden className="hidden" />
+          <input name="qz_hp" tabIndex={-1} autoComplete="off" aria-hidden data-lpignore="true" data-1p-ignore="true" data-bwignore="true" data-form-type="other" style={{ position: "absolute", left: "-9999px", width: 1, height: 1, opacity: 0 }} />
           <p className="mt-1 text-sm font-medium">Payment</p>
           <PaymentPicker methods={methods} value={method} onChange={setMethod} amount={quote?.total ?? price * qty} tone="glass" />
 

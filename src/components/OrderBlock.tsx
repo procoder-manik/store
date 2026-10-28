@@ -68,7 +68,7 @@ export function OrderBlock({ block, products, zones, slug, preview = false }: { 
     const f = new FormData(e.currentTarget);
     const selections = sel.map((o) => ({ offerId: o.id, picks: Object.fromEntries(o.items.flatMap((it) => { const p = byId.get(it.productId) as Product; const v = p.variants?.length ? variantFor(p, pickFor(o.id, p)) : undefined; return v ? [[p.id, v.id]] : []; })) }));
     start(async () => {
-      const r = await placeLandingOrderV2({ slug, selections, zoneId, name: String(f.get("name")), phone: String(f.get("phone")), district: String(f.get("district")), address: String(f.get("address")), note: String(f.get("note") ?? ""), website: String(f.get("website") ?? "") });
+      const r = await placeLandingOrderV2({ slug, selections, zoneId, name: String(f.get("name")), phone: String(f.get("phone")), district: String(f.get("district")), address: String(f.get("address")), note: String(f.get("note") ?? ""), website: String(f.get("qz_hp") ?? "") });
       if (!r.ok) return setError(r.error);
       router.push(`/thank-you/${r.id}`);
     });
@@ -129,7 +129,7 @@ export function OrderBlock({ block, products, zones, slug, preview = false }: { 
           </div>
           <textarea name="address" required minLength={6} rows={2} placeholder="Full address" autoComplete="street-address" className={input} />
           <input name="note" placeholder="Note (optional)" maxLength={300} className={input} />
-          <input name="website" tabIndex={-1} autoComplete="off" aria-hidden className="hidden" />
+          <input name="qz_hp" tabIndex={-1} autoComplete="off" aria-hidden data-lpignore="true" data-1p-ignore="true" data-bwignore="true" data-form-type="other" style={{ position: "absolute", left: "-9999px", width: 1, height: 1, opacity: 0 }} />
         </div>
 
         <dl className="grid gap-2 border-t border-line pt-5 text-sm">

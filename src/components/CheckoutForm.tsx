@@ -73,7 +73,7 @@ export function CheckoutForm({ zones, bump = null, prefill = null, methods = [] 
     const payload = {
       name: String(f.get("name")), phone: String(f.get("phone")), email: String(f.get("email") ?? ""),
       zoneId, district: String(f.get("district")), address: String(f.get("address")), note: String(f.get("note") ?? ""),
-      coupon, bump: bumpOn, useCredit, ref: readRef(), paymentMethod: method, payerNumber: String(f.get("payer") ?? ""), trxId: String(f.get("trxId") ?? ""), website: String(f.get("website") ?? ""), items: cartInput,
+      coupon, bump: bumpOn, useCredit, ref: readRef(), paymentMethod: method, payerNumber: String(f.get("payer") ?? ""), trxId: String(f.get("trxId") ?? ""), website: String(f.get("qz_hp") ?? ""), items: cartInput,
     };
     start(async () => {
       const r = await placeOrder(payload);
@@ -117,7 +117,7 @@ export function CheckoutForm({ zones, bump = null, prefill = null, methods = [] 
           </div>
           <div><label className={label} htmlFor="address">Full address</label><textarea id="address" name="address" defaultValue={prefill?.address} required minLength={6} maxLength={300} rows={3} autoComplete="street-address" className={input} /></div>
           <div><label className={label} htmlFor="note">Order note (optional)</label><input id="note" name="note" maxLength={300} className={input} /></div>
-          <input name="website" tabIndex={-1} autoComplete="off" aria-hidden className="hidden" />
+          <input name="qz_hp" tabIndex={-1} autoComplete="off" aria-hidden data-lpignore="true" data-1p-ignore="true" data-bwignore="true" data-form-type="other" style={{ position: "absolute", left: "-9999px", width: 1, height: 1, opacity: 0 }} />
 
           {bump && (
             <label className={`flex cursor-pointer items-start gap-3 rounded-2xl border-2 border-dashed p-4 ${bumpOn ? "border-accent bg-accent/5" : "border-line"}`}>

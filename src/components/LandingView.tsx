@@ -41,7 +41,7 @@ export function LandingView({ landing, product, zones }: { landing: LandingData;
     start(async () => {
       const r = await placeLandingOrder({
         slug: landing.slug, qty: offer.qty, variantId: variant?.id, name: String(f.get("name")), phone: String(f.get("phone")), zoneId,
-        district: String(f.get("district")), address: String(f.get("address")), note: String(f.get("note") ?? ""), website: String(f.get("website") ?? ""),
+        district: String(f.get("district")), address: String(f.get("address")), note: String(f.get("note") ?? ""), website: String(f.get("qz_hp") ?? ""),
       });
       if (!r.ok) return setError(r.error);
       router.push(`/thank-you/${r.id}`);
@@ -98,7 +98,7 @@ export function LandingView({ landing, product, zones }: { landing: LandingData;
           </div>
           <textarea name="address" required minLength={6} rows={2} placeholder="Full address" autoComplete="street-address" className={input} />
           <input name="note" placeholder="Note (optional)" maxLength={300} className={input} />
-          <input name="website" tabIndex={-1} autoComplete="off" aria-hidden className="hidden" />
+          <input name="qz_hp" tabIndex={-1} autoComplete="off" aria-hidden data-lpignore="true" data-1p-ignore="true" data-bwignore="true" data-form-type="other" style={{ position: "absolute", left: "-9999px", width: 1, height: 1, opacity: 0 }} />
 
           <dl className="grid gap-1.5 border-t border-line pt-4 text-sm">
             <div className="flex justify-between"><dt className="text-muted">{offer.label || `Buy ${offer.qty}`}</dt><dd>{formatPrice(offer.price)}</dd></div>
