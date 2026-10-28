@@ -5,7 +5,7 @@ A fast, fully editable online store for Bangladesh with a 3D hanger-style storef
 - **Live site:** https://store.manikhossain.in
 - **Admin panel:** https://store.manikhossain.in/admin (sign in at `/login`, two-step verification required)
 - **Code:** private GitHub repository, deployed automatically by Vercel on every push to `main`
-- **Database and file storage:** Supabase (project code `sgikpqcycyewbrahjhok`)
+- **Database and file storage:** Supabase (project code is in your Supabase dashboard, not stored here)
 
 > This file is the single source of truth for the whole project: how it is built, what exists, how to run and update it, what went wrong before, and what is still to do. Last updated 28 Oct 2026.
 
@@ -13,11 +13,11 @@ A fast, fully editable online store for Bangladesh with a 3D hanger-style storef
 
 ## দ্রুত নির্দেশিকা (বাংলা)
 
-প্রজেক্ট ফোল্ডার: `C:\Users\acer\Documents\all mern project\Ecommerce project\store`
+প্রজেক্ট ফোল্ডার: আপনার কম্পিউটারের `store` ফোল্ডার (যেখানে `package.json` আছে)
 
 **নতুন আপডেট zip বসানো ও লাইভ করা (PowerShell):**
 ```powershell
-cd "C:\Users\acer\Documents\all mern project\Ecommerce project\store"
+cd "আপনার-প্রজেক্ট-ফোল্ডারের-পথ"
 Expand-Archive -Force $HOME\Downloads\update-XX.zip .
 dir
 ```
@@ -286,7 +286,7 @@ Check what the live server actually sees: **Admin → Health check**.
 
 GitHub repository secrets it needs: `SUPABASE_DB_URL` (Supabase → Connect → **Session pooler** URI with the database password), `BACKUP_PASSPHRASE`, `RCLONE_CONF` (output of `rclone config show gdrive`).
 
-Google Drive access uses your own Google Cloud OAuth client (project `loomhaus-backup`, scope `drive.file`, app published, so the token does not expire after 7 days).
+Google Drive access uses your own Google Cloud OAuth client (your own client, scope `drive.file`, app published, so the token does not expire after 7 days).
 
 **Restore:** `gpg -d loomhaus-db-DATE.sql.gz.gpg | gunzip | psql "NEW_DATABASE_URL"` into a fresh Supabase project. Test a restore once a year.
 
@@ -345,7 +345,7 @@ Work from the top. Tick each box when done and keep this list updated.
 - [ ] Remove `REQUIRE_ADMIN_MFA` from Vercel, then Redeploy. First check that the authenticator app on your phone works.
 - [ ] Set `NEXT_PUBLIC_SITE_URL` to `https://store.manikhossain.in` (it was `http://`), then Redeploy.
 - [ ] Delete the folder `src/app/api/debug-env` and push. It is a temporary check page.
-- [ ] Replace the temporary admin password (`Store2026Admin`) with a strong private one.
+- [ ] If the admin password was ever set to a simple temporary one, replace it with a strong private one.
 - [ ] Replace keys that were pasted in chat: a new `EMAIL_SECRET`, a new `GEMINI_API_KEY`, and any other key that was ever shown in full.
 
 ### B. Finish the backup
