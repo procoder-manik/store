@@ -1,0 +1,60 @@
+# Daily backup of the Supabase database to Google Drive, encrypted.
+# Setup steps are in the chat. Needs three GitHub secrets:
+#   SUPABASE_DB_URL     the Session pooler connection string (with your database password)
+#   BACKUP_PASSPHRASE   a long password you choose; without it the backups cannot be opened
+#   RCLONE_CONF         the Google Drive login text printed by: rclone config show gdrive
+name: Daily database backup
+
+on:
+  schedule:
+    - cron: "30 20 * * *" # 02:30 every night, Bangladesh time
+  workflow_dispatch: {} # lets you press "Run workflow" to test it
+
+permissions:
+  contents: read
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Dump the database
+        env:
+          DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+        run: |
+          set -euo pipefail
+          # pg_dump 17 can read older servers too. Saves the store data (public) and the sign-in accounts (auth).
+          docker run --rm -e DB_URL postgres:17 sh -c 'pg_dump "$DB_URL" --no-owner --no-privileges --schema=public --schema=auth' | gzip -9 > backup.sql.gz
+          # Refuse to continue with an empty or broken dump.
+          test "$(stat -c%s backup.sql.gz)" -gt 5000
+          zcat backup.sql.gz | grep -q "CREATE TABLE public.orders"
+
+      - name: Encrypt it
+        env:
+          PASS: ${{ secrets.BACKUP_PASSPHRASE }}
+        run: |
+          set -euo pipefail
+          STAMP=$(TZ=Asia/Dhaka date +%Y-%m-%d_%H-%M)
+          echo "STAMP=$STAMP" >> "$GITHUB_ENV"
+          gpg --batch --yes --pinentry-mode loopback --symmetric --cipher-algo AES256 --passphrase "$PASS" -o "loomhaus-db-$STAMP.sql.gz.gpg" backup.sql.gz
+          rm backup.sql.gz
+
+      - name: Upload to Google Drive
+        env:
+          RCLONE_CONF: ${{ secrets.RCLONE_CONF }}
+        run: |
+          set -euo pipefail
+          curl -fsSL https://rclone.org/install.sh | sudo bash
+          mkdir -p ~/.config/rclone
+          printf '%s\n' "$RCLONE_CONF" > ~/.config/rclone/rclone.conf
+          rclone copy "loomhaus-db-${STAMP}.sql.gz.gpg" gdrive:Loomhaus-backups --verbose
+          # Keep the last 30 days, remove older ones.
+          rclone delete gdrive:Loomhaus-backups --min-age 30d --verbose
+          rclone ls gdrive:Loomhaus-backups | tail -n 3
+
+      - name: Keep a second copy on GitHub for 7 days
+        uses: actions/upload-artifact@v4
+        with:
+          name: db-backup-${{ env.STAMP }}
+          path: loomhaus-db-*.sql.gz.gpg
+          retention-days: 7
