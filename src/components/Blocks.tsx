@@ -55,7 +55,7 @@ export function BlockView({ b, ctx }: { b: Block; ctx: BlockCtx }) {
       if (b.variant === "bold") {
         return (
           <section className={wrap}>
-            <div className="relative overflow-hidden rounded-3xl border border-line bg-surface px-6 py-12 md:px-14 md:py-20">
+            <div data-bleed="both" className="relative overflow-hidden rounded-3xl border border-line bg-surface px-6 py-12 md:px-14 md:py-20">
               <div aria-hidden className="animate-floaty absolute -right-10 -top-10 h-56 w-56 rounded-full bg-accent opacity-90 md:h-80 md:w-80" />
               <div aria-hidden className="animate-floaty absolute bottom-6 right-24 h-16 w-16 rounded-full border-4 border-ink md:h-24 md:w-24" style={{ animationDelay: "-3s" }} />
               <div className="relative max-w-4xl">
@@ -71,7 +71,7 @@ export function BlockView({ b, ctx }: { b: Block; ctx: BlockCtx }) {
         return (
           <section className={wrap}>
             <div className="grid items-center gap-8 overflow-hidden rounded-3xl border border-line bg-surface md:grid-cols-2">
-              <div className="p-8 md:p-14">
+              <div data-bleed="left" className="p-8 md:p-14">
                 <Heading as={b.level} className="font-display text-4xl font-semibold leading-tight tracking-tight md:text-6xl">{b.heading}</Heading>
                 {b.sub && <p className="mt-4 max-w-md text-base text-muted md:text-lg">{b.sub}</p>}
                 {b.button && b.link && <Link href={b.link} className="mt-7 inline-block rounded-pill bg-accent px-7 py-3.5 text-sm font-semibold text-accent-ink transition hover:-translate-y-0.5">{b.button}</Link>}
@@ -89,7 +89,7 @@ export function BlockView({ b, ctx }: { b: Block; ctx: BlockCtx }) {
           <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-accent to-ink">
             {b.image && <img src={b.image} alt="" className="absolute inset-0 h-full w-full object-cover" />}
             <div className={`absolute inset-0 ${center ? "bg-black/45" : "bg-gradient-to-r from-black/60 via-black/25 to-transparent"}`} />
-            <div className={`relative flex min-h-[320px] flex-col justify-center p-8 text-white md:min-h-[440px] md:p-14 ${center ? "items-center text-center" : ""}`}>
+            <div data-bleed="both" className={`relative flex min-h-[320px] flex-col justify-center p-8 text-white md:min-h-[440px] md:p-14 ${center ? "items-center text-center" : ""}`}>
               <Heading as={b.level} className="max-w-3xl font-display text-4xl font-semibold leading-tight md:text-6xl">{b.heading}</Heading>
               {b.sub && <p className="mt-4 max-w-xl text-base opacity-90 md:text-lg">{b.sub}</p>}
               {b.button && b.link && <Link href={b.link} className={`${btn} mt-7 w-fit`}>{b.button}</Link>}
@@ -106,7 +106,7 @@ export function BlockView({ b, ctx }: { b: Block; ctx: BlockCtx }) {
     case "rail3d":
     case "rail3dfull": {
       const list = pick(products, b.source, b.category, b.tag);
-      return <Storefront products={list.length ? list : products} categories={categories} variant={b.style} showHero={b.showHero} heading={b.heading} sub={b.sub || undefined} button={b.button} link={b.link} button2={b.button2} link2={b.link2} defaultView={b.defaultView} level={b.level} />;
+      return <Storefront products={list.length ? list : products} categories={categories} variant={b.style} showHero={b.showHero} heading={b.heading} sub={b.sub || undefined} button={b.button} link={b.link} button2={b.button2} link2={b.link2} defaultView={b.defaultView} level={b.level} full={b.type === "rail3dfull"} />;
     }
     case "slider":
     case "sliderfull":
@@ -224,7 +224,7 @@ export function BlockView({ b, ctx }: { b: Block; ctx: BlockCtx }) {
         <>
           {b.image ? <img src={b.image} alt="" className="absolute inset-0 h-full w-full object-cover" /> : <div className="absolute inset-0 bg-gradient-to-br from-accent to-ink" />}
           <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-black/20 to-transparent" />
-          <div className="relative flex h-full flex-col justify-end p-6 text-white md:p-10"><p className="font-display text-2xl font-semibold md:text-4xl">{b.title}</p>{b.sub && <p className="mt-1 max-w-md text-sm opacity-90">{b.sub}</p>}{b.button && <span className={`${btn} mt-4 w-fit !py-2`}>{b.button}</span>}</div>
+          <div data-bleed="both" className="relative flex h-full flex-col justify-end p-6 text-white md:p-10"><p className="font-display text-2xl font-semibold md:text-4xl">{b.title}</p>{b.sub && <p className="mt-1 max-w-md text-sm opacity-90">{b.sub}</p>}{b.button && <span className={`${btn} mt-4 w-fit !py-2`}>{b.button}</span>}</div>
         </>
       );
       const cls = "relative block aspect-[16/9] overflow-hidden rounded-3xl md:aspect-[21/8]";
@@ -405,7 +405,7 @@ export function BlockRenderer({ blocks, ...ctx }: { blocks: Block[] } & BlockCtx
         // Full width versions: the same section with the page's side margins and rounded corners removed (see globals.css).
         const full = bleed ? <div data-fullbleed={bleed}>{view}</div> : view;
         // Space above and below, set per section in the builder. Sections with none set get no extra wrapper.
-        const sp = { paddingTop: b.pt, paddingBottom: b.pb, marginTop: b.mt, marginBottom: b.mb };
+        const sp = { paddingTop: b.pt, paddingBottom: b.pb, paddingLeft: b.pl, paddingRight: b.pr, marginTop: b.mt, marginBottom: b.mb, marginLeft: b.ml, marginRight: b.mr };
         const el = Object.values(sp).some((v) => v !== undefined) ? <div style={sp}>{full}</div> : full;
         // The first section is already on screen, and the ready-made 3D slider handles its own entrance.
         if (b.anim === "none" || i === 0 || b.type === "rail3d" || b.type === "rail3dfull") return <div key={b.id}>{el}</div>;

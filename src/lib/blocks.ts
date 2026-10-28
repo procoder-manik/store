@@ -19,6 +19,10 @@ const typo = {
   pb: z.number().int().min(0).max(300).optional(),
   mt: z.number().int().min(-100).max(300).optional(),
   mb: z.number().int().min(-100).max(300).optional(),
+  pl: z.number().int().min(0).max(300).optional(),
+  pr: z.number().int().min(0).max(300).optional(),
+  ml: z.number().int().min(-100).max(300).optional(),
+  mr: z.number().int().min(-100).max(300).optional(),
 };
 const anim = z.enum(["none", "fade", "up", "zoom", "left", "right"]).default("up");
 const common = { id, anim, level, ...typo };

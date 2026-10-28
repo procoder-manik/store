@@ -89,7 +89,7 @@ export function SliderBlock({ slides, style = "slide", level = "h2" }: { slides:
         <div className="flex transition-transform duration-700 ease-out" style={{ transform: `translateX(-${i * 100}%)` }}>
           {slides.map((s, k) => (
             <div key={k} aria-hidden={k !== i} className="grid w-full shrink-0 md:min-h-[440px] md:grid-cols-2">
-              <div className="flex flex-col justify-center gap-3 p-8 md:p-14"><Copy s={s} level={level} tab={k === i} dark={false} /></div>
+              <div data-bleed="left" className="flex flex-col justify-center gap-3 p-8 md:p-14"><Copy s={s} level={level} tab={k === i} dark={false} /></div>
               <div className="relative min-h-[240px] bg-gradient-to-br from-accent/25 to-paper">{s.image && <img src={s.image} alt="" loading={k === 0 ? "eager" : "lazy"} className="absolute inset-0 h-full w-full object-cover" />}</div>
             </div>
           ))}
@@ -105,7 +105,7 @@ export function SliderBlock({ slides, style = "slide", level = "h2" }: { slides:
           {slides.map((s, k) => (
             <div key={k} aria-hidden={k !== i} className="relative min-h-[320px] w-full shrink-0 md:min-h-[460px]">
               {bg(s, k)}
-              <div className="relative flex min-h-[320px] max-w-xl flex-col justify-center gap-3 p-8 text-white md:min-h-[460px] md:p-14"><Copy s={s} level={level} tab={k === i} /></div>
+              <div data-bleed="slide" className="relative flex min-h-[320px] max-w-xl flex-col justify-center gap-3 p-8 text-white md:min-h-[460px] md:p-14"><Copy s={s} level={level} tab={k === i} /></div>
             </div>
           ))}
         </div>

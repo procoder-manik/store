@@ -173,7 +173,13 @@ body { @apply bg-paper font-body text-ink antialiased; }
 [data-hweight] [data-heading] { font-weight: var(--h-weight); }
 [data-hcase] [data-heading] { text-transform: var(--h-case); }
 
-/* "Full width" sections: same design, edge to edge. "tight" also removes the side padding and rounded corners. */
+/* "Full width" sections: the background runs edge to edge, the text stays inside the same container as the header.
+   --g is the distance from the screen edge to the header's content edge, measured on this section (cqw = its width). */
+[data-fullbleed] { container-type: inline-size; --g: max(2rem, calc((100cqw - 80rem) / 2 + 2rem)); }
 [data-fullbleed] > section { max-width: none; }
-[data-fullbleed="tight"] > section { padding-left: 0; padding-right: 0; padding-top: 0; padding-bottom: 0; }
+[data-fullbleed="tight"] > section { padding: 0; }
 [data-fullbleed="tight"] .rounded-3xl { border-radius: 0; }
+[data-fullbleed="wide"] > section { padding-left: var(--g); padding-right: var(--g); }
+[data-fullbleed] [data-bleed="both"] { padding-left: var(--g); padding-right: var(--g); }
+[data-fullbleed] [data-bleed="left"] { padding-left: var(--g); }
+[data-fullbleed] [data-bleed="slide"] { padding-left: var(--g); max-width: calc(var(--g) + 36rem); }

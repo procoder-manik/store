@@ -114,13 +114,12 @@ function StyleRow({ b, set }: { b: Block; set: Setter }) {
           {b.level === "p" && <p className="-mt-1 text-xs text-muted">A paragraph tag is plain text. Search engines will not treat it as a heading.</p>}
         </>
       )}
-      <p className="text-xs font-medium">Space around this section (pixels)<InfoTip text="Padding is the space inside, around the content. Margin is the space outside, between this section and the next. Leave a box empty to keep the section's own spacing. A negative margin pulls the next section closer." /></p>
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-        <F l="Padding top"><input type="number" min={0} max={300} className={input} placeholder="auto" value={b.pt ?? ""} onChange={(e) => set({ pt: num(e.target.value, 0, 300) })} /></F>
-        <F l="Padding bottom"><input type="number" min={0} max={300} className={input} placeholder="auto" value={b.pb ?? ""} onChange={(e) => set({ pb: num(e.target.value, 0, 300) })} /></F>
-        <F l="Margin top"><input type="number" min={-100} max={300} className={input} placeholder="auto" value={b.mt ?? ""} onChange={(e) => set({ mt: num(e.target.value, -100, 300) })} /></F>
-        <F l="Margin bottom"><input type="number" min={-100} max={300} className={input} placeholder="auto" value={b.mb ?? ""} onChange={(e) => set({ mb: num(e.target.value, -100, 300) })} /></F>
-      </div>
+      <p className="text-xs font-medium">Space around this section (pixels)<InfoTip text="Padding is the space inside, around the content. Margin is the space outside, between this section and its neighbours. Leave a box empty to keep the section's own spacing. A negative margin pulls the next section closer." /></p>
+      {([["Padding", ["pt", "pb", "pl", "pr"], 0], ["Margin", ["mt", "mb", "ml", "mr"], -100]] as const).map(([name, keys, min]) => (
+        <div key={name} className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+          {keys.map((k, n) => <F key={k} l={`${name} ${["top", "bottom", "left", "right"][n]}`}><input type="number" min={min} max={300} className={input} placeholder="auto" value={(b as unknown as Record<string, number | undefined>)[k] ?? ""} onChange={(e) => set({ [k]: num(e.target.value, min, 300) })} /></F>)}
+        </div>
+      ))}
       <div className="grid grid-cols-2 gap-3">
         <F l="When it appears"><select className={input} value={b.anim} onChange={(e) => set({ anim: e.target.value })}>{ANIMATIONS.map((a) => <option key={a.id} value={a.id}>{a.name}</option>)}</select></F>
       </div>
