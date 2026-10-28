@@ -184,7 +184,7 @@ export function ProductHero({ products, categories, eyebrow = "", heading, sub, 
 
         {/* Price and size on the right */}
         <div key={p.id} className="hero-fade relative z-30 order-4 md:absolute md:right-[4.5%] md:top-[23%] md:text-right">
-          <p className="text-xs font-medium uppercase tracking-[0.18em] text-white/65">{p.name}</p>
+          <p className="max-w-[17rem] font-display text-xl font-semibold leading-snug md:ml-auto md:text-2xl">{p.name}</p>
           <p className="mt-1.5 font-display text-4xl font-semibold tracking-tight md:text-[2.6rem]">{formatPrice(p.basePrice)}</p>
           {p.compareAt && p.compareAt > p.basePrice && <p className="font-display text-2xl text-white/80 line-through decoration-2">{formatPrice(p.compareAt)}</p>}
           {p.hasColors !== false && p.colors.length > 1 && (

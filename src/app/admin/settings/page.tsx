@@ -2,7 +2,8 @@ import { createClient } from "@/lib/supabase/server";
 import { mergeSettings } from "@/lib/settings";
 import { PALETTES } from "@/lib/palettes";
 import { THEMES } from "@/lib/themes";
-import { saveAnnouncement, saveBump, saveAppearance, saveChat, saveContact, savePopup, saveProof, saveTracking } from "./actions";
+import { ImageField } from "@/components/admin/ImageField";
+import { saveAnnouncement, saveBump, saveAppearance, saveChat, saveContact, saveExtras, savePopup, saveProof, saveTracking } from "./actions";
 
 const input = "w-full rounded-xl border border-line bg-surface px-3 py-2 text-sm";
 const card = "rounded-xl border border-line bg-surface p-5";
@@ -118,7 +119,12 @@ export default async function Settings() {
             <div><label className={label}>Support email</label><input name="email" type="email" defaultValue={s.contact.email} placeholder="hello@yourstore.com" className={input} /></div>
             <div><label className={label}>Opening hours</label><input name="hours" maxLength={120} defaultValue={s.contact.hours} placeholder="Every day, 10am to 8pm" className={input} /></div>
           </div>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div><label className={label}>Business or shop name (shown on the Contact page)</label><input name="businessName" maxLength={80} defaultValue={s.contact.businessName} className={input} /></div>
+            <div><label className={label}>Second phone number (optional)</label><input name="phone2" inputMode="tel" defaultValue={s.contact.phone2} placeholder="01712345678" className={input} /></div>
+          </div>
           <div><label className={label}>Address (optional)</label><input name="address" maxLength={200} defaultValue={s.contact.address} className={input} /></div>
+          <div><label className={label}>Google Maps link (optional)</label><input name="mapUrl" maxLength={500} placeholder="https://maps.google.com/..." defaultValue={s.contact.mapUrl} className={input} /></div>
           <button className={`${save} w-fit`}>Save contact</button>
         </form>
 
@@ -131,7 +137,19 @@ export default async function Settings() {
             <div><label className={label}>First message</label><input name="greeting" required maxLength={200} defaultValue={s.chat.greeting} className={input} /></div>
           </div>
           <div><label className={label}>Store notes the assistant may use (return policy, delivery time, contact number, offers). Anything here can be shown to customers.</label><textarea name="knowledge" rows={6} maxLength={3000} defaultValue={s.chat.knowledge} className={input} /></div>
+          <ImageField name="avatar" value={s.chat.avatar} label="Chat picture (empty = your store logo)" />
+          <label className="flex items-center gap-2 text-sm"><input type="checkbox" name="waEnabled" defaultChecked={s.chat.waEnabled} /> Show the WhatsApp link under the chat</label>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div><label className={label}>WhatsApp number (empty = the WhatsApp number in Contact)</label><input name="waNumber" inputMode="tel" placeholder="01712345678" defaultValue={s.chat.waNumber.replace(/^88/, "")} className={input} /></div>
+            <div><label className={label}>Message that opens in WhatsApp</label><input name="waNote" maxLength={200} defaultValue={s.chat.waNote} className={input} /></div>
+          </div>
           <button className={`${save} w-fit`}>Save assistant</button>
+        </form>
+
+        <form action={saveExtras} className={`${card} grid gap-4`}>
+          <h2 className="font-display text-base font-semibold">Back to Top button</h2>
+          <label className="flex items-center gap-2 text-sm"><input type="checkbox" name="backToTop" defaultChecked={s.extras.backToTop} /> Show a Back to Top button when visitors scroll down</label>
+          <button className={`${save} w-fit`}>Save</button>
         </form>
 
         <form action={saveBump} className={`${card} grid gap-4`}>

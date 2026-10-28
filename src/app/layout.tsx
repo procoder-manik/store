@@ -1,5 +1,4 @@
 import type { Metadata, Viewport } from "next";
-import Link from "next/link";
 import { fontClasses } from "./fonts";
 import "./globals.css";
 import { Providers } from "@/components/Providers";
@@ -15,6 +14,8 @@ import { PromoPopup } from "@/components/PromoPopup";
 import { SocialProof } from "@/components/SocialProof";
 import { CompareBar } from "@/components/CompareBar";
 import { ChatWidget } from "@/components/ChatWidget";
+import { BackToTop } from "@/components/BackToTop";
+import { AnnouncementBar } from "@/components/AnnouncementBar";
 import { getCatalog } from "@/lib/catalog";
 import { Suspense } from "react";
 import { RefCapture } from "@/components/RefCapture";
@@ -43,7 +44,6 @@ export const viewport: Viewport = { width: "device-width", initialScale: 1 };
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const [{ categories }, s, zones] = await Promise.all([getCatalog(), getPublicSettings(), getZones()]);
   const a = s.announcement;
-  const bar = "block bg-ink px-4 py-2 text-center text-xs text-paper";
   const methods = availableMethods(s.payments, { sslReady: sslConfigured() });
   return (
     <html lang="en" suppressHydrationWarning data-theme={isTheme(s.appearance.theme) ? s.appearance.theme : "studio"} data-buttons={s.appearance.buttons ?? "round"} {...(isPalette(s.appearance.accent) ? { "data-palette": s.appearance.accent } : {})} className={fontClasses}>
@@ -56,7 +56,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           <PaymentsProvider methods={methods}>
           <Suspense fallback={null}><RefCapture /></Suspense>
           <StoreOnly>
-            {a.enabled && a.text && (a.link ? <Link href={a.link} className={bar}>{a.text}</Link> : <div className={bar}>{a.text}</div>)}
+            {a.enabled && a.text && <AnnouncementBar text={a.text} link={a.link} />}
             <Header brand={s.brand.name} logo={s.brand.logo} links={s.header.links} categories={categories} themePicker={s.appearance.visitorPicker} cfg={s.headerStyle} contact={{ phone: s.contact.phone, whatsapp: s.contact.whatsapp }} />
           </StoreOnly>
           {children}
@@ -64,7 +64,8 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           <CartDrawer />
           <PromoPopup p={s.popup} />
           <CompareBar />
-          {s.chat.enabled && <ChatWidget name={s.chat.name} greeting={s.chat.greeting} />}
+          {s.extras.backToTop && <StoreOnly><BackToTop /></StoreOnly>}
+          {s.chat.enabled && <ChatWidget name={s.chat.name} greeting={s.chat.greeting} avatar={s.chat.avatar || s.brand.logo} whatsapp={s.chat.waEnabled ? s.chat.waNumber || s.contact.whatsapp : ""} waNote={s.chat.waNote} />}
           {s.proof.mode !== "off" && <SocialProof />}
           </PaymentsProvider>
           </ZonesProvider>

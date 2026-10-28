@@ -29,7 +29,7 @@ function Text({ text }: { text: string }) {
   return <>{parts.map((p, i) => (i % 2 ? <Link key={i} href={p} className="font-medium underline">{p}</Link> : <span key={i}>{p}</span>))}</>;
 }
 
-export function ChatWidget({ name, greeting }: { name: string; greeting: string }) {
+export function ChatWidget({ name, greeting, avatar = "", whatsapp = "", waNote = "" }: { name: string; greeting: string; avatar?: string; whatsapp?: string; waNote?: string }) {
   const path = usePathname();
   const [open, setOpen] = useState(false);
   const [msgs, setMsgs] = useState<Msg[]>([{ role: "assistant", content: greeting }]);
@@ -84,12 +84,12 @@ export function ChatWidget({ name, greeting }: { name: string; greeting: string 
   return (
     <>
       {!open && (
-        <button aria-label="Open chat" onClick={() => setOpen(true)} className="fixed bottom-20 right-3 z-40 grid h-14 w-14 place-items-center rounded-full bg-accent text-accent-ink shadow-xl transition hover:scale-105 md:bottom-5 md:right-5"><MessageCircle size={24} /></button>
+        <button aria-label="Open chat" onClick={() => setOpen(true)} className="fixed bottom-20 right-3 z-40 flex flex-col items-center gap-1 transition hover:scale-105 md:bottom-5 md:right-5"><span className="grid h-14 w-14 place-items-center rounded-full bg-accent text-accent-ink shadow-xl">{avatar ? <img src={avatar} alt="" className="h-full w-full rounded-full object-cover" /> : <MessageCircle size={24} />}</span><span className="rounded-pill bg-surface px-2.5 py-0.5 text-[11px] font-semibold shadow">Chat with us</span></button>
       )}
       {open && (
         <section aria-label={name} className="pop-in fixed inset-x-3 bottom-3 z-50 flex h-[min(560px,80dvh)] flex-col overflow-hidden rounded-3xl border border-line bg-surface shadow-2xl md:inset-x-auto md:bottom-5 md:right-5 md:w-[380px]">
           <header className="flex items-center justify-between border-b border-line px-4 py-3">
-            <p className="font-display text-base font-semibold">{name}</p>
+            <p className="flex items-center gap-2 font-display text-base font-semibold">{avatar && <img src={avatar} alt="" className="h-8 w-8 rounded-full border border-line object-cover" />}{name}</p>
             <div className="flex items-center gap-1">
               <button aria-label={muted ? "Turn sound on" : "Turn sound off"} onClick={toggleSound} className="grid h-9 w-9 place-items-center rounded-full hover:bg-paper">{muted ? <VolumeX size={16} /> : <Volume2 size={16} />}</button>
               <button aria-label="Close chat" onClick={() => setOpen(false)} className="grid h-9 w-9 place-items-center rounded-full hover:bg-paper"><X size={16} /></button>
@@ -118,6 +118,12 @@ export function ChatWidget({ name, greeting }: { name: string; greeting: string 
             <input value={text} onChange={(e) => setText(e.target.value)} maxLength={500} placeholder="Ask about products or delivery" aria-label="Your message" className="min-w-0 flex-1 rounded-pill border border-line bg-paper px-4 py-2.5 text-sm" />
             <button aria-label="Send" disabled={busy || !text.trim()} className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-accent text-accent-ink disabled:opacity-40"><Send size={16} /></button>
           </form>
+          {whatsapp && (
+            <p className="border-t border-line px-4 py-2 text-center text-xs text-muted">
+              Need a quick reply? Contact us on{" "}
+              <a href={`https://wa.me/${whatsapp}?text=${encodeURIComponent([waNote, [...msgs].reverse().find((m) => m.role === "user")?.content && `My question: ${[...msgs].reverse().find((m) => m.role === "user")?.content}`].filter(Boolean).join("\n\n"))}`} target="_blank" rel="noopener noreferrer" className="font-semibold text-accent underline">WhatsApp</a>.
+            </p>
+          )}
         </section>
       )}
     </>

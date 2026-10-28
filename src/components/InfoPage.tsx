@@ -8,10 +8,13 @@ export function InfoPage({ title, intro, sections, faq, current, wide = false, c
 }) {
   return (
     <main>
-      <div className="border-b border-line bg-surface">
-        <div className="mx-auto max-w-6xl px-5 py-12 md:py-16">
-          <h1 className="font-display text-4xl font-semibold tracking-tight md:text-5xl">{title}</h1>
-          {intro && <p className="mt-4 max-w-2xl text-base leading-relaxed text-muted md:text-lg">{intro}</p>}
+      <div className="relative overflow-hidden border-b border-line bg-gradient-to-br from-accent/10 via-surface to-surface">
+        <div aria-hidden className="absolute -right-16 -top-16 h-56 w-56 rounded-full bg-accent/10 blur-3xl" />
+        <div className="relative mx-auto max-w-6xl px-5 py-10 md:py-14">
+          <nav aria-label="Breadcrumb" className="flex items-center gap-2 text-xs text-muted"><Link href="/" className="hover:text-ink">Home</Link><span aria-hidden>/</span><span className="text-ink">{title}</span></nav>
+          <h1 className="mt-4 font-display text-3xl font-semibold tracking-tight md:text-5xl">{title}</h1>
+          <span aria-hidden className="mt-4 block h-1 w-14 rounded-full bg-accent" />
+          {intro && <p className="mt-5 max-w-2xl text-base leading-relaxed text-muted md:text-lg">{intro}</p>}
         </div>
       </div>
       <div className={`mx-auto grid max-w-6xl gap-12 px-5 py-12 md:py-16 ${wide ? "" : "md:grid-cols-[1fr_240px]"}`}>

@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { ImageField } from "@/components/admin/ImageField";
 import { createBanner, deleteBanner, toggleBanner } from "./actions";
 
 const input = "w-full rounded-xl border border-line bg-surface px-3 py-2 text-sm";
@@ -13,7 +14,7 @@ export default async function Banners() {
       <form action={createBanner} className="mt-5 grid max-w-3xl gap-3 sm:grid-cols-2">
         <input name="title" required maxLength={80} placeholder="Title" className={input} />
         <input name="subtitle" maxLength={160} placeholder="Subtitle (optional)" className={input} />
-        <input name="image" placeholder="Image link (Pexels, Unsplash or Pixabay, optional)" className={`${input} sm:col-span-2`} />
+        <div className="sm:col-span-2"><ImageField name="image" value="" label="Banner picture (optional)" /></div>
         <input name="link" placeholder="Link, like /shop?cat=hoodies" className={input} />
         <input name="button" maxLength={30} placeholder="Button text" className={input} />
         <input name="sort" type="number" min={0} placeholder="Order (0 shows first)" className={input} />

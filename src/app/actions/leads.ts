@@ -64,6 +64,7 @@ export async function sendContact(input: unknown): Promise<R> {
     await notifyContact({ name: p.data.name, phone, email: p.data.email, message: p.data.message });
     return { ok: true, message: "Thank you. We will get back to you soon." };
   } catch (e) {
+    console.error("[contact] could not send:", (e as Error).message);
     return { ok: false, message: process.env.NODE_ENV !== "production" ? `${(e as Error).message}. Open Admin, Health check.` : "Messages are not available right now. Please call us." };
   }
 }

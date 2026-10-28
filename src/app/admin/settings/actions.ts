@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { requireAdmin } from "@/lib/admin";
-import { normalizePhone } from "@/lib/utils";
+import { isLogoUrl, normalizePhone } from "@/lib/utils";
 import { isPalette } from "@/lib/palettes";
 import { isTheme } from "@/lib/themes";
 
@@ -73,8 +73,11 @@ export async function saveChat(fd: FormData) {
     name: z.string().trim().min(1, "Give the assistant a name").max(40),
     greeting: z.string().trim().min(1, "Add a greeting").max(200),
     knowledge: z.string().trim().max(3000),
-  }), { name: fd.get("name"), greeting: fd.get("greeting"), knowledge: fd.get("knowledge") });
-  await save("chat", { enabled: on(fd.get("enabled")), ...d });
+    avatar: z.string().trim().max(500).refine((v) => v === "" || isLogoUrl(v), "The picture must be uploaded here or come from Pexels, Unsplash or Pixabay"),
+    waNote: z.string().trim().max(200),
+    waNumber: bd,
+  }), { name: fd.get("name"), greeting: fd.get("greeting"), knowledge: fd.get("knowledge"), avatar: fd.get("avatar") ?? "", waNote: fd.get("waNote") ?? "", waNumber: fd.get("waNumber") ?? "" });
+  await save("chat", { enabled: on(fd.get("enabled")), ...d, waNumber: d.waNumber ? `88${d.waNumber}` : "", waEnabled: on(fd.get("waEnabled")) });
 }
 
 const bd = z.string().trim().transform((v, ctx) => {
@@ -90,8 +93,11 @@ export async function saveContact(fd: FormData) {
     email: z.union([z.literal(""), z.string().trim().toLowerCase().email("Enter a valid email address").max(120)]),
     address: z.string().trim().max(200),
     hours: z.string().trim().max(120),
-  }), { phone: fd.get("phone") ?? "", whatsapp: fd.get("whatsapp") ?? "", email: fd.get("email") ?? "", address: fd.get("address") ?? "", hours: fd.get("hours") ?? "" });
-  await save("contact", { phone: d.phone, whatsapp: d.whatsapp ? `88${d.whatsapp}` : "", email: d.email, address: d.address, hours: d.hours });
+    businessName: z.string().trim().max(80),
+    phone2: bd,
+    mapUrl: z.string().trim().max(500).refine((v) => v === "" || v.startsWith("https://"), "The map link must start with https://"),
+  }), { phone: fd.get("phone") ?? "", whatsapp: fd.get("whatsapp") ?? "", email: fd.get("email") ?? "", address: fd.get("address") ?? "", hours: fd.get("hours") ?? "", businessName: fd.get("businessName") ?? "", phone2: fd.get("phone2") ?? "", mapUrl: fd.get("mapUrl") ?? "" });
+  await save("contact", { phone: d.phone, whatsapp: d.whatsapp ? `88${d.whatsapp}` : "", email: d.email, address: d.address, hours: d.hours, businessName: d.businessName, phone2: d.phone2, mapUrl: d.mapUrl });
 }
 
 export async function saveAppearance(fd: FormData) {
@@ -104,4 +110,8 @@ export async function saveAppearance(fd: FormData) {
   if (accent && !isPalette(accent)) throw new Error("Choose one of the accent colors");
   if (!["light", "dark", "system"].includes(mode)) throw new Error("Choose a mode");
   await save("appearance", { theme, accent, mode, buttons, visitorPicker: on(fd.get("visitorPicker")) });
+}
+
+export async function saveExtras(fd: FormData) {
+  await save("extras", { backToTop: on(fd.get("backToTop")) });
 }

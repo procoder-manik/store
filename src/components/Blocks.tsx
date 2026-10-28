@@ -126,10 +126,13 @@ export function BlockView({ b, ctx }: { b: Block; ctx: BlockCtx }) {
     }
     case "pagehead":
       return (
-        <div className="border-b border-line bg-surface">
-          <div className="mx-auto max-w-6xl px-5 py-12 md:py-16">
-            <Heading as={b.level} className="font-display text-4xl font-semibold tracking-tight md:text-5xl">{b.title}</Heading>
-            {b.intro && <p className="mt-4 max-w-2xl text-base leading-relaxed text-muted md:text-lg">{b.intro}</p>}
+        <div className="relative overflow-hidden border-b border-line bg-gradient-to-br from-accent/10 via-surface to-surface">
+          <div aria-hidden className="absolute -right-16 -top-16 h-56 w-56 rounded-full bg-accent/10 blur-3xl" />
+          <div className="relative mx-auto max-w-6xl px-5 py-10 md:py-14">
+            <nav aria-label="Breadcrumb" className="flex items-center gap-2 text-xs text-muted"><Link href="/" className="hover:text-ink">Home</Link><span aria-hidden>/</span><span className="text-ink">{b.title}</span></nav>
+            <Heading as={b.level} className="mt-4 font-display text-3xl font-semibold tracking-tight md:text-5xl">{b.title}</Heading>
+            <span aria-hidden className="mt-4 block h-1 w-14 rounded-full bg-accent" />
+            {b.intro && <p className="mt-5 max-w-2xl text-base leading-relaxed text-muted md:text-lg">{b.intro}</p>}
           </div>
         </div>
       );

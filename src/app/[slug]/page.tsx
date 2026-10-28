@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { cache } from "react";
-import { Mail, MapPin, MessageCircle, Phone, Clock } from "lucide-react";
+import { Building2, Mail, MapPin, MessageCircle, Phone, Clock } from "lucide-react";
 import { getCatalog } from "@/lib/catalog";
 import { blocksSchema, type Block } from "@/lib/blocks";
 import { SITE_URL } from "@/lib/config";
@@ -57,19 +57,21 @@ export default async function Info({ params }: Params) {
   ] } : null;
 
   if (slug === "contact") {
+    // Sample details show until you add your own in Admin, Settings, Contact.
+    const wa = contact.whatsapp ? `0${contact.whatsapp.replace(/^88/, "")}` : "01XXXXXXXXX";
     const rows = [
-      contact.phone && { icon: Phone, label: "Call us", value: contact.phone, href: `tel:${contact.phone}` },
-      contact.whatsapp && { icon: MessageCircle, label: "WhatsApp", value: `0${contact.whatsapp.slice(3)}`, href: `https://wa.me/${contact.whatsapp}` },
-      contact.email && { icon: Mail, label: "Email", value: contact.email, href: `mailto:${contact.email}` },
-      contact.hours && { icon: Clock, label: "Hours", value: contact.hours, href: "" },
-      contact.address && { icon: MapPin, label: "Address", value: contact.address, href: "" },
-    ].filter(Boolean) as { icon: typeof Phone; label: string; value: string; href: string }[];
+      { icon: Building2, label: "Our shop", value: contact.businessName || brand.name, href: "" },
+      { icon: Phone, label: "Call us", value: [contact.phone || "01XXXXXXXXX", contact.phone2].filter(Boolean).join(" / "), href: `tel:${contact.phone || ""}` },
+      { icon: MessageCircle, label: "WhatsApp", value: wa, href: contact.whatsapp ? `https://wa.me/${contact.whatsapp}` : "" },
+      { icon: Mail, label: "Email", value: contact.email || "hello@yourstore.com", href: contact.email ? `mailto:${contact.email}` : "" },
+      { icon: Clock, label: "Opening hours", value: contact.hours || "Every day, 10am to 8pm", href: "" },
+      { icon: MapPin, label: "Address", value: contact.address || "Your shop address, Dhaka, Bangladesh", href: contact.mapUrl },
+    ] as { icon: typeof Phone; label: string; value: string; href: string }[];
     return (
       <InfoPage title={d.title} intro={d.intro} current="contact" wide>
         <div className="grid gap-8 lg:grid-cols-[1fr_320px]">
           <div className="rounded-3xl border border-line bg-surface p-6 md:p-8"><h2 className="mb-5 font-display text-xl font-semibold">Send us a message</h2><ContactForm /></div>
           <ul className="grid content-start gap-3">
-            {rows.length === 0 && <li className="rounded-2xl border border-line p-5 text-sm text-muted">Our contact details will appear here once they are added in Admin, Settings.</li>}
             {rows.map(({ icon: Icon, label, value, href }) => (
               <li key={label} className="flex items-start gap-3 rounded-2xl border border-line bg-surface p-4 text-sm">
                 <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-accent/10 text-accent"><Icon size={16} /></span>

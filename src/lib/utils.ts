@@ -6,7 +6,7 @@ export const IMAGE_HOSTS = ["images.pexels.com", "images.unsplash.com", "cdn.pix
 export function isAllowedImageUrl(u: string) {
   try {
     const x = new URL(u);
-    return x.protocol === "https:" && IMAGE_HOSTS.includes(x.hostname);
+    return x.protocol === "https:" && (IMAGE_HOSTS.includes(x.hostname) || x.hostname.endsWith(".supabase.co"));
   } catch {
     return false;
   }
