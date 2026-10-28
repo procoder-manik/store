@@ -34,9 +34,19 @@ export type StorefrontProps = {
   button?: string; link?: string; button2?: string; link2?: string; defaultView?: "3d" | "grid"; level?: HeadingLevel;
   /** Full width: one deep colour background that follows the product in front and fades as the rail moves. */
   full?: boolean;
+  /** Where the previous and next buttons sit. */
+  arrows?: "sides" | "off" | "top-right" | "bottom-left" | "bottom-center" | "bottom-right";
+  /** Where the category buttons sit along the bottom, or off. */
+  pills?: "off" | "left" | "center" | "right";
+  headAlign?: "left" | "center";
+  /** Background behind the heading text: none, the theme colour, a gradient of the theme, or your own colour. */
+  textBg?: "none" | "theme" | "gradient" | "custom";
+  textBgColor?: string;
 };
 
-export function Storefront({ products, categories, variant = "hanger", showHero = true, heading = "Pick it off the rail.", sub, button = "Shop everything", link = "/shop", button2 = "New in", link2 = "/shop?tag=new", defaultView = "3d", level = "h1", full = false }: StorefrontProps) {
+export function Storefront({ products, categories, variant = "hanger", showHero = true, heading = "Pick it off the rail.", sub, button = "Shop everything", link = "/shop", button2 = "New in", link2 = "/shop?tag=new", defaultView = "3d", level = "h1", full = false, arrows: arrowsIn, pills: pillsIn, headAlign = "left", textBg = "none", textBgColor = "#1f6f78" }: StorefrontProps) {
+  const arrowsAt = arrowsIn ?? (full ? "bottom-right" : "sides");
+  const pillsAt = pillsIn ?? (full ? "left" : "center");
   const { resolvedTheme } = useTheme();
   const [category, setCategory] = useState("all");
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -82,6 +92,18 @@ export function Storefront({ products, categories, variant = "hanger", showHero 
   });
 
   const arrow = `absolute top-1/2 z-10 hidden h-12 w-12 -translate-y-1/2 place-items-center rounded-full border shadow-lg backdrop-blur-xl transition md:grid ${full ? "border-white/25 bg-white/10 text-white hover:bg-white/20" : "border-line bg-surface/80 hover:bg-surface"}`;
+  const small = `grid h-10 w-10 shrink-0 place-items-center rounded-full border shadow-lg backdrop-blur-xl transition disabled:opacity-30 ${full ? "border-white/25 bg-white/10 text-white hover:bg-white/20" : "border-line bg-surface/80 hover:bg-surface"}`;
+  const arrowPair = view === "3d" && list.length > 1 && !selected && (
+    <span className="flex gap-2">
+      <button aria-label="Previous" onClick={() => go(-1)} disabled={idx === 0} className={small}><ChevronLeft size={18} /></button>
+      <button aria-label="Next" onClick={() => go(1)} disabled={idx >= list.length - 1} className={small}><ChevronRight size={18} /></button>
+    </span>
+  );
+  // In a full width section the controls line up with the header's content edge.
+  const gutter = full ? { both: "md:px-[var(--g)]", right: "right-3 md:right-[var(--g)]" } : { both: "md:px-4", right: "right-4" };
+  // Background behind the heading text. Text colour follows it so it always reads well.
+  const lum = (hex: string) => { const n = parseInt(hex.slice(1), 16); return (0.299 * (n >> 16) + 0.587 * ((n >> 8) & 255) + 0.114 * (n & 255)) / 255; };
+  const box = textBg === "none" ? undefined : textBg === "theme" ? { background: "var(--accent)", color: "var(--accent-ink)" } : textBg === "gradient" ? { background: "linear-gradient(135deg, var(--accent) 0%, color-mix(in srgb, var(--accent) 35%, #0b0f14) 100%)", color: "#ffffff" } : { background: textBgColor, color: lum(textBgColor) > 0.6 ? "#15171c" : "#ffffff" };
   const pills = (
     <div className={`no-scrollbar flex max-w-full items-center gap-1 overflow-x-auto rounded-full border p-1.5 shadow-[0_10px_40px_-10px_rgba(0,0,0,0.35)] backdrop-blur-xl ${full ? "border-white/20 bg-white/10" : "border-white/55 bg-white/30 dark:border-white/15 dark:bg-white/10"}`}>
       {[{ id: "all", label: "All products" }, ...categories].map((c) => (
@@ -109,19 +131,19 @@ export function Storefront({ products, categories, variant = "hanger", showHero 
     <>
       {showHero && (
         <section className={`mx-auto max-w-7xl pb-4 pt-7 md:pb-5 md:pt-10 ${full ? "px-3 md:px-8" : "px-5 md:px-10"}`}>
-          <div className="grid gap-5 md:grid-cols-[minmax(0,1fr)_auto] md:items-end">
-            <div className="max-w-2xl">
-              <p className={`hero-in flex items-center gap-2 text-xs font-medium uppercase tracking-[0.18em] ${full ? "text-white/70" : "text-muted"}`}>
-                <span className="h-px w-8 bg-accent" />{products.length} pieces in store
+          <div style={box} className={`${box ? "rounded-3xl px-6 py-8 md:px-10 md:py-10 [&_.text-muted]:text-current [&_.text-muted]:opacity-80" : ""} ${headAlign === "center" ? "grid justify-items-center gap-6 text-center" : "grid gap-5 md:grid-cols-[minmax(0,1fr)_auto] md:items-end"}`}>
+            <div className={headAlign === "center" ? "mx-auto max-w-3xl" : "max-w-2xl"}>
+              <p className={`hero-in flex items-center gap-2 text-xs font-medium uppercase tracking-[0.18em] ${headAlign === "center" ? "justify-center" : ""} ${box ? "opacity-80" : full ? "text-white/70" : "text-muted"}`}>
+                <span className="h-px w-8 bg-current opacity-60" />{products.length} pieces in store
               </p>
-              <Heading as={level} className="hero-in mt-3 font-display text-[clamp(2.2rem,5.2vw,3.8rem)] font-semibold leading-[0.98] tracking-tight">{heading}</Heading>
-              <p className={`hero-in-2 mt-3 max-w-md text-base leading-relaxed ${full ? "text-white/80" : "text-muted"}`}>{sub ?? "Clothing, bedding and home decor, delivered across Bangladesh. Drag the rail, then tap anything to see it up close."}</p>
-              <div className="hero-in-3 mt-5 flex flex-wrap items-center gap-3">
-                {button && link && <Link href={link} className={`rounded-pill px-7 py-3.5 text-sm font-semibold shadow-lg transition hover:-translate-y-0.5 ${full ? "bg-white text-black" : "bg-ink text-paper"}`}>{button}</Link>}
-                {button2 && link2 && <Link href={link2} className={`group inline-flex items-center gap-1.5 rounded-pill border px-6 py-3.5 text-sm font-medium transition hover:-translate-y-0.5 ${full ? "border-white/30 bg-white/10 text-white" : "border-line bg-surface"}`}>{button2}<span aria-hidden className="transition group-hover:translate-x-0.5">&rarr;</span></Link>}
+              <Heading as={level} className="hero-in mt-3 font-display text-[clamp(2rem,4.6vw,3.4rem)] font-semibold leading-[1.02] tracking-tight">{heading}</Heading>
+              <p className={`hero-in-2 mt-3 text-base leading-relaxed ${headAlign === "center" ? "mx-auto max-w-xl" : "max-w-md"} ${box ? "opacity-85" : full ? "text-white/80" : "text-muted"}`}>{sub ?? "Clothing, bedding and home decor, delivered across Bangladesh. Drag the rail, then tap anything to see it up close."}</p>
+              <div className={`hero-in-3 mt-5 flex flex-wrap items-center gap-3 ${headAlign === "center" ? "justify-center" : ""}`}>
+                {button && link && <Link href={link} className={`rounded-pill px-7 py-3.5 text-sm font-semibold shadow-lg transition hover:-translate-y-0.5 ${full || box ? "bg-white text-black" : "bg-ink text-paper"}`}>{button}</Link>}
+                {button2 && link2 && <Link href={link2} className={`group inline-flex items-center gap-1.5 rounded-pill border px-6 py-3.5 text-sm font-medium transition hover:-translate-y-0.5 ${full || box ? "border-current/30 bg-white/10" : "border-line bg-surface"}`}>{button2}<span aria-hidden className="transition group-hover:translate-x-0.5">&rarr;</span></Link>}
               </div>
             </div>
-            <ul className={`hero-in-3 hidden shrink-0 gap-5 border-l pl-7 text-sm md:grid ${full ? "border-white/20 [&_.text-muted]:text-white/70" : "border-line"}`}>
+            <ul className={`hero-in-3 text-sm ${headAlign === "center" ? "flex flex-wrap justify-center gap-x-8 gap-y-2" : "hidden shrink-0 gap-5 border-l pl-7 md:grid"} ${headAlign === "left" ? (box || full ? "border-current/25" : "border-line") : ""} ${box ? "[&_.text-muted]:opacity-80" : full ? "[&_.text-muted]:text-white/70" : ""}`}>
               <li><span className="block font-display text-xl font-semibold">Cash on delivery</span><span className="text-muted">Check it, then pay</span></li>
               <li><span className="block font-display text-xl font-semibold">All 64 districts</span><span className="text-muted">Inside and outside Dhaka</span></li>
             </ul>
@@ -160,14 +182,24 @@ export function Storefront({ products, categories, variant = "hanger", showHero 
               <CardCarousel layout={variant as "arc" | "coverflow" | "diagonal" | "stack" | "wave"} products={list} selectedId={selectedId} colorHex="#ffffff" onSelect={select} dark={full || resolvedTheme === "dark"} nudge={nudge} onIndex={setIdx} />
             ))}
             {list.length === 0 && <p className="absolute inset-0 grid place-items-center text-sm text-muted">No products here yet.</p>}
-            {view === "3d" && list.length > 1 && !selected && (
+            {view === "3d" && list.length > 1 && !selected && arrowsAt === "sides" && (
               <>
                 <button aria-label="Previous" onClick={() => go(-1)} disabled={idx === 0} className={`${arrow} ${full ? "left-[var(--g,1.25rem)]" : "left-5"} disabled:opacity-30`}><ChevronLeft size={20} /></button>
                 <button aria-label="Next" onClick={() => go(1)} disabled={idx >= list.length - 1} className={`${arrow} ${full ? "right-[var(--g,1.25rem)]" : "right-5"} disabled:opacity-30`}><ChevronRight size={20} /></button>
               </>
             )}
+            {arrowsAt === "top-right" && arrowPair && <div className={`absolute top-4 z-10 ${gutter.right}`}>{arrowPair}</div>}
             {full ? <div className="pointer-events-none absolute inset-0 z-20 mx-auto max-w-7xl text-ink [&>*]:pointer-events-auto">{panel}</div> : panel}
-            <div className={`absolute inset-x-0 bottom-4 z-10 flex justify-center px-3 transition-opacity duration-300 ${selected ? "pointer-events-none opacity-0" : "opacity-100"}`}>{pills}</div>
+            {(pillsAt !== "off" || (arrowsAt.startsWith("bottom") && arrowPair)) && (
+              <div className={`absolute inset-x-0 bottom-4 z-10 flex items-center gap-3 px-3 transition-opacity duration-300 ${gutter.both} ${selected ? "pointer-events-none opacity-0" : "opacity-100"}`}>
+                {(["left", "center", "right"] as const).map((slot) => (
+                  <div key={slot} className={`flex min-w-0 items-center gap-2 ${slot === "left" ? "flex-1 justify-start" : slot === "center" ? "flex-none justify-center" : "flex-1 justify-end"}`}>
+                    {pillsAt === slot && pills}
+                    {arrowsAt === `bottom-${slot}` && arrowPair}
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         </div>
       )}

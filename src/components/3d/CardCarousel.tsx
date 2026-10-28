@@ -255,7 +255,7 @@ function Rig({ products, selectedId, onSelect, nudge, onIndex, layout, dragged }
 export default function CardCarousel(props: Props) {
   const dragged = useRef(false);
   return (
-    <Canvas flat camera={{ position: [0, 0, 6.0], fov: 38 }} dpr={[1, 1.75]} gl={{ alpha: true, antialias: true, powerPreference: "high-performance" }} onPointerMissed={() => { if (!dragged.current) props.onSelect(null); }}>
+    <Canvas flat camera={{ position: [0, 0, 6.0], fov: 38 }} dpr={[1, typeof window !== "undefined" && window.innerWidth > 1300 ? 1.25 : 1.75]} gl={{ alpha: true, antialias: true, powerPreference: "high-performance" }} onPointerMissed={() => { if (!dragged.current) props.onSelect(null); }}>
       <ambientLight intensity={props.dark ? 0.75 : 1.15} />
       <directionalLight position={[-2, 3, 5]} intensity={props.dark ? 1.2 : 1.5} />
       <Rig {...props} dragged={dragged} />

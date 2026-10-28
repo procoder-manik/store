@@ -376,7 +376,7 @@ function Controls({ target, max, rot, locked, dragged }: { target: Ref<number>; 
       e.preventDefault();
       target.current = next;
       window.clearTimeout(timer);
-      timer = window.setTimeout(() => snap(), 160);
+      timer = window.setTimeout(() => snap(), 140);
     };
     el.addEventListener("pointerdown", pd);
     window.addEventListener("pointermove", pm);
@@ -431,7 +431,7 @@ function Track({ products, selectedId, colorHex, onSelect, nudge, onIndex, sh, d
     const g = group.current;
     if (!g) return;
     const base = locked.current || size.width < 700 ? 0 : START;
-    g.position.x = damp(g.position.x, target.current + base, 4, dt);
+    g.position.x = damp(g.position.x, target.current + base, 3.2, dt);
     const idx = locked.current ? lastSel.current : clamp(Math.round(-(g.position.x - base) / SPACING), 0, Math.max(0, products.length - 1));
     if (idx !== last.current) { last.current = idx; onIndex(idx); }
   });
@@ -494,7 +494,7 @@ function Scene({ dark, dragged, ...rest }: Props & { dragged: Ref<boolean> }) {
 export default function HangerRail(props: Props) {
   const dragged = useRef(false);
   return (
-    <Canvas shadows flat camera={{ position: [0, 0.35, 5.4], fov: 38 }} dpr={[1, 1.75]} gl={{ alpha: true, antialias: true, powerPreference: "high-performance" }} onPointerMissed={() => { if (!dragged.current) props.onSelect(null); }}>
+    <Canvas shadows flat camera={{ position: [0, 0.35, 5.4], fov: 38 }} dpr={[1, typeof window !== "undefined" && window.innerWidth > 1300 ? 1.25 : 1.75]} gl={{ alpha: true, antialias: true, powerPreference: "high-performance" }} onPointerMissed={() => { if (!dragged.current) props.onSelect(null); }}>
       <Scene {...props} dragged={dragged} />
     </Canvas>
   );

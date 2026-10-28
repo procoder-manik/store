@@ -106,7 +106,7 @@ export function BlockView({ b, ctx }: { b: Block; ctx: BlockCtx }) {
     case "rail3d":
     case "rail3dfull": {
       const list = pick(products, b.source, b.category, b.tag);
-      return <Storefront products={list.length ? list : products} categories={categories} variant={b.style} showHero={b.showHero} heading={b.heading} sub={b.sub || undefined} button={b.button} link={b.link} button2={b.button2} link2={b.link2} defaultView={b.defaultView} level={b.level} full={b.type === "rail3dfull"} />;
+      return <Storefront products={list.length ? list : products} categories={categories} variant={b.style} showHero={b.showHero} heading={b.heading} sub={b.sub || undefined} button={b.button} link={b.link} button2={b.button2} link2={b.link2} defaultView={b.defaultView} level={b.level} full={b.type === "rail3dfull"} arrows={b.arrows} pills={b.pills} headAlign={b.headAlign} textBg={b.textBg} textBgColor={b.textBgColor} />;
     }
     case "slider":
     case "sliderfull":

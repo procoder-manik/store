@@ -68,7 +68,7 @@ export async function deleteTemplate(id: string) {
 type Tpl = { id: string; name: string; subject: string; heading: string; body: string; button_text: string | null; button_url: string | null; image_url: string | null; blocks?: unknown };
 
 /** The saved design, or a plain older template turned into blocks. */
-export function designOf(t: Tpl): EmailDesign {
+function designOf(t: Tpl): EmailDesign {
   const p = emailDesignSchema.safeParse(t.blocks);
   return p.success ? p.data : legacyToDesign(t);
 }
