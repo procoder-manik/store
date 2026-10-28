@@ -5,6 +5,7 @@ import { saveLayoutStyle } from "@/app/admin/header-footer/actions";
 import { FOOTER_STYLES, HEADER_STYLES, type FooterStyleCfg, type FooterStyleId, type HeaderStyleCfg, type HeaderStyleId } from "@/lib/layout-styles";
 import type { Cat } from "@/lib/catalog";
 import type { Settings } from "@/lib/settings";
+import { InfoTip } from "./InfoTip";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 
@@ -52,7 +53,7 @@ export function LayoutStylePicker({ header, footer, brand, links, footerData, co
   return (
     <form onSubmit={(e) => { e.preventDefault(); setMsg(null); start(async () => { const r = await saveLayoutStyle({ header: h, footer: f }); setMsg(r.ok ? { ok: true, text: "Saved. Your store now uses this header and footer." } : { ok: false, text: r.error ?? "Could not save." }); }); }} className="grid max-w-5xl gap-10">
       <section className="grid gap-4">
-        <h2 className="font-display text-lg font-semibold">Header</h2>
+        <h2 className="font-display text-lg font-semibold">Header<InfoTip text="The bar at the top of every page with your logo, menu, search and cart. Pick the design that fits how many products and categories you have." /></h2>
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {HEADER_STYLES.map((s) => (
             <button key={s.id} type="button" aria-pressed={h.style === s.id} onClick={() => sh({ style: s.id })} className={card(h.style === s.id)}>
@@ -62,13 +63,13 @@ export function LayoutStylePicker({ header, footer, brand, links, footerData, co
           ))}
         </div>
         <div className="grid gap-3 rounded-xl border border-line bg-surface p-4 sm:grid-cols-2">
-          <Toggle on={h.sticky} onChange={(v) => sh({ sticky: v })}>Stay at the top while scrolling</Toggle>
+          <Toggle on={h.sticky} onChange={(v) => sh({ sticky: v })}>Stay at the top while scrolling<InfoTip text="Keeps the menu and cart in reach while visitors scroll, which makes buying easier." /></Toggle>
           <Toggle on={h.showSearch} onChange={(v) => sh({ showSearch: v })}>Show search</Toggle>
           <Toggle on={h.showAccount} onChange={(v) => sh({ showAccount: v })}>Show account icon</Toggle>
           <Toggle on={h.showWishlist} onChange={(v) => sh({ showWishlist: v })}>Show wishlist icon</Toggle>
           <Toggle on={h.showThemeToggle} onChange={(v) => sh({ showThemeToggle: v })}>Show light and dark button</Toggle>
           <Toggle on={h.uppercaseMenu} onChange={(v) => sh({ uppercaseMenu: v })}>Menu in CAPITAL LETTERS</Toggle>
-          <Toggle on={h.topBar.enabled} onChange={(v) => sh({ topBar: { ...h.topBar, enabled: v } })}>Show a thin strip above the header</Toggle>
+          <Toggle on={h.topBar.enabled} onChange={(v) => sh({ topBar: { ...h.topBar, enabled: v } })}>Show a thin strip above the header<InfoTip text="A small strip for a short message, your phone number and a Track order link." /></Toggle>
           <div><label className={label}>Words in that strip (your phone number is added by itself)</label><input className={input} maxLength={120} value={h.topBar.text} onChange={(e) => sh({ topBar: { ...h.topBar, text: e.target.value } })} /></div>
           <div><label className={label}>Header button text (optional)</label><input className={input} maxLength={24} placeholder="Shop now" value={h.cta.label} onChange={(e) => sh({ cta: { ...h.cta, label: e.target.value } })} /></div>
           <div><label className={label}>Header button link</label><input className={input} placeholder="/shop" value={h.cta.href} onChange={(e) => sh({ cta: { ...h.cta, href: e.target.value } })} /></div>
@@ -82,7 +83,7 @@ export function LayoutStylePicker({ header, footer, brand, links, footerData, co
       </section>
 
       <section className="grid gap-4">
-        <h2 className="font-display text-lg font-semibold">Footer</h2>
+        <h2 className="font-display text-lg font-semibold">Footer<InfoTip text="The area at the bottom of every page. It builds trust with contact details, policies and the payment methods you accept." /></h2>
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {FOOTER_STYLES.map((s) => (
             <button key={s.id} type="button" aria-pressed={f.style === s.id} onClick={() => sf({ style: s.id })} className={card(f.style === s.id)}>
@@ -92,7 +93,7 @@ export function LayoutStylePicker({ header, footer, brand, links, footerData, co
           ))}
         </div>
         <div className="grid gap-3 rounded-xl border border-line bg-surface p-4 sm:grid-cols-2">
-          <Toggle on={f.showPayments} onChange={(v) => sf({ showPayments: v })}>Show the payment methods you accept</Toggle>
+          <Toggle on={f.showPayments} onChange={(v) => sf({ showPayments: v })}>Show the payment methods you accept<InfoTip text="Shows the payment methods you turned on, so buyers feel safe before checkout." /></Toggle>
           <Toggle on={f.showTrust} onChange={(v) => sf({ showTrust: v })}>Show the delivery promises strip (classic and dark)</Toggle>
           {(["facebook", "instagram", "youtube", "tiktok"] as const).map((k) => (
             <div key={k}><label className={`${label} capitalize`}>{k} link (optional)</label><input className={input} placeholder="https://" value={f.social[k]} onChange={(e) => sf({ social: { ...f.social, [k]: e.target.value } })} /></div>

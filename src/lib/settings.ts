@@ -16,7 +16,7 @@ export type Settings = {
   brand: { name: string; tagline: string; logo: string };
   header: { links: { label: string; href: string }[] };
   footer: { about: string; columns: { title: string; links: { label: string; href: string }[] }[]; copyright: string; newsletter: boolean };
-  extras: { backToTop: boolean };
+  extras: { backToTop: boolean; catalog: boolean };
   payments: PaymentsSettings;
   headerStyle: HeaderStyleCfg;
   footerStyle: FooterStyleCfg;
@@ -34,7 +34,7 @@ export const DEFAULTS: Settings = {
   brand: { name: BRAND.name, tagline: BRAND.tagline, logo: "" },
   header: { links: [{ label: "Shop", href: "/shop" }] },
   footer: { about: "", columns: [], copyright: "", newsletter: true },
-  extras: { backToTop: true },
+  extras: { backToTop: true, catalog: true },
   payments: DEFAULT_PAYMENTS,
   headerStyle: DEFAULT_HEADER_STYLE,
   footerStyle: DEFAULT_FOOTER_STYLE,

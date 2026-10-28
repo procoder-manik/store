@@ -172,3 +172,8 @@ body { @apply bg-paper font-body text-ink antialiased; }
 @media (min-width: 768px) { [data-hsize="custom"] [data-heading] { font-size: var(--h-size); } }
 [data-hweight] [data-heading] { font-weight: var(--h-weight); }
 [data-hcase] [data-heading] { text-transform: var(--h-case); }
+
+/* "Full width" sections: same design, edge to edge. "tight" also removes the side padding and rounded corners. */
+[data-fullbleed] > section { max-width: none; }
+[data-fullbleed="tight"] > section { padding-left: 0; padding-right: 0; padding-top: 0; padding-bottom: 0; }
+[data-fullbleed="tight"] .rounded-3xl { border-radius: 0; }

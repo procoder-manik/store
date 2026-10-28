@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { InfoTip } from "./InfoTip";
 import { savePayments } from "@/app/admin/payments/actions";
 import { CATALOG, type CatalogItem, type MethodCfg, type MethodGroup, type MethodId, type PaymentsSettings } from "@/lib/payments";
 
@@ -47,13 +48,13 @@ export function PaymentsEditor({ initial, sslReady }: { initial: PaymentsSetting
         {c.manual && c.group === "mobile" && (
           <div className="grid gap-3 sm:grid-cols-[1fr_160px]">
             <div><label className={label}>{c.name} number customers send money to</label><input className={input} inputMode="tel" placeholder="01712345678" value={cfg.account} onChange={(e) => set(c.id, { account: e.target.value })} /></div>
-            <div><label className={label}>Account type</label><select className={input} value={cfg.accountType} onChange={(e) => set(c.id, { accountType: e.target.value as MethodCfg["accountType"] })}><option value="">Not shown</option><option value="personal">Personal</option><option value="agent">Agent</option><option value="merchant">Merchant</option></select></div>
+            <div><label className={label}>Account type<InfoTip text="Personal, Agent or Merchant, as set up in the wallet app. Customers see it so they use the right Send Money option." /></label><select className={input} value={cfg.accountType} onChange={(e) => set(c.id, { accountType: e.target.value as MethodCfg["accountType"] })}><option value="">Not shown</option><option value="personal">Personal</option><option value="agent">Agent</option><option value="merchant">Merchant</option></select></div>
           </div>
         )}
         {c.manual && c.group === "bank" && (
           <div><label className={label}>Bank details customers see (bank, account name, account number, branch)</label><textarea className={input} rows={4} maxLength={400} placeholder={"Bank: \nAccount name: \nAccount number: \nBranch: "} value={cfg.account} onChange={(e) => set(c.id, { account: e.target.value })} /></div>
         )}
-        {c.manual && <div><label className={label}>Extra words for the customer (optional)</label><input className={input} maxLength={200} placeholder={c.group === "mobile" ? "Use Send Money, not Payment." : "Use your order number as the reference."} value={cfg.instructions} onChange={(e) => set(c.id, { instructions: e.target.value })} /></div>}
+        {c.manual && <div><label className={label}>Extra words for the customer (optional)<InfoTip text="A short instruction shown at checkout, like Use Send Money, not Payment. It prevents wrong payments." /></label><input className={input} maxLength={200} placeholder={c.group === "mobile" ? "Use Send Money, not Payment." : "Use your order number as the reference."} value={cfg.instructions} onChange={(e) => set(c.id, { instructions: e.target.value })} /></div>}
         {c.id === "sslcommerz" && !sslReady && <p className="text-xs text-muted">Customers will not see SSLCommerz until SSLCOMMERZ_STORE_ID and SSLCOMMERZ_STORE_PASSWORD are set where the site is hosted. Those stay on the server on purpose, so they are never stored in these settings.</p>}
       </div>
     );
@@ -63,7 +64,7 @@ export function PaymentsEditor({ initial, sslReady }: { initial: PaymentsSetting
     <form onSubmit={(e) => { e.preventDefault(); setMsg(null); start(async () => { const r = await savePayments({ methods: m }); setMsg(r.ok ? { ok: true, text: "Saved. Checkout is updated." } : { ok: false, text: r.error ?? "Could not save." }); }); }} className="grid max-w-3xl gap-8">
       {GROUPS.map((g) => (
         <section key={g.id} className="grid gap-3">
-          <div><h2 className="font-display text-base font-semibold">{g.title}</h2>{g.note && <p className="mt-1 text-xs text-muted">{g.note}</p>}</div>
+          <div><h2 className="font-display text-base font-semibold">{g.title}<InfoTip text={g.note || (g.id === "cash" ? "The customer pays the delivery rider in cash. Many customers in Bangladesh prefer it, so keep it on unless you want only prepaid orders." : "Customers send money to your bank account and give you the transfer reference. You check your bank before sending the order.")} /></h2>{g.note && <p className="mt-1 text-xs text-muted">{g.note}</p>}</div>
           {CATALOG.filter((c) => c.group === g.id).map(card)}
         </section>
       ))}

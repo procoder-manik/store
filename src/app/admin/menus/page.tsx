@@ -12,7 +12,7 @@ export default async function Menus() {
   ]);
   const s = mergeSettings((data ?? []) as { key: string; value: unknown }[]);
   const suggestions = [
-    { label: "Shop", href: "/shop" }, { label: "Track your order", href: "/track" }, { label: "My account", href: "/account" }, { label: "Wishlist", href: "/wishlist" },
+    { label: "Shop", href: "/shop" }, { label: "Catalog", href: "/catalog" }, { label: "Track your order", href: "/track" }, { label: "My account", href: "/account" }, { label: "Wishlist", href: "/wishlist" },
     ...categories.map((c) => ({ label: c.label, href: `/shop?cat=${c.id}` })),
     ...(pages ?? []).map((p) => ({ label: p.title as string, href: `/p/${p.slug}` })),
   ];

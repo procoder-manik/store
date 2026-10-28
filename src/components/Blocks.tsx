@@ -4,6 +4,8 @@ import type { Cat } from "@/lib/catalog";
 import type { Banner } from "@/lib/banners";
 import type { Block } from "@/lib/blocks";
 import { formatPrice } from "@/lib/config";
+import { Clock, CreditCard, Gift, Headset, RefreshCcw, ShieldCheck, Star, Truck } from "lucide-react";
+import { HtmlBlock } from "./HtmlBlock";
 import { Countdown } from "./Countdown";
 import { CountUp } from "./CountUp";
 import { Heading } from "./Heading";
@@ -29,7 +31,8 @@ function pick(products: Product[], source: "all" | "category" | "tag", category:
 export function BlockView({ b, ctx }: { b: Block; ctx: BlockCtx }) {
   const { products, categories } = ctx;
   switch (b.type) {
-    case "hero": {
+    case "hero":
+    case "herofull": {
       if (b.variant === "aurora") {
         return (
           <section className={wrap}>
@@ -95,15 +98,18 @@ export function BlockView({ b, ctx }: { b: Block; ctx: BlockCtx }) {
         </section>
       );
     }
-    case "showcase": {
+    case "showcase":
+    case "showcasefull": {
       const list = pick(products, b.source, b.category, b.tag);
-      return <ProductHero products={list.length ? list : products} categories={categories} eyebrow={b.eyebrow} heading={b.heading} sub={b.sub} button={b.button} tagline={b.tagline} level={b.level} autoplay={b.autoplay} fit={b.fit} showNav={b.showNav} social={{ facebook: b.facebook, instagram: b.instagram, youtube: b.youtube, whatsapp: b.whatsapp }} />;
+      return <ProductHero products={list.length ? list : products} categories={categories} eyebrow={b.eyebrow} heading={b.heading} sub={b.sub} button={b.button} tagline={b.tagline} level={b.level} full={b.type === "showcasefull"} autoplay={b.autoplay} fit={b.fit} showNav={b.showNav} social={{ facebook: b.facebook, instagram: b.instagram, youtube: b.youtube, whatsapp: b.whatsapp }} />;
     }
-    case "rail3d": {
+    case "rail3d":
+    case "rail3dfull": {
       const list = pick(products, b.source, b.category, b.tag);
       return <Storefront products={list.length ? list : products} categories={categories} variant={b.style} showHero={b.showHero} heading={b.heading} sub={b.sub || undefined} button={b.button} link={b.link} button2={b.button2} link2={b.link2} defaultView={b.defaultView} level={b.level} />;
     }
     case "slider":
+    case "sliderfull":
       return <SliderBlock slides={b.slides} style={b.style} level={b.level} />;
     case "spotlight": {
       const p = products.find((x) => x.id === b.productId) ?? products[0];
@@ -212,7 +218,8 @@ export function BlockView({ b, ctx }: { b: Block; ctx: BlockCtx }) {
         </section>
       );
     }
-    case "banner": {
+    case "banner":
+    case "bannerfull": {
       const inner = (
         <>
           {b.image ? <img src={b.image} alt="" className="absolute inset-0 h-full w-full object-cover" /> : <div className="absolute inset-0 bg-gradient-to-br from-accent to-ink" />}
@@ -257,13 +264,42 @@ export function BlockView({ b, ctx }: { b: Block; ctx: BlockCtx }) {
     case "cta":
       return (
         <section className={wrap}>
-          <div className="rounded-3xl bg-ink p-8 text-center text-paper md:p-14">
-            <Heading as={b.level} className="font-display text-3xl font-semibold md:text-4xl">{b.heading}</Heading>
+          <div className="relative isolate overflow-hidden rounded-3xl bg-ink px-6 py-12 text-center text-white md:px-14 md:py-16">
+            <div aria-hidden className="animate-aurora-a absolute -left-16 -top-20 -z-10 h-72 w-72 rounded-full bg-accent opacity-60 blur-3xl" />
+            <div aria-hidden className="animate-aurora-b absolute -bottom-24 -right-10 -z-10 h-80 w-80 rounded-full bg-accent opacity-40 blur-3xl" />
+            <Heading as={b.level} className="font-display text-3xl font-semibold md:text-5xl">{b.heading}</Heading>
             {b.text && <p className="mx-auto mt-3 max-w-xl opacity-80">{b.text}</p>}
-            {b.button && b.link && <Link href={b.link} className="mt-6 inline-block rounded-pill bg-accent px-7 py-3 text-sm font-semibold text-accent-ink">{b.button}</Link>}
+            {b.button && b.link && <Link href={b.link} className="shine mt-8 inline-block rounded-pill bg-white px-8 py-3.5 text-sm font-semibold text-black transition hover:-translate-y-0.5">{b.button}</Link>}
           </div>
         </section>
       );
+    case "split":
+      return (
+        <section className={wrap}>
+          <div className={`grid items-center gap-8 md:grid-cols-2 md:gap-14 ${b.imageSide === "right" ? "md:[&>*:first-child]:order-2" : ""}`}>
+            <div className="overflow-hidden rounded-3xl border border-line bg-surface">{b.image ? <img src={b.image} alt="" loading="lazy" className="aspect-[4/3] w-full object-cover" /> : <div className="aspect-[4/3] bg-gradient-to-br from-accent/25 to-paper" />}</div>
+            <div>
+              {b.heading && <Heading as={b.level} className="font-display text-3xl font-semibold tracking-tight md:text-4xl">{b.heading}</Heading>}
+              <div className="mt-4 grid gap-3 text-[15px] leading-relaxed text-muted md:text-base"><Rich text={b.body} /></div>
+              {b.button && b.link && <Link href={b.link} className="mt-6 inline-block rounded-pill bg-accent px-7 py-3.5 text-sm font-semibold text-accent-ink transition hover:-translate-y-0.5">{b.button}</Link>}
+            </div>
+          </div>
+        </section>
+      );
+    case "trust": {
+      const ICONS = { truck: Truck, shield: ShieldCheck, refresh: RefreshCcw, headset: Headset, gift: Gift, card: CreditCard, clock: Clock, star: Star };
+      return (
+        <section className={wrap}>
+          <ul className="grid gap-5 rounded-3xl border border-line bg-surface p-6 sm:grid-cols-2 lg:grid-cols-4">
+            {b.items.map((x, i) => { const I = ICONS[x.icon]; return (
+              <li key={i} className="flex items-start gap-3"><span className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-accent/10 text-accent"><I size={20} /></span><span><span className="block text-sm font-semibold">{x.title}</span><span className="text-sm text-muted">{x.text}</span></span></li>
+            ); })}
+          </ul>
+        </section>
+      );
+    }
+    case "html":
+      return <HtmlBlock code={b.code} />;
     case "marquee": {
       const speed = { slow: "46s", normal: "28s", fast: "14s" }[b.speed];
       const look = { plain: "border-y border-line bg-surface text-ink", accent: "bg-accent text-accent-ink", dark: "bg-ink text-paper" }[b.look];
@@ -364,9 +400,15 @@ export function BlockRenderer({ blocks, ...ctx }: { blocks: Block[] } & BlockCtx
   return (
     <>
       {blocks.map((b, i) => {
-        const el = <TypoScope b={b}><BlockView b={b} ctx={ctx} /></TypoScope>;
+        const bleed = b.type === "herofull" || b.type === "sliderfull" || b.type === "bannerfull" ? "tight" : b.type === "rail3dfull" ? "wide" : undefined;
+        const view = <TypoScope b={b}><BlockView b={b} ctx={ctx} /></TypoScope>;
+        // Full width versions: the same section with the page's side margins and rounded corners removed (see globals.css).
+        const full = bleed ? <div data-fullbleed={bleed}>{view}</div> : view;
+        // Space above and below, set per section in the builder. Sections with none set get no extra wrapper.
+        const sp = { paddingTop: b.pt, paddingBottom: b.pb, marginTop: b.mt, marginBottom: b.mb };
+        const el = Object.values(sp).some((v) => v !== undefined) ? <div style={sp}>{full}</div> : full;
         // The first section is already on screen, and the ready-made 3D slider handles its own entrance.
-        if (b.anim === "none" || i === 0 || b.type === "rail3d") return <div key={b.id}>{el}</div>;
+        if (b.anim === "none" || i === 0 || b.type === "rail3d" || b.type === "rail3dfull") return <div key={b.id}>{el}</div>;
         return <Reveal key={b.id} anim={b.anim}>{el}</Reveal>;
       })}
     </>

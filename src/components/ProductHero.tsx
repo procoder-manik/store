@@ -14,7 +14,7 @@ import { ProductArt } from "./ProductArt";
 export type HeroSocial = { facebook?: string; instagram?: string; youtube?: string; whatsapp?: string };
 type Props = {
   products: Product[]; categories: Cat[];
-  eyebrow?: string; heading: string; sub: string; button: string; tagline: string; level?: HeadingLevel;
+  eyebrow?: string; heading: string; sub: string; button: string; tagline: string; level?: HeadingLevel; full?: boolean;
   social?: HeroSocial; autoplay?: number; fit?: "cutout" | "card"; showNav?: boolean;
 };
 
@@ -34,7 +34,7 @@ const POSES: Record<string, { x: number; y: number; s: number; o: number; blur: 
   "-2": { x: -18, y: -26, s: 0.26, o: 0, blur: 4, z: 1 },
 };
 
-export function ProductHero({ products, categories, eyebrow = "", heading, sub, button, tagline, level = "h1", social = {}, autoplay = 6, fit = "cutout", showNav = true }: Props) {
+export function ProductHero({ products, categories, eyebrow = "", heading, sub, button, tagline, level = "h1", full = false, social = {}, autoplay = 6, fit = "cutout", showNav = true }: Props) {
   const { add, setOpen, items } = useCart();
   const [cat, setCat] = useState("all");
   const [cur, setCur] = useState(0);
@@ -107,12 +107,12 @@ export function ProductHero({ products, categories, eyebrow = "", heading, sub, 
   const circle = "grid h-9 w-9 place-items-center rounded-full border border-white/20 bg-white/10 backdrop-blur transition hover:bg-white/25";
 
   return (
-    <section aria-roledescription="carousel" aria-label="Featured products" className="mx-auto max-w-7xl px-3 py-4 md:px-8 md:py-6">
+    <section aria-roledescription="carousel" aria-label="Featured products" className={full ? "w-full" : "mx-auto max-w-7xl px-3 py-4 md:px-8 md:py-6"}>
       <div
         ref={stage}
         onKeyDown={(e) => { if (e.key === "ArrowRight") go(cur + 1); if (e.key === "ArrowLeft") go(cur - 1); }}
-        className="relative isolate flex flex-col gap-5 overflow-hidden rounded-3xl p-5 text-white shadow-2xl md:block md:h-[min(80dvh,700px)] md:min-h-[600px] md:gap-0 md:p-0"
-        style={{ background: deep(color?.hex, 0.8) }}
+        className={`relative isolate flex flex-col gap-5 overflow-hidden ${full ? "px-3 py-5" : "p-5"} text-white md:block md:min-h-[600px] md:gap-0 md:p-0 ${full ? "md:h-[min(92dvh,860px)]" : "rounded-3xl shadow-2xl md:h-[min(80dvh,700px)]"}`}
+        style={{ background: deep(color?.hex, 0.8), ...(full ? ({ "--g": "max(2rem, calc((100% - 80rem) / 2 + 2rem))" } as React.CSSProperties) : {}) }}
       >
         {/* One background layer per product, so the whole card changes colour with a soft fade. */}
         {list.map((q, i) => (
@@ -120,7 +120,7 @@ export function ProductHero({ products, categories, eyebrow = "", heading, sub, 
         ))}
 
         {/* Top row */}
-        <div className="relative z-30 order-1 flex items-center justify-between gap-3 md:absolute md:inset-x-[4%] md:top-[5%]">
+        <div className={`relative z-30 order-1 flex items-center justify-between gap-3 md:absolute md:top-[5%] ${full ? "md:left-[var(--g)] md:right-[var(--g)]" : "md:inset-x-[4%]"}`}>
           <span className="hidden min-w-24 text-xs font-medium uppercase tracking-[0.2em] text-white/70 md:block">{eyebrow}</span>
           {showNav && (
             <nav aria-label="Product groups" className="no-scrollbar flex max-w-full items-center gap-1 overflow-x-auto rounded-full border border-white/15 bg-white/10 p-1.5 backdrop-blur-xl">
@@ -136,7 +136,7 @@ export function ProductHero({ products, categories, eyebrow = "", heading, sub, 
         </div>
 
         {/* Text on the left */}
-        <div className="relative z-30 order-2 md:absolute md:left-[4.5%] md:top-[21%] md:w-[33%]">
+        <div className={`relative z-30 order-2 md:absolute md:top-[21%] ${full ? "md:left-[var(--g)] md:w-[min(33%,30rem)]" : "md:left-[4.5%] md:w-[33%]"}`}>
           <div className="mb-5 hidden gap-2 md:flex">
             <button aria-label="Previous product" onClick={() => go(cur - 1)} className={circle}><ChevronLeft size={16} /></button>
             <button aria-label="Next product" onClick={() => go(cur + 1)} className={circle}><ChevronRight size={16} /></button>
@@ -150,7 +150,7 @@ export function ProductHero({ products, categories, eyebrow = "", heading, sub, 
 
         {/* The products */}
         <div
-          className="relative z-10 order-3 h-[330px] touch-pan-y md:absolute md:inset-0 md:h-auto"
+          className={`relative z-10 order-3 h-[330px] touch-pan-y md:absolute md:h-auto ${full ? "md:inset-y-0 md:left-[var(--g)] md:right-[var(--g)]" : "md:inset-0"}`}
           onPointerDown={(e) => { touch.current = e.clientX; }}
           onPointerUp={(e) => { if (touch.current !== null && Math.abs(e.clientX - touch.current) > 50) go(cur + (e.clientX < touch.current ? 1 : -1)); touch.current = null; }}
         >
@@ -183,7 +183,7 @@ export function ProductHero({ products, categories, eyebrow = "", heading, sub, 
         </div>
 
         {/* Price and size on the right */}
-        <div key={p.id} className="hero-fade relative z-30 order-4 md:absolute md:right-[4.5%] md:top-[23%] md:text-right">
+        <div key={p.id} className={`hero-fade relative z-30 order-4 md:absolute md:top-[23%] md:text-right ${full ? "md:right-[var(--g)]" : "md:right-[4.5%]"}`}>
           <p className="max-w-[17rem] font-display text-xl font-semibold leading-snug md:ml-auto md:text-2xl">{p.name}</p>
           <p className="mt-1.5 font-display text-4xl font-semibold tracking-tight md:text-[2.6rem]">{formatPrice(p.basePrice)}</p>
           {p.compareAt && p.compareAt > p.basePrice && <p className="font-display text-2xl text-white/80 line-through decoration-2">{formatPrice(p.compareAt)}</p>}
@@ -207,7 +207,7 @@ export function ProductHero({ products, categories, eyebrow = "", heading, sub, 
         </div>
 
         {/* Bottom: social links and the line under the product */}
-        <div className="relative z-30 order-5 flex items-end justify-between gap-4 md:absolute md:inset-x-[4.5%] md:bottom-[5.5%]">
+        <div className={`relative z-30 order-5 flex items-end justify-between gap-4 md:absolute md:bottom-[5.5%] ${full ? "md:left-[var(--g)] md:right-[var(--g)]" : "md:inset-x-[4.5%]"}`}>
           <div className="flex min-w-24 gap-3">
             {socials.map(({ href, Icon, label }) => <a key={label} href={href} target="_blank" rel="noopener noreferrer" aria-label={label} className="text-white/75 transition hover:text-white"><Icon size={16} /></a>)}
           </div>

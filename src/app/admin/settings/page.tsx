@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { mergeSettings } from "@/lib/settings";
 import { PALETTES } from "@/lib/palettes";
 import { THEMES } from "@/lib/themes";
+import { InfoTip } from "@/components/admin/InfoTip";
 import { ImageField } from "@/components/admin/ImageField";
 import { saveAnnouncement, saveBump, saveAppearance, saveChat, saveContact, saveExtras, savePopup, saveProof, saveTracking } from "./actions";
 
@@ -24,7 +25,7 @@ export default async function Settings() {
       <h1 className="font-display text-2xl font-semibold">Settings</h1>
       <div className="mt-6 grid max-w-3xl gap-5">
         <form action={saveAppearance} className={`${card} grid gap-5`}>
-          <div><h2 className="font-display text-base font-semibold">Theme</h2><p className="mt-1 text-xs text-muted">A theme changes everything at once: colors, backgrounds, text, heading and body fonts, and how rounded buttons and cards are. Dark mode has its own matching colors.</p></div>
+          <div><h2 className="font-display text-base font-semibold">Theme<InfoTip text="Changes the colors, fonts and corner shapes of the whole store at once, so it looks like one designed brand." /></h2><p className="mt-1 text-xs text-muted">A theme changes everything at once: colors, backgrounds, text, heading and body fonts, and how rounded buttons and cards are. Dark mode has its own matching colors.</p></div>
           <div className="grid gap-3 sm:grid-cols-2">
             {THEMES.map((t) => (
               <label key={t.id} className="group relative cursor-pointer overflow-hidden rounded-xl border border-line has-[:checked]:border-ink has-[:checked]:ring-2 has-[:checked]:ring-ink/20">
@@ -76,7 +77,7 @@ export default async function Settings() {
         </form>
 
         <form action={saveAnnouncement} className={`${card} grid gap-4`}>
-          <h2 className="font-display text-base font-semibold">Announcement bar</h2>
+          <h2 className="font-display text-base font-semibold">Announcement bar<InfoTip text="The thin banner at the very top, for a delivery promise or a sale. Visitors can close it with the X." /></h2>
           <label className="flex items-center gap-2 text-sm"><input type="checkbox" name="enabled" defaultChecked={s.announcement.enabled} /> Show the bar at the top of every page</label>
           <div><label className={label}>Message</label><input name="text" maxLength={160} defaultValue={s.announcement.text} className={input} /></div>
           <div><label className={label}>Link (optional)</label><input name="link" maxLength={200} defaultValue={s.announcement.link} placeholder="/shop" className={input} /></div>
@@ -84,7 +85,7 @@ export default async function Settings() {
         </form>
 
         <form action={saveTracking} className={`${card} grid gap-4`}>
-          <h2 className="font-display text-base font-semibold">Tracking and analytics</h2>
+          <h2 className="font-display text-base font-semibold">Tracking and analytics<InfoTip text="Connects Facebook Pixel, Google Analytics and Search Console so you can see visitors, run ads and measure sales." /></h2>
           <p className="text-xs text-muted">Leave a field empty to turn it off. If you add a Tag Manager ID, GA4 is loaded through it, so do not add GA4 again inside the container. Add to cart and purchase events are sent automatically.</p>
           <div className="grid gap-4 sm:grid-cols-2">
             <div><label className={label}>Facebook Pixel ID</label><input name="fbPixel" defaultValue={s.tracking.fbPixel} placeholder="1234567890" className={input} /></div>
@@ -97,7 +98,7 @@ export default async function Settings() {
         </form>
 
         <form action={savePopup} className={`${card} grid gap-4`}>
-          <h2 className="font-display text-base font-semibold">Promo popup</h2>
+          <h2 className="font-display text-base font-semibold">Promo popup<InfoTip text="A popup that offers a coupon, once per visit. It turns visitors into buyers or email subscribers." /></h2>
           <label className="flex items-center gap-2 text-sm"><input type="checkbox" name="enabled" defaultChecked={s.popup.enabled} /> Show the popup to visitors (once per visit)</label>
           <div><label className={label}>Title</label><input name="title" required maxLength={80} defaultValue={s.popup.title} className={input} /></div>
           <div><label className={label}>Text</label><input name="text" maxLength={240} defaultValue={s.popup.text} className={input} /></div>
@@ -111,7 +112,7 @@ export default async function Settings() {
         </form>
 
         <form action={saveContact} className={`${card} grid gap-4`}>
-          <h2 className="font-display text-base font-semibold">Contact numbers</h2>
+          <h2 className="font-display text-base font-semibold">Contact numbers<InfoTip text="Your phone, WhatsApp, email, address and hours. They appear on the Contact page and in the footer and chat." /></h2>
           <p className="text-xs text-muted">Shown on your Contact page and in the footer. A WhatsApp number adds an "Order on WhatsApp" button to every product page.</p>
           <div className="grid gap-4 sm:grid-cols-2">
             <div><label className={label}>Phone number</label><input name="phone" inputMode="tel" defaultValue={s.contact.phone} placeholder="01712345678" className={input} /></div>
@@ -129,7 +130,7 @@ export default async function Settings() {
         </form>
 
         <form action={saveChat} className={`${card} grid gap-4`}>
-          <h2 className="font-display text-base font-semibold">AI shopping assistant</h2>
+          <h2 className="font-display text-base font-semibold">AI shopping assistant<InfoTip text="A chat helper that answers customers from your real products, prices and delivery fees, so you answer fewer repeated questions." /></h2>
           <p className="text-xs text-muted">A chat button for visitors. It answers from your live products, prices, stock and delivery fees, plus the notes below. It needs GEMINI_API_KEY (free) or ANTHROPIC_API_KEY in your .env.local file.</p>
           <label className="flex items-center gap-2 text-sm"><input type="checkbox" name="enabled" defaultChecked={s.chat.enabled} /> Show the chat button</label>
           <div className="grid gap-4 sm:grid-cols-2">
@@ -147,13 +148,14 @@ export default async function Settings() {
         </form>
 
         <form action={saveExtras} className={`${card} grid gap-4`}>
-          <h2 className="font-display text-base font-semibold">Back to Top button</h2>
-          <label className="flex items-center gap-2 text-sm"><input type="checkbox" name="backToTop" defaultChecked={s.extras.backToTop} /> Show a Back to Top button when visitors scroll down</label>
+          <h2 className="font-display text-base font-semibold">Back to Top button and catalog<InfoTip text="Two small extras for visitors: a jump-to-top button and a price-free product catalog page." /></h2>
+          <label className="flex items-center gap-2 text-sm"><input type="checkbox" name="backToTop" defaultChecked={s.extras.backToTop} /> Show a Back to Top button when visitors scroll down<InfoTip text="A small button that jumps back to the top of a long page. It helps on phones, where scrolling back up takes a while." /></label>
+          <label className="flex items-center gap-2 text-sm"><input type="checkbox" name="catalog" defaultChecked={s.extras.catalog} /> Turn on the public Catalog page at /catalog<InfoTip text="A product book with pictures and names only, no prices. Useful when prices change often, when you send it to wholesale buyers, or when you want customers to message you for a price. Add /catalog to your menu under Site and menu." /></label>
           <button className={`${save} w-fit`}>Save</button>
         </form>
 
         <form action={saveBump} className={`${card} grid gap-4`}>
-          <h2 className="font-display text-base font-semibold">Checkout extra offer (order bump)</h2>
+          <h2 className="font-display text-base font-semibold">Checkout extra offer (order bump)<InfoTip text="One extra product offered with a checkbox at checkout. It raises the value of each order." /></h2>
           <p className="text-xs text-muted">One extra product offered with a checkbox on the checkout page. Leave the special price empty to use the normal price.</p>
           <label className="flex items-center gap-2 text-sm"><input type="checkbox" name="enabled" defaultChecked={s.bump.enabled} /> Show this offer at checkout</label>
           <div><label className={label}>Product option</label>
@@ -169,7 +171,7 @@ export default async function Settings() {
         </form>
 
         <form action={saveProof} className={`${card} grid gap-4`}>
-          <h2 className="font-display text-base font-semibold">Recent purchase notifications</h2>
+          <h2 className="font-display text-base font-semibold">Recent purchase notifications<InfoTip text="Small pop-ups like Someone in Dhaka just ordered. They build trust. Use real orders only." /></h2>
           <p className="text-xs text-muted">Real mode shows only the first name, district, product and price from actual orders. Demo mode shows made-up purchases. Demo mode can mislead customers and may break advertising rules, so switch to Real once you have orders.</p>
           <select name="mode" defaultValue={s.proof.mode} className={input}>
             <option value="off">Off</option><option value="real">Real orders</option><option value="demo">Demo (made-up)</option>

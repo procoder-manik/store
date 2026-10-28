@@ -2,6 +2,8 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { CampaignControls } from "@/components/admin/CampaignControls";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { getAudience } from "@/lib/audience";
+import { InfoTip } from "@/components/admin/InfoTip";
 
 export default async function Emails() {
   const supabase = await createClient();
@@ -9,13 +11,15 @@ export default async function Emails() {
     supabase.from("email_templates").select("id, name, subject").order("created_at", { ascending: false }),
     supabase.from("email_campaigns").select("id, name, audience, sent_count, failed_count, created_at").order("created_at", { ascending: false }).limit(10),
   ]);
+  let counts = { subscribers: 0, customers: 0, vip: 0 };
+  try { const db = createAdminClient(); const [a, b, c] = await Promise.all([getAudience(db, "subscribers"), getAudience(db, "customers"), getAudience(db, "vip")]); counts = { subscribers: a.length, customers: b.length, vip: c.length }; } catch { /* counts stay zero */ }
   const configured = !!(process.env.RESEND_API_KEY && process.env.EMAIL_FROM);
   let log: { id: string; to_email: string; subject: string; kind: string; status: string; error: string | null; created_at: string }[] = [];
   try { log = ((await createAdminClient().from("email_log").select("*").order("created_at", { ascending: false }).limit(8)).data ?? []) as typeof log; } catch { /* log not set up */ }
   return (
     <>
       <div className="flex items-center justify-between">
-        <h1 className="font-display text-2xl font-semibold">Email marketing</h1>
+        <h1 className="font-display text-2xl font-semibold">Email marketing<InfoTip text="Design an email once (for example an Eid offer), then send it to your leads and customers. Open an email to change it, or press Send to reach everyone in the audience." /></h1>
         <span className="flex gap-2"><Link href="/admin/emails/automatic" className="rounded-pill border border-line px-5 py-2 text-sm font-medium hover:bg-surface">Automatic emails</Link><Link href="/admin/emails/new" className="rounded-pill bg-accent px-5 py-2 text-sm font-semibold text-accent-ink">New template</Link></span>
       </div>
       <p className="mt-1 max-w-2xl text-sm text-muted">Every email uses your brand name and colors automatically. Write the message, preview it, send yourself a test, then send it to an audience. Each email includes an unsubscribe link.</p>
@@ -26,7 +30,7 @@ export default async function Emails() {
         {(tpls ?? []).map((t) => (
           <li key={t.id} className="rounded-xl border border-line bg-surface p-4">
             <div className="flex items-start justify-between gap-3"><span><Link href={`/admin/emails/${t.id}`} className="font-medium hover:underline">{t.name}</Link><span className="block text-xs text-muted">{t.subject}</span></span><Link href={`/admin/emails/${t.id}`} className="text-xs underline">Edit</Link></div>
-            <CampaignControls templateId={t.id} />
+            <CampaignControls templateId={t.id} counts={counts} />
           </li>
         ))}
       </ul>

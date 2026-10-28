@@ -11,13 +11,14 @@ import { formatPrice } from "@/lib/config";
 import { slugify } from "@/lib/utils";
 import { BlockRenderer } from "@/components/Blocks";
 import { ImageField } from "./ImageField";
+import { InfoTip } from "./InfoTip";
 
 export type PageInitial = { id?: string; slug: string; title: string; description: string; status: string; blocks: Block[] };
 const EMPTY: PageInitial = { slug: "", title: "", description: "", status: "draft", blocks: [] };
 const input = "w-full rounded-xl border border-line bg-surface px-3 py-2 text-sm";
 const label = "mb-1 block text-xs font-medium text-muted";
 const ALL = BLOCK_GROUPS.flatMap((g) => g.types);
-const LANDING: BlockType[] = ["hero", "slider", "spotlight", "richtext", "text", "image", "features", "faq", "cta", "banner", "products", "newsletter", "order", "marquee", "stats", "countdown", "gallery", "testimonials"];
+const LANDING: BlockType[] = ["hero", "herofull", "slider", "sliderfull", "split", "trust", "html", "bannerfull", "spotlight", "richtext", "text", "image", "features", "faq", "cta", "banner", "products", "newsletter", "order", "marquee", "stats", "countdown", "gallery", "testimonials"];
 
 function F({ l, children }: { l: string; children: React.ReactNode }) { return <div><label className={label}>{l}</label>{children}</div>; }
 type Setter = (p: Record<string, unknown>) => void;
@@ -72,8 +73,8 @@ function OffersEditor({ b, set, products }: { b: OrderB; set: Setter; products: 
 }
 
 /** Blocks that have no heading text, so there is nothing to style. */
-const NO_HEADING: BlockType[] = ["marquee", "image", "banner"];
-const num = (v: string, min: number, max: number) => (v === "" ? undefined : Math.min(max, Math.max(min, Math.round(Number(v)) || min)));
+const NO_HEADING: BlockType[] = ["marquee", "image", "banner", "bannerfull", "html", "trust"];
+const num = (v: string, min: number, max: number) => { const n = Math.round(Number(v)); return v === "" || !Number.isFinite(n) ? undefined : Math.min(max, Math.max(min, n)); };
 
 function StyleRow({ b, set }: { b: Block; set: Setter }) {
   const hasHeading = !NO_HEADING.includes(b.type);
@@ -113,6 +114,13 @@ function StyleRow({ b, set }: { b: Block; set: Setter }) {
           {b.level === "p" && <p className="-mt-1 text-xs text-muted">A paragraph tag is plain text. Search engines will not treat it as a heading.</p>}
         </>
       )}
+      <p className="text-xs font-medium">Space around this section (pixels)<InfoTip text="Padding is the space inside, around the content. Margin is the space outside, between this section and the next. Leave a box empty to keep the section's own spacing. A negative margin pulls the next section closer." /></p>
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+        <F l="Padding top"><input type="number" min={0} max={300} className={input} placeholder="auto" value={b.pt ?? ""} onChange={(e) => set({ pt: num(e.target.value, 0, 300) })} /></F>
+        <F l="Padding bottom"><input type="number" min={0} max={300} className={input} placeholder="auto" value={b.pb ?? ""} onChange={(e) => set({ pb: num(e.target.value, 0, 300) })} /></F>
+        <F l="Margin top"><input type="number" min={-100} max={300} className={input} placeholder="auto" value={b.mt ?? ""} onChange={(e) => set({ mt: num(e.target.value, -100, 300) })} /></F>
+        <F l="Margin bottom"><input type="number" min={-100} max={300} className={input} placeholder="auto" value={b.mb ?? ""} onChange={(e) => set({ mb: num(e.target.value, -100, 300) })} /></F>
+      </div>
       <div className="grid grid-cols-2 gap-3">
         <F l="When it appears"><select className={input} value={b.anim} onChange={(e) => set({ anim: e.target.value })}>{ANIMATIONS.map((a) => <option key={a.id} value={a.id}>{a.name}</option>)}</select></F>
       </div>
@@ -130,9 +138,11 @@ function Fields({ b, set, cats, products }: { b: Block; set: Setter; cats: Cat[]
     {x.source === "tag" && <F l="Tag"><select className={input} value={x.tag} onChange={(e) => set({ tag: e.target.value })}>{["new", "hot", "bestseller", "featured", "sale"].map((v) => <option key={v}>{v}</option>)}</select></F>}
   </>;
   switch (b.type) {
-    case "hero": return <>{t("heading", b.heading, "Heading", 120)}{t("sub", b.sub, "Sub text", 240)}{ti("image", b.image, "Picture")}{pair("button", b.button, "Button text", "link", b.link, "Button link")}
+    case "hero":
+    case "herofull": return <>{t("heading", b.heading, "Heading", 120)}{t("sub", b.sub, "Sub text", 240)}{ti("image", b.image, "Picture")}{pair("button", b.button, "Button text", "link", b.link, "Button link")}
       <F l="Layout"><select className={input} value={b.variant} onChange={(e) => set({ variant: e.target.value })}><option value="overlay">Image behind the text, text on the left</option><option value="center">Image behind the text, centered</option><option value="split">Text on one side, image on the other</option><option value="aurora">Moving glow, centered (modern)</option><option value="bold">Giant bold type with floating shapes</option></select></F></>;
-    case "showcase": return <>{t("eyebrow", b.eyebrow, "Small label, top left", 40)}{t("heading", b.heading, "Heading", 120)}<F l="Text under the heading"><textarea className={input} rows={3} maxLength={300} value={b.sub} onChange={(e) => set({ sub: e.target.value })} /></F>{t("button", b.button, "Button text (opens the product on show)", 30)}{t("tagline", b.tagline, "Line at the bottom", 100)}
+    case "showcase":
+    case "showcasefull": return <>{t("eyebrow", b.eyebrow, "Small label, top left", 40)}{t("heading", b.heading, "Heading", 120)}<F l="Text under the heading"><textarea className={input} rows={3} maxLength={300} value={b.sub} onChange={(e) => set({ sub: e.target.value })} /></F>{t("button", b.button, "Button text (opens the product on show)", 30)}{t("tagline", b.tagline, "Line at the bottom", 100)}
       {source(b)}
       <div className="grid grid-cols-2 gap-3">
         <F l="Change product every (seconds, 0 = never)"><input type="number" min={0} max={20} className={input} value={b.autoplay} onChange={(e) => set({ autoplay: Math.min(20, Math.max(0, Number(e.target.value) || 0)) })} /></F>
@@ -141,12 +151,14 @@ function Fields({ b, set, cats, products }: { b: Block; set: Setter; cats: Cat[]
       <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={b.showNav} onChange={(e) => set({ showNav: e.target.checked })} /> Show the category buttons at the top</label>
       <p className="text-xs text-muted">Social links shown at the bottom left. Leave any empty to hide it.</p>
       {t("facebook", b.facebook, "Facebook link", 300)}{t("instagram", b.instagram, "Instagram link", 300)}{t("youtube", b.youtube, "YouTube link", 300)}{t("whatsapp", b.whatsapp, "WhatsApp link, like https://wa.me/8801712345678", 300)}</>;
-    case "rail3d": return <>{t("heading", b.heading, "Heading", 120)}{t("sub", b.sub, "Sub text (blank = automatic)", 240)}{pair("button", b.button, "Button text", "link", b.link, "Button link")}{pair("button2", b.button2, "Second button text", "link2", b.link2, "Second button link")}
+    case "rail3d":
+    case "rail3dfull": return <>{t("heading", b.heading, "Heading", 120)}{t("sub", b.sub, "Sub text (blank = automatic)", 240)}{pair("button", b.button, "Button text", "link", b.link, "Button link")}{pair("button2", b.button2, "Second button text", "link2", b.link2, "Second button link")}
       <F l="3D style"><select className={input} value={b.style} onChange={(e) => set({ style: e.target.value })}>{[...new Set(RAIL_STYLES.map((s) => s.group))].map((g) => <optgroup key={g} label={g}>{RAIL_STYLES.filter((s) => s.group === g).map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}</optgroup>)}</select></F>
       <p className="-mt-1 text-xs text-muted">Hanger rail shows clothes on hangers. The other styles show your product photos as cards, so they suit real photos best.</p>
       {source(b)}<F l="Start as"><select className={input} value={b.defaultView} onChange={(e) => set({ defaultView: e.target.value })}><option value="3d">3D slider (visitors can switch to a grid)</option><option value="grid">A plain product grid (visitors can switch to 3D)</option></select></F>
       <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={b.showHero} onChange={(e) => set({ showHero: e.target.checked })} /> Show the heading and buttons above the slider</label></>;
-    case "slider": return <><F l="Slider style"><select className={input} value={b.style} onChange={(e) => set({ style: e.target.value })}>{SLIDER_STYLES.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}</select></F>{b.slides.map((s, i) => <div key={i} className="grid gap-2 rounded-xl border border-line p-3">
+    case "slider":
+    case "sliderfull": return <><F l="Slider style"><select className={input} value={b.style} onChange={(e) => set({ style: e.target.value })}>{SLIDER_STYLES.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}</select></F>{b.slides.map((s, i) => <div key={i} className="grid gap-2 rounded-xl border border-line p-3">
         <div className="flex gap-2"><input aria-label="Slide title" placeholder="Title" maxLength={80} className={input} value={s.title} onChange={(e) => set({ slides: b.slides.map((x, j) => (j === i ? { ...x, title: e.target.value } : x)) })} />{b.slides.length > 1 && <button type="button" aria-label="Remove slide" onClick={() => set({ slides: b.slides.filter((_, j) => j !== i) })} className="px-2"><Trash2 size={14} /></button>}</div>
         <input aria-label="Slide text" placeholder="Text" maxLength={160} className={input} value={s.sub} onChange={(e) => set({ slides: b.slides.map((x, j) => (j === i ? { ...x, sub: e.target.value } : x)) })} />
         <ImageField key={`s${i}`} value={s.image} label="Slide picture" onChange={(u) => set({ slides: b.slides.map((x, j) => (j === i ? { ...x, image: u } : x)) })} />
@@ -184,7 +196,8 @@ function Fields({ b, set, cats, products }: { b: Block; set: Setter; cats: Cat[]
     case "products": return <>{t("title", b.title, "Title", 80)}{source(b)}<F l="How many (2 to 12)"><input type="number" min={2} max={12} className={input} value={b.count} onChange={(e) => set({ count: Math.min(12, Math.max(2, Number(e.target.value) || 4)) })} /></F></>;
     case "categories": return t("title", b.title, "Title", 80);
     case "banners": return <>{t("title", b.title, "Title (optional)", 80)}<p className="text-xs text-muted">Shows the banners you manage under Banners.</p></>;
-    case "banner": return <>{t("title", b.title, "Title", 80)}{t("sub", b.sub, "Sub text", 160)}{ti("image", b.image, "Picture")}{pair("button", b.button, "Button text", "link", b.link, "Link")}</>;
+    case "banner":
+    case "bannerfull": return <>{t("title", b.title, "Title", 80)}{t("sub", b.sub, "Sub text", 160)}{ti("image", b.image, "Picture")}{pair("button", b.button, "Button text", "link", b.link, "Link")}</>;
     case "image": return <>{ti("image", b.image, "Picture")}{t("caption", b.caption, "Caption", 160)}{t("link", b.link, "Link (optional)", 300)}</>;
     case "newsletter": return <>{t("title", b.title, "Title", 80)}{t("text", b.text, "Text", 200)}</>;
     case "cta": return <>{t("heading", b.heading, "Heading", 120)}{t("text", b.text, "Text", 240)}{pair("button", b.button, "Button text", "link", b.link, "Link")}</>;
@@ -201,6 +214,9 @@ function Fields({ b, set, cats, products }: { b: Block; set: Setter; cats: Cat[]
         <div className="flex gap-2"><input aria-label="Name" placeholder="Name" maxLength={60} className={input} value={it.name} onChange={(e) => set({ items: b.items.map((x, j) => (j === i ? { ...x, name: e.target.value } : x)) })} /><input aria-label="Place or role" placeholder="City or role" maxLength={60} className={input} value={it.role} onChange={(e) => set({ items: b.items.map((x, j) => (j === i ? { ...x, role: e.target.value } : x)) })} /><button type="button" aria-label="Remove" onClick={() => set({ items: b.items.filter((_, j) => j !== i) })} className="px-2"><Trash2 size={14} /></button></div></div>)}{b.items.length < 6 && <button type="button" onClick={() => set({ items: [...b.items, { quote: "", name: "", role: "" }] })} className="w-fit text-sm underline">Add a review</button>}</>;
     case "countdown": return <>{t("title", b.title, "Title", 80)}{t("text", b.text, "Text", 200)}<F l="Offer ends on (your local time)"><input type="datetime-local" className={input} value={b.endsAt.slice(0, 16)} onChange={(e) => set({ endsAt: e.target.value })} /></F>{pair("button", b.button, "Button text", "link", b.link, "Button link")}</>;
     case "gallery": return <>{t("title", b.title, "Title (optional)", 80)}{b.images.map((it, i) => <div key={i} className="flex gap-2 rounded-xl border border-line p-3"><div className="grid flex-1 gap-2"><ImageField key={`g${i}`} value={it.src} label="Photo" onChange={(u) => set({ images: b.images.map((x, j) => (j === i ? { ...x, src: u } : x)) })} /><input aria-label="Caption" placeholder="Caption (optional)" maxLength={80} className={input} value={it.caption} onChange={(e) => set({ images: b.images.map((x, j) => (j === i ? { ...x, caption: e.target.value } : x)) })} /></div><button type="button" aria-label="Remove" onClick={() => set({ images: b.images.filter((_, j) => j !== i) })} className="px-2"><Trash2 size={14} /></button></div>)}{b.images.length < 8 && <button type="button" onClick={() => set({ images: [...b.images, { src: "", caption: "" }] })} className="w-fit text-sm underline">Add a photo</button>}</>;
+    case "split": return <>{t("heading", b.heading, "Heading", 120)}<F l="Text (blank line between paragraphs)"><textarea className={input} rows={5} maxLength={2000} value={b.body} onChange={(e) => set({ body: e.target.value })} /></F>{ti("image", b.image, "Picture")}{pair("button", b.button, "Button text", "link", b.link, "Button link")}<F l="Picture on the"><select className={input} value={b.imageSide} onChange={(e) => set({ imageSide: e.target.value })}><option value="left">Left</option><option value="right">Right</option></select></F></>;
+    case "trust": return <>{b.items.map((it, i) => <div key={i} className="grid gap-2 rounded-xl border border-line p-3"><div className="flex gap-2"><select aria-label="Icon" className={`${input} !w-32`} value={it.icon} onChange={(e) => set({ items: b.items.map((x, j) => (j === i ? { ...x, icon: e.target.value } : x)) })}>{["truck", "shield", "refresh", "headset", "gift", "card", "clock", "star"].map((v) => <option key={v} value={v}>{v}</option>)}</select><input aria-label="Title" placeholder="Title" maxLength={60} className={input} value={it.title} onChange={(e) => set({ items: b.items.map((x, j) => (j === i ? { ...x, title: e.target.value } : x)) })} />{b.items.length > 1 && <button type="button" aria-label="Remove" onClick={() => set({ items: b.items.filter((_, j) => j !== i) })} className="px-2"><Trash2 size={14} /></button>}</div><input aria-label="Text" placeholder="Short text" maxLength={120} className={input} value={it.text} onChange={(e) => set({ items: b.items.map((x, j) => (j === i ? { ...x, text: e.target.value } : x)) })} /></div>)}{b.items.length < 6 && <button type="button" onClick={() => set({ items: [...b.items, { icon: "star", title: "", text: "" }] })} className="w-fit text-sm underline">Add a badge</button>}</>;
+    case "html": return <><F l="Your HTML, CSS and JavaScript"><textarea className={`${input} font-mono text-xs`} rows={16} spellCheck={false} maxLength={50000} value={b.code} onChange={(e) => set({ code: e.target.value })} /></F><p className="text-xs text-muted">It shows exactly as written, inside its own safe frame, so it cannot break the rest of your store. Use pictures from your uploads or Pexels, Unsplash and Pixabay. Google Fonts work too.</p></>;
     case "order": return <OffersEditor b={b} set={set} products={products} />;
     case "features": return <>{t("title", b.title, "Title", 80)}{b.items.map((it, i) => <div key={i} className="grid gap-2 rounded-xl border border-line p-3"><div className="flex gap-2"><input aria-label="Feature title" placeholder="Title" maxLength={60} className={input} value={it.title} onChange={(e) => set({ items: b.items.map((x, j) => (j === i ? { ...x, title: e.target.value } : x)) })} /><button type="button" aria-label="Remove" onClick={() => set({ items: b.items.filter((_, j) => j !== i) })} className="px-2"><Trash2 size={14} /></button></div><input aria-label="Feature text" placeholder="Text" maxLength={200} className={input} value={it.text} onChange={(e) => set({ items: b.items.map((x, j) => (j === i ? { ...x, text: e.target.value } : x)) })} /></div>)}{b.items.length < 6 && <button type="button" onClick={() => set({ items: [...b.items, { title: "", text: "" }] })} className="w-fit text-sm underline">Add a feature</button>}</>;
     case "faq": return <>{t("title", b.title, "Title", 80)}{b.items.map((it, i) => <div key={i} className="grid gap-2 rounded-xl border border-line p-3"><div className="flex gap-2"><input aria-label="Question" placeholder="Question" maxLength={160} className={input} value={it.q} onChange={(e) => set({ items: b.items.map((x, j) => (j === i ? { ...x, q: e.target.value } : x)) })} /><button type="button" aria-label="Remove" onClick={() => set({ items: b.items.filter((_, j) => j !== i) })} className="px-2"><Trash2 size={14} /></button></div><textarea aria-label="Answer" placeholder="Answer" rows={2} maxLength={800} className={input} value={it.a} onChange={(e) => set({ items: b.items.map((x, j) => (j === i ? { ...x, a: e.target.value } : x)) })} /></div>)}{b.items.length < 12 && <button type="button" onClick={() => set({ items: [...b.items, { q: "", a: "" }] })} className="w-fit text-sm underline">Add a question</button>}</>;
