@@ -61,7 +61,7 @@ export default async function LandingPage({ params }: Params) {
     const order = b.blocks.find((x) => x.type === "order");
     return (
       <main>
-        <BlockRenderer blocks={b.blocks} products={b.products} categories={b.categories} zones={b.zones} slug={slug} />
+        <BlockRenderer blocks={b.blocks} products={b.products} categories={b.categories} zones={b.zones} slug={slug} page={{ title: b.title, description: b.description }} />
         {order && order.type === "order" && <a href="#order" className="fixed inset-x-4 bottom-4 z-30 rounded-pill bg-accent py-3.5 text-center text-sm font-semibold text-accent-ink shadow-2xl md:hidden">{order.cta || "Order now"}</a>}
       </main>
     );

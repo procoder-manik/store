@@ -25,7 +25,9 @@ const typo = {
   mr: z.number().int().min(-100).max(300).optional(),
 };
 const anim = z.enum(["none", "fade", "up", "zoom", "left", "right"]).default("up");
-const common = { id, anim, level, ...typo };
+// titleMode: use this section as the page's title section, with the page's own title and description.
+// crumbs: show Home / page name. Neither appears on the home page.
+const common = { id, anim, level, titleMode: z.boolean().optional(), crumbs: z.boolean().optional(), ...typo };
 export type HeadingLevel = "h1" | "h2" | "h3" | "h4" | "h5" | "h6" | "p";
 export type Anim = "none" | "fade" | "up" | "zoom" | "left" | "right";
 

@@ -32,6 +32,10 @@ export type StorefrontProps = {
   products: Product[]; categories: Cat[];
   variant?: RailVariant; showHero?: boolean; heading?: string; sub?: string;
   button?: string; link?: string; button2?: string; link2?: string; defaultView?: "3d" | "grid"; level?: HeadingLevel;
+  /** Used as the page title section: the small delivery points and piece count step aside. */
+  titleMode?: boolean;
+  /** The page name for the breadcrumb. Empty hides it. */
+  crumb?: string;
   /** Full width: one deep colour background that follows the product in front and fades as the rail moves. */
   full?: boolean;
   /** "color": a deep background that follows the product in front. "wall": the original soft wall. */
@@ -46,7 +50,7 @@ export type StorefrontProps = {
   textBgColor?: string;
 };
 
-export function Storefront({ products, categories, variant = "hanger", showHero = true, heading = "Pick it off the rail.", sub, button = "Shop everything", link = "/shop", button2 = "New in", link2 = "/shop?tag=new", defaultView = "3d", level = "h1", full = false, bgMode = "color", arrows: arrowsIn, pills: pillsIn, headAlign = "left", textBg = "none", textBgColor = "#1f6f78" }: StorefrontProps) {
+export function Storefront({ products, categories, variant = "hanger", showHero = true, heading = "Pick it off the rail.", sub, button = "Shop everything", link = "/shop", button2 = "New in", link2 = "/shop?tag=new", defaultView = "3d", level = "h1", titleMode = false, crumb = "", full = false, bgMode = "color", arrows: arrowsIn, pills: pillsIn, headAlign = "left", textBg = "none", textBgColor = "#1f6f78" }: StorefrontProps) {
   const arrowsAt = arrowsIn ?? (full ? "bottom-right" : "sides");
   const pillsAt = pillsIn ?? "center";
   // ui: the slider area is a deep colour (light buttons). headDark: the text above it also sits on that colour (only when full width).
@@ -138,20 +142,24 @@ export function Storefront({ products, categories, variant = "hanger", showHero 
         <section className={`mx-auto max-w-7xl pb-4 pt-7 md:pb-5 md:pt-10 ${full ? "px-3 md:px-8" : "px-5 md:px-10"}`}>
           <div style={box} className={`${box ? "rounded-3xl px-6 py-8 md:px-10 md:py-10 [&_.text-muted]:text-current [&_.text-muted]:opacity-80" : ""} ${headAlign === "center" ? "grid justify-items-center gap-6 text-center" : "grid gap-5 md:grid-cols-[minmax(0,1fr)_auto] md:items-end"}`}>
             <div className={headAlign === "center" ? "mx-auto max-w-3xl" : "max-w-2xl"}>
-              <p className={`hero-in flex items-center gap-2 text-xs font-medium uppercase tracking-[0.18em] ${headAlign === "center" ? "justify-center" : ""} ${box ? "opacity-80" : headDark ? "text-white/70" : "text-muted"}`}>
-                <span className="h-px w-8 bg-current opacity-60" />{products.length} pieces in store
-              </p>
+              {crumb ? (
+                <nav aria-label="Breadcrumb" className={`hero-in flex flex-wrap items-center gap-2 text-xs ${headAlign === "center" ? "justify-center" : ""} ${box ? "opacity-80" : headDark ? "text-white/75" : "text-muted"}`}><Link href="/" className="hover:underline">Home</Link><span aria-hidden>/</span><span>{crumb}</span></nav>
+              ) : !titleMode && (
+                <p className={`hero-in flex items-center gap-2 text-xs font-medium uppercase tracking-[0.18em] ${headAlign === "center" ? "justify-center" : ""} ${box ? "opacity-80" : headDark ? "text-white/70" : "text-muted"}`}>
+                  <span className="h-px w-8 bg-current opacity-60" />{products.length} pieces in store
+                </p>
+              )}
               <Heading as={level} className="hero-in mt-3 font-display text-[clamp(2rem,4.6vw,3.4rem)] font-semibold leading-[1.02] tracking-tight">{heading}</Heading>
-              <p className={`hero-in-2 mt-3 text-base leading-relaxed ${headAlign === "center" ? "mx-auto max-w-xl" : "max-w-md"} ${box ? "opacity-85" : headDark ? "text-white/80" : "text-muted"}`}>{sub ?? "Clothing, bedding and home decor, delivered across Bangladesh. Drag the rail, then tap anything to see it up close."}</p>
+              <p className={`hero-in-2 mt-3 text-base leading-relaxed ${headAlign === "center" ? "mx-auto max-w-xl" : "max-w-md"} ${box ? "opacity-85" : headDark ? "text-white/80" : "text-muted"}`}>{sub ?? "Bedsheets, pillows and home decor, delivered across Bangladesh. Drag the rail, then tap anything to see it up close."}</p>
               <div className={`hero-in-3 mt-5 flex flex-wrap items-center gap-3 ${headAlign === "center" ? "justify-center" : ""}`}>
                 {button && link && <Link href={link} className={`rounded-pill px-7 py-3.5 text-sm font-semibold shadow-lg transition hover:-translate-y-0.5 ${headDark || box ? "bg-white text-black" : "bg-ink text-paper"}`}>{button}</Link>}
                 {button2 && link2 && <Link href={link2} className={`group inline-flex items-center gap-1.5 rounded-pill border px-6 py-3.5 text-sm font-medium transition hover:-translate-y-0.5 ${headDark || box ? "border-current/30 bg-white/10" : "border-line bg-surface"}`}>{button2}<span aria-hidden className="transition group-hover:translate-x-0.5">&rarr;</span></Link>}
               </div>
             </div>
-            <ul className={`hero-in-3 text-sm ${headAlign === "center" ? "flex flex-wrap justify-center gap-x-8 gap-y-2" : "hidden shrink-0 gap-5 border-l pl-7 md:grid"} ${headAlign === "left" ? (box || headDark ? "border-current/25" : "border-line") : ""} ${box ? "[&_.text-muted]:opacity-80" : headDark ? "[&_.text-muted]:text-white/70" : ""}`}>
+            {!titleMode && <ul className={`hero-in-3 text-sm ${headAlign === "center" ? "flex flex-wrap justify-center gap-x-8 gap-y-2" : "hidden shrink-0 gap-5 border-l pl-7 md:grid"} ${headAlign === "left" ? (box || headDark ? "border-current/25" : "border-line") : ""} ${box ? "[&_.text-muted]:opacity-80" : headDark ? "[&_.text-muted]:text-white/70" : ""}`}>
               <li><span className="block font-display text-xl font-semibold">Cash on delivery</span><span className="text-muted">Check it, then pay</span></li>
               <li><span className="block font-display text-xl font-semibold">All 64 districts</span><span className="text-muted">Inside and outside Dhaka</span></li>
-            </ul>
+            </ul>}
           </div>
         </section>
       )}

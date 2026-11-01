@@ -125,11 +125,17 @@ function Card({ p, i, layout, pos, target, selected, locked, offX, shadow, onPic
     loader.setCrossOrigin("anonymous");
     loader.load(p.image, (t) => {
       if (!alive) { t.dispose(); return; }
-      t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 8;
-      const img = t.image as { width: number; height: number };
-      const ca = CW / CH, ia = img.width / img.height;
-      if (ia > ca) { t.repeat.set(ca / ia, 1); t.offset.set((1 - ca / ia) / 2, 0); } else { t.repeat.set(1, ia / ca); t.offset.set(0, (1 - ia / ca) / 2); }
-      made = t; setPhoto(t);
+      // The whole product stays visible on the card, with a little room around it.
+      const img = t.image as HTMLImageElement;
+      const w = 960, h = Math.round(w * (CH / CW)), room = 0.9;
+      const fit = Math.min((w * room) / img.width, (h * room) / img.height);
+      const canvas = document.createElement("canvas");
+      canvas.width = w; canvas.height = h;
+      canvas.getContext("2d")?.drawImage(img, (w - img.width * fit) / 2, (h - img.height * fit) / 2, img.width * fit, img.height * fit);
+      t.dispose();
+      const fitted = new THREE.CanvasTexture(canvas);
+      fitted.colorSpace = THREE.SRGBColorSpace; fitted.anisotropy = 8;
+      made = fitted; setPhoto(fitted);
     }, undefined, () => { if (alive) art(); });
     return () => { alive = false; made?.dispose(); };
   }, [p.image, p.kind, p.colors]);

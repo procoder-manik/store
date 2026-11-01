@@ -46,7 +46,7 @@ export default async function CustomPage({ params }: Params) {
   return (
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(ld).replace(/</g, "\\u003c") }} />
-      <main><BlockRenderer blocks={p.blocks} products={products} categories={categories} /></main>
+      <main><BlockRenderer blocks={p.blocks} products={products} categories={categories} page={{ title: p.title, description: p.description }} /></main>
     </>
   );
 }

@@ -24,14 +24,31 @@ import { Storefront } from "./Storefront";
 const wrap = "mx-auto max-w-7xl px-5 py-12 md:px-8 md:py-20";
 const btn = "rounded-pill bg-white px-6 py-3 text-sm font-semibold text-black transition hover:-translate-y-0.5";
 
-export type BlockCtx = { products: Product[]; categories: Cat[]; banners?: Banner[]; zones?: Zone[]; slug?: string; preview?: boolean; first?: boolean };
+export type BlockCtx = { products: Product[]; categories: Cat[]; banners?: Banner[]; zones?: Zone[]; slug?: string; preview?: boolean; first?: boolean; page?: { title: string; description?: string } };
 
 function pick(products: Product[], source: "all" | "category" | "tag" | "preorder", category: string, tag: Product["tags"][number]) {
   if (source === "preorder") return products.filter((p) => p.preorder);
   return source === "category" ? products.filter((p) => p.category === category) : source === "tag" ? products.filter((p) => p.tags.includes(tag)) : products;
 }
 
-export function BlockView({ b, ctx }: { b: Block; ctx: BlockCtx }) {
+function Crumbs({ title, dark = false }: { title: string; dark?: boolean }) {
+  return <nav aria-label="Breadcrumb" className={`flex flex-wrap items-center gap-2 text-xs ${dark ? "text-white/75" : "text-muted"}`}><Link href="/" className={dark ? "hover:text-white" : "hover:text-ink"}>Home</Link><span aria-hidden>/</span><span className={dark ? "text-white" : "text-ink"}>{title}</span></nav>;
+}
+
+const CRUMB_BAR = new Set(["showcase", "showcasefull", "hero", "herofull", "slider", "sliderfull"]);
+
+/** Sections that can act as the page's title section take the page's title and description, and can show a breadcrumb. */
+export function BlockView({ b: raw, ctx }: { b: Block; ctx: BlockCtx }) {
+  const page = ctx.page;
+  const asTitle = !!raw.titleMode && !!page;
+  const titled = (asTitle && "heading" in raw ? { ...raw, heading: page.title, sub: page.description || ("sub" in raw ? raw.sub : "") } : raw) as Block;
+  const crumb = raw.crumbs && page ? page.title : "";
+  const view = <BlockBody b={titled} ctx={ctx} asTitle={asTitle} crumb={crumb} />;
+  if (crumb && CRUMB_BAR.has(raw.type)) return <><div className="mx-auto max-w-7xl px-5 py-3 md:px-8"><Crumbs title={crumb} /></div>{view}</>;
+  return view;
+}
+
+function BlockBody({ b, ctx, asTitle, crumb }: { b: Block; ctx: BlockCtx; asTitle: boolean; crumb: string }) {
   const { products, categories } = ctx;
   switch (b.type) {
     case "hero":
@@ -124,7 +141,7 @@ export function BlockView({ b, ctx }: { b: Block; ctx: BlockCtx }) {
     case "rail3d":
     case "rail3dfull": {
       const list = pick(products, b.source, b.category, b.tag);
-      return <Storefront products={list.length ? list : products} categories={categories} variant={b.style} showHero={b.showHero} heading={b.heading} sub={b.sub || undefined} button={b.button} link={b.link} button2={b.button2} link2={b.link2} defaultView={b.defaultView} level={b.level} full={b.type === "rail3dfull"} arrows={b.arrows} pills={b.pills} headAlign={b.headAlign} textBg={b.textBg} textBgColor={b.textBgColor} bgMode={b.bgMode} />;
+      return <Storefront products={list.length ? list : products} categories={categories} variant={b.style} showHero={b.showHero} heading={b.heading} sub={b.sub || undefined} button={b.button} link={b.link} button2={b.button2} link2={b.link2} defaultView={b.defaultView} level={asTitle ? "h1" : b.level} titleMode={asTitle} crumb={crumb} full={b.type === "rail3dfull"} arrows={b.arrows} pills={b.pills} headAlign={b.headAlign} textBg={b.textBg} textBgColor={b.textBgColor} bgMode={b.bgMode} />;
     }
     case "slider":
     case "sliderfull":
@@ -153,10 +170,10 @@ export function BlockView({ b, ctx }: { b: Block; ctx: BlockCtx }) {
         <div className="relative overflow-hidden border-b border-line bg-gradient-to-br from-accent/10 via-surface to-surface">
           <div aria-hidden className="absolute -right-16 -top-16 h-56 w-56 rounded-full bg-accent/10 blur-3xl" />
           <div className="relative mx-auto max-w-6xl px-5 py-10 md:py-14">
-            <nav aria-label="Breadcrumb" className="flex items-center gap-2 text-xs text-muted"><Link href="/" className="hover:text-ink">Home</Link><span aria-hidden>/</span><span className="text-ink">{b.title}</span></nav>
-            <Heading as={b.level} className="mt-4 font-display text-3xl font-semibold tracking-tight md:text-5xl">{b.title}</Heading>
+            {b.crumbs !== false && ctx.page && <Crumbs title={asTitle ? ctx.page.title : b.title} />}
+            <Heading as={b.level} className="mt-4 font-display text-3xl font-semibold tracking-tight md:text-5xl">{asTitle && ctx.page ? ctx.page.title : b.title}</Heading>
             <span aria-hidden className="mt-4 block h-1 w-14 rounded-full bg-accent" />
-            {b.intro && <p className="mt-5 max-w-2xl text-base leading-relaxed text-muted md:text-lg">{b.intro}</p>}
+            {(b.intro || (asTitle && ctx.page?.description)) && <p className="mt-5 max-w-2xl text-base leading-relaxed text-muted md:text-lg">{asTitle ? ctx.page?.description || b.intro : b.intro}</p>}
           </div>
         </div>
       );

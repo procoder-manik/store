@@ -46,7 +46,7 @@ export default async function Info({ params }: Params) {
 
   if (c) {
     const { products, categories } = await getCatalog();
-    return <main><BlockRenderer blocks={c.blocks} products={products} categories={categories} /></main>;
+    return <main><BlockRenderer blocks={c.blocks} products={products} categories={categories} page={{ title: c.title, description: c.description }} /></main>;
   }
 
   const d = infoDefault(slug, brand.name, contact.email);

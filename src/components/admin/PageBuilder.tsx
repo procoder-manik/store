@@ -127,6 +127,21 @@ function StyleRow({ b, set }: { b: Block; set: Setter }) {
   );
 }
 
+const TITLE_SECTIONS: BlockType[] = ["pagehead", "showcase", "showcasefull", "hero", "herofull", "rail3d", "rail3dfull", "slider", "sliderfull"];
+
+/** Lets any top-of-page section act as the page's title section, with a breadcrumb. The home page never shows these. */
+function TitleOptions({ b, set, isHome }: { b: Block; set: Setter; isHome: boolean }) {
+  if (!TITLE_SECTIONS.includes(b.type)) return null;
+  if (isHome) return <p className="rounded-xl bg-paper p-3 text-xs text-muted">The home page has no breadcrumb or page title section, so this section uses the text you type here.</p>;
+  const canTitle = !b.type.startsWith("slider");
+  return (
+    <div className="grid gap-2 rounded-xl border border-line p-3">
+      {canTitle && <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={!!b.titleMode} onChange={(e) => set({ titleMode: e.target.checked })} /> Use as this page&apos;s title section<InfoTip text="On: shows the page title and description you set for this page. Off: shows the text you type in this section." /></label>}
+      <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={b.type === "pagehead" ? b.crumbs !== false : !!b.crumbs} onChange={(e) => set({ crumbs: e.target.checked })} /> Show the breadcrumb (Home / page name)</label>
+    </div>
+  );
+}
+
 function Fields({ b, set, cats, products }: { b: Block; set: Setter; cats: Cat[]; products: Product[] }) {
   const t = (k: string, v: string, l: string, max = 200) => <F l={l}><input className={input} maxLength={max} value={v} onChange={(e) => set({ [k]: e.target.value })} /></F>;
   const ti = (k: string, v: string, l: string) => <ImageField key={b.id + k} value={v} label={l} onChange={(u) => set({ [k]: u })} />;
@@ -308,7 +323,7 @@ export function PageBuilder({ initial = EMPTY, products, categories, kind = "pag
                 <button type="button" aria-label="Move down" onClick={() => mv(i, i + 1)} className="grid h-8 w-8 place-items-center rounded-full hover:bg-paper"><ArrowDown size={14} /></button>
                 <button type="button" aria-label="Delete block" onClick={() => setBlocks(blocks.filter((_, j) => j !== i))} className="grid h-8 w-8 place-items-center rounded-full hover:bg-paper"><Trash2 size={14} /></button>
               </div>
-              {open === b.id && <div className="grid gap-3 border-t border-line p-4"><Fields b={b} set={(p) => patch(i, p)} cats={categories} products={products} /><StyleRow b={b} set={(p) => patch(i, p)} /></div>}
+              {open === b.id && <div className="grid gap-3 border-t border-line p-4"><TitleOptions b={b} set={(p) => patch(i, p)} isHome={builtin?.path === "/"} /><Fields b={b} set={(p) => patch(i, p)} cats={categories} products={products} /><StyleRow b={b} set={(p) => patch(i, p)} /></div>}
             </div>
           ))}
         </section>
@@ -325,7 +340,7 @@ export function PageBuilder({ initial = EMPTY, products, categories, kind = "pag
       <div className="min-w-0">
         <p className="mb-2 text-xs font-medium text-muted">Live preview</p>
         <div className="max-h-[85vh] overflow-y-auto rounded-xl border border-line bg-paper">
-          {blocks.length === 0 ? <p className="p-10 text-center text-sm text-muted">Your page appears here as you add blocks.</p> : <BlockRenderer blocks={blocks} products={products} categories={categories} zones={zones} slug={f.slug} preview />}
+          {blocks.length === 0 ? <p className="p-10 text-center text-sm text-muted">Your page appears here as you add blocks.</p> : <BlockRenderer blocks={blocks} products={products} categories={categories} zones={zones} slug={f.slug} preview page={builtin?.path === "/" ? undefined : { title: f.title, description: f.description }} />}
         </div>
       </div>
     </div>
