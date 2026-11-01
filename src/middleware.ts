@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { createServerClient } from "@supabase/ssr";
+import { adminHome, canOpen, isStaffRole } from "@/lib/roles";
 
 export async function middleware(req: NextRequest) {
   // Preview pages exist only on a developer's computer.
@@ -32,6 +33,18 @@ export async function middleware(req: NextRequest) {
       },
     });
     user = (await supabase.auth.getUser()).data.user;
+    // Each role sees only its part of the admin panel. Checked on every page change, not only the first load.
+    if (user && req.nextUrl.pathname.startsWith("/admin")) {
+      const { data: profile } = await supabase.from("profiles").select("role").eq("id", user.id).maybeSingle();
+      const role = String(profile?.role ?? "");
+      const path = req.nextUrl.pathname;
+      if (isStaffRole(role) && !canOpen(role, path)) {
+        const to = req.nextUrl.clone();
+        to.pathname = adminHome(role);
+        to.search = "";
+        return NextResponse.redirect(to);
+      }
+    }
   }
 
   if (needsAuth && !user) {

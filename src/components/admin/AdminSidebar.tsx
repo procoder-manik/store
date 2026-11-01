@@ -8,6 +8,7 @@ import {
   MoreHorizontal, Plus, Receipt, Search, Settings, CreditCard, PanelTop, ShieldAlert, ShoppingBag, ShoppingCart, Sparkles, Star, Store, TicketPercent, Truck, Users, X,
 } from "lucide-react";
 import { SignOutButton } from "@/components/SignOutButton";
+import { adminHome, canOpen } from "@/lib/roles";
 
 const GROUPS = [
   { title: "Overview", items: [{ href: "/admin", label: "Dashboard", icon: LayoutDashboard }] },
@@ -39,6 +40,7 @@ const GROUPS = [
     { href: "/admin/menus", label: "Site and menu", icon: PanelsTopLeft },
     { href: "/admin/permalinks", label: "URLs and search", icon: Link2 },
     { href: "/admin/settings", label: "Settings", icon: Settings },
+    { href: "/admin/users", label: "Users", icon: Users },
     { href: "/admin/audit", label: "Audit log", icon: ScrollText },
     { href: "/admin/health", label: "Health check", icon: HeartPulse },
   ] },
@@ -51,7 +53,7 @@ const CREATE = [
 ];
 
 /** Ctrl+K, or the search button: jump to any admin page, or look up an order or product by what you type. */
-function CommandMenu({ onClose }: { onClose: () => void }) {
+function CommandMenu({ onClose, role }: { onClose: () => void; role: string }) {
   const router = useRouter();
   const [q, setQ] = useState("");
   const [cur, setCur] = useState(0);
@@ -61,13 +63,13 @@ function CommandMenu({ onClose }: { onClose: () => void }) {
   const term = q.trim();
   const rows = useMemo(() => {
     const low = term.toLowerCase();
-    const pages = [...CREATE, ...GROUPS.flatMap((g) => g.items)].filter((i) => !low || i.label.toLowerCase().includes(low));
+    const pages = [...CREATE, ...GROUPS.flatMap((g) => g.items)].filter((i) => canOpen(role, i.href) && (!low || i.label.toLowerCase().includes(low)));
     const find = term ? [
       { href: `/admin/orders?q=${encodeURIComponent(term)}`, label: `Find orders matching "${term}"`, icon: ShoppingBag },
       { href: `/admin/products?q=${encodeURIComponent(term)}`, label: `Find products matching "${term}"`, icon: Package },
-    ] : [];
+    ].filter((i) => canOpen(role, i.href.split("?")[0])) : [];
     return [...pages, ...find];
-  }, [term]);
+  }, [term, role]);
 
   const go = (href: string) => { onClose(); router.push(href); };
   const key = (e: React.KeyboardEvent) => {
@@ -96,11 +98,11 @@ function CommandMenu({ onClose }: { onClose: () => void }) {
   );
 }
 
-function Nav({ path, pending }: { path: string; pending: number }) {
+function Nav({ path, pending, role }: { path: string; pending: number; role: string }) {
   const on = (href: string) => (href === "/admin" ? path === "/admin" : path === href || path.startsWith(`${href}/`));
   return (
     <nav aria-label="Admin" className="grid gap-6">
-      {GROUPS.map((g) => (
+      {GROUPS.map((g) => ({ ...g, items: g.items.filter((i) => canOpen(role, i.href)) })).filter((g) => g.items.length > 0).map((g) => (
         <div key={g.title}>
           <p className="px-3 pb-1.5 text-xs text-muted">{g.title}</p>
           <ul className="grid gap-0.5">
@@ -119,7 +121,7 @@ function Nav({ path, pending }: { path: string; pending: number }) {
   );
 }
 
-export function AdminSidebar({ brand, pending = 0 }: { brand: string; pending?: number }) {
+export function AdminSidebar({ brand, pending = 0, role = "super_admin" }: { brand: string; pending?: number; role?: string }) {
   const path = usePathname();
   const [open, setOpen] = useState(false);
   const [cmd, setCmd] = useState(false);
@@ -134,16 +136,16 @@ export function AdminSidebar({ brand, pending = 0 }: { brand: string; pending?: 
     { href: "/admin/orders", label: "Orders", icon: ShoppingBag },
     { href: "/admin/products", label: "Products", icon: Package },
     { href: "/admin/crm", label: "Customers", icon: Users },
-  ];
+  ].filter((t) => canOpen(role, t.href));
   const onTab = (href: string) => (href === "/admin" ? path === "/admin" : path.startsWith(href));
 
   const body = (
     <div className="flex h-full flex-col gap-6 p-4">
       <div className="flex items-center justify-between px-2 pt-1">
-        <Link href="/admin" className="font-display text-lg font-semibold tracking-tight">{brand}<span className="ml-2 rounded-pill bg-paper px-2 py-0.5 align-middle text-xs font-normal text-muted">Admin</span></Link>
+        <Link href={adminHome(role)} className="font-display text-lg font-semibold tracking-tight">{brand}<span className="ml-2 rounded-pill bg-paper px-2 py-0.5 align-middle text-xs font-normal text-muted">Admin</span></Link>
       </div>
       <button onClick={() => setCmd(true)} className="flex h-10 items-center gap-2 rounded-xl border border-line px-3 text-sm text-muted transition hover:border-ink/40"><Search size={15} /> Search<kbd className="ml-auto hidden rounded border border-line px-1.5 text-[11px] lg:block">Ctrl K</kbd></button>
-      <div className="min-h-0 flex-1 overflow-y-auto pr-1"><Nav path={path} pending={pending} /></div>
+      <div className="min-h-0 flex-1 overflow-y-auto pr-1"><Nav path={path} pending={pending} role={role} /></div>
       <div className="grid gap-2 border-t border-line pt-4">
         <p className="flex items-center gap-2 px-2 text-xs text-muted"><Sparkles size={14} className="text-accent" /> Click any text box, then the spark, to write it with AI.</p>
         <div className="flex items-center gap-2">
@@ -161,8 +163,8 @@ export function AdminSidebar({ brand, pending = 0 }: { brand: string; pending?: 
         <span className="font-display font-semibold">{brand} admin</span>
         <button aria-label="Search the admin panel" onClick={() => setCmd(true)} className="ml-auto grid h-10 w-10 place-items-center rounded-full hover:bg-paper"><Search size={18} /></button>
       </div>
-      {cmd && <CommandMenu onClose={() => setCmd(false)} />}
-      <nav aria-label="Quick links" className="fixed inset-x-0 bottom-0 z-30 grid grid-cols-5 border-t border-line bg-surface/95 pb-[env(safe-area-inset-bottom)] backdrop-blur lg:hidden">
+      {cmd && <CommandMenu role={role} onClose={() => setCmd(false)} />}
+      <nav aria-label="Quick links" style={{ gridTemplateColumns: `repeat(${tabs.length + 1}, minmax(0, 1fr))` }} className="fixed inset-x-0 bottom-0 z-30 grid border-t border-line bg-surface/95 pb-[env(safe-area-inset-bottom)] backdrop-blur lg:hidden">
         {tabs.map(({ href, label, icon: Icon }) => (
           <Link key={href} href={href} aria-current={onTab(href) ? "page" : undefined} className={`relative flex h-14 flex-col items-center justify-center gap-0.5 text-[11px] ${onTab(href) ? "font-semibold text-accent" : "text-muted"}`}>
             <Icon size={19} />{label}

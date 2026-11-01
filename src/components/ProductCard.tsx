@@ -23,8 +23,8 @@ export function ProductCard({ p, zones }: { p: Product; zones?: Zone[] }) {
   const soldOut = (p.variants?.length ?? 0) > 0 && p.variants!.every((v) => v.stock <= 0);
   const onSale = (p.compareAt ?? 0) > p.basePrice || p.tags.includes("sale");
   const off = (p.compareAt ?? 0) > p.basePrice ? Math.round((1 - p.basePrice / (p.compareAt as number)) * 100) : 0;
-  const tagOrder = ["sale", "bestseller", "new"] as const;
-  const badges = tagOrder.filter((t) => (t === "sale" ? onSale : p.tags.includes(t))).slice(0, 1);
+  const tagOrder = ["sale", "hot", "bestseller", "new", "featured"] as const;
+  const badges = tagOrder.filter((t) => (t === "sale" ? onSale : p.tags.includes(t))).slice(0, 2);
   const swatches = p.hasColors === false ? [] : p.colors;
   // "Add to cart" never opens a popup: it drops the first in-stock option straight into the cart.
   // To choose another colour or size first, the shopper uses "Buy now" or opens the product page.
@@ -51,8 +51,8 @@ export function ProductCard({ p, zones }: { p: Product; zones?: Zone[] }) {
             <ProductArt kind={p.kind} color={p.colors[0].hex} className="aspect-[4/5] w-full" />
           )}
         </Link>
-        <div className="pointer-events-none absolute left-2.5 top-2.5">
-          {p.preorder && !soldOut ? <span className="inline-block rounded-full bg-accent px-2.5 py-1 text-[11px] font-semibold text-accent-ink">Pre-order{off > 0 ? `, ${off}% off` : ""}</span> : soldOut ? <span className="rounded-full bg-ink px-2.5 py-1 text-[11px] font-medium text-paper">Sold out</span> : badges.map((t) => <TagBadge key={t} tag={t} text={t === "sale" && off > 0 ? `${off}% off` : undefined} />)}
+        <div className="pointer-events-none absolute left-2.5 top-2.5 flex flex-col items-start gap-1.5">
+          {p.preorder && !soldOut ? <span className="inline-block rounded-full bg-accent px-2.5 py-1 text-[11px] font-semibold text-accent-ink">Pre-order{off > 0 ? `, ${off}% off` : ""}</span> : soldOut ? <span className="rounded-full bg-ink px-2.5 py-1 text-[11px] font-medium text-paper">Sold out</span> : badges.map((t) => <TagBadge key={t} tag={t} text={t === "sale" && off > 0 ? `-${off}%` : undefined} />)}
         </div>
         {p.offerEndsAt && !soldOut && <span className="absolute bottom-3 left-3"><OfferCountdown endsAt={p.offerEndsAt} compact /></span>}
         <button onClick={quickAdd} disabled={soldOut} aria-label={added ? `${p.name} added to cart` : `Add ${p.name} to cart`} className="absolute bottom-2.5 right-2.5 grid h-10 w-10 place-items-center rounded-full bg-surface text-ink shadow-md transition hover:bg-accent hover:text-accent-ink active:scale-95 disabled:opacity-40">{added ? <Check size={17} /> : <ShoppingBag size={17} strokeWidth={1.6} />}</button>

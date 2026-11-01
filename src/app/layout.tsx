@@ -17,6 +17,8 @@ import { ChatWidget } from "@/components/ChatWidget";
 import { BackToTop } from "@/components/BackToTop";
 import { AnnouncementBar } from "@/components/AnnouncementBar";
 import { getCatalog } from "@/lib/catalog";
+import { getBanners } from "@/lib/banners";
+import { BannerPopup, OfferSlider } from "@/components/OfferSlider";
 import { Suspense } from "react";
 import { RefCapture } from "@/components/RefCapture";
 import { RecoveryCatcher } from "@/components/RecoveryCatcher";
@@ -42,7 +44,8 @@ export async function generateMetadata(): Promise<Metadata> {
 export const viewport: Viewport = { width: "device-width", initialScale: 1, viewportFit: "cover", themeColor: [{ media: "(prefers-color-scheme: light)", color: "#f5f5f1" }, { media: "(prefers-color-scheme: dark)", color: "#0b1513" }] };
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
-  const [{ categories, products }, s, zones] = await Promise.all([getCatalog(), getPublicSettings(), getZones()]);
+  const [{ categories, products }, s, zones, banners] = await Promise.all([getCatalog(), getPublicSettings(), getZones(), getBanners()]);
+  const inSlot = (slot: string) => banners.filter((b) => b.slot === slot);
   const a = s.announcement;
   // The menu always lists the live categories first, then any extra links added in Admin, Site and menu.
   const categoryLinks = categories.map((c) => ({ label: c.label, href: `/category/${c.id}` }));
@@ -62,10 +65,12 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           <Suspense fallback={null}><RefCapture /></Suspense>
           <RecoveryCatcher />
           <StoreOnly>
-            {a.enabled && a.text && <AnnouncementBar text={a.text} link={a.link} />}
+            {inSlot("header").length > 0 ? <OfferSlider banners={inSlot("header")} size="strip" /> : a.enabled && a.text && <AnnouncementBar text={a.text} link={a.link} />}
             <Header brand={s.brand.name} logo={s.brand.logo} links={menuLinks} categories={categories} themePicker={s.appearance.visitorPicker} cfg={s.headerStyle} contact={{ phone: s.contact.phone, whatsapp: s.contact.whatsapp }} />
           </StoreOnly>
           {children}
+          <StoreOnly><div className="mt-16"><OfferSlider banners={inSlot("pre-footer")} size="band" /></div></StoreOnly>
+          <StoreOnly><BannerPopup banners={inSlot("popup")} /></StoreOnly>
           <StoreOnly><Footer categories={categories} brand={s.brand} footer={s.footer} contact={s.contact} cfg={s.footerStyle} payments={methods.map((m) => m.name)} /></StoreOnly>
           <CartDrawer />
           <PromoPopup p={s.popup} />

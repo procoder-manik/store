@@ -61,6 +61,7 @@ export const blockSchema = z.discriminatedUnion("type", [
   z.object({ ...common, type: z.literal("products"), title: text(80), source: z.enum(["all", "category", "tag", "preorder"]), category: text(80), tag: z.enum(["new", "hot", "bestseller", "featured", "sale"]), count: z.number().int().min(2).max(12) }),
   z.object({ ...common, type: z.literal("categories"), title: text(80) }),
   z.object({ ...common, type: z.literal("banners"), title: text(80) }),
+  z.object({ ...common, type: z.literal("offers"), slot: z.string().trim().toLowerCase().regex(/^[a-z0-9-]{1,40}$/).default("home"), size: z.enum(["hero", "band", "strip"]).default("hero") }),
   z.object({ ...common, type: z.literal("banner"), title: text(80), sub: text(160), image, button: text(30), link }),
   z.object({ ...common, type: z.literal("bannerfull"), title: text(80), sub: text(160), image, button: text(30), link }),
   z.object({ ...common, type: z.literal("features"), title: text(80), items: z.array(z.object({ title: text(60), text: text(200) })).max(6) }),
@@ -86,13 +87,13 @@ export type BlockType = Block["type"];
 export const BLOCK_LABELS: Record<BlockType, string> = {
   hero: "Hero banner", herofull: "Hero banner, full width", sliderfull: "Image slider, full width", rail3dfull: "3D product slider, full width", bannerfull: "Banner, full width", split: "Picture and text side by side", trust: "Trust badges (delivery, returns, support)", html: "Custom HTML code", showcase: "Product showcase hero", showcasefull: "Product showcase hero, full width", rail3d: "3D product slider", slider: "Image slider", spotlight: "Product spotlight", pagehead: "Page title",
   richtext: "Text with headings and links", marquee: "Scrolling ticker", stats: "Numbers that count up", testimonials: "Customer words", countdown: "Countdown timer", gallery: "Photo gallery",
-  text: "Text", products: "Products", categories: "Categories", banners: "Offer banners", banner: "Banner", features: "Features",
+  text: "Text", products: "Products", categories: "Categories", banners: "Offer banners in a row", offers: "Offer slider", banner: "Banner", features: "Features",
   faq: "Questions", image: "Image", newsletter: "Email sign up", cta: "Call to action", order: "Order form with offers",
 };
 
 export const BLOCK_GROUPS: { title: string; types: BlockType[] }[] = [
   { title: "Top of the page", types: ["showcase", "showcasefull", "hero", "herofull", "rail3d", "rail3dfull", "slider", "sliderfull", "spotlight", "pagehead"] },
-  { title: "Products", types: ["products", "categories", "banners", "banner", "bannerfull"] },
+  { title: "Products", types: ["offers", "products", "categories", "banners", "banner", "bannerfull"] },
   { title: "Eye-catching", types: ["marquee", "stats", "countdown", "gallery", "testimonials"] },
   { title: "Content", types: ["richtext", "text", "split", "image", "features", "trust", "faq", "newsletter", "cta", "html"] },
   { title: "Selling", types: ["order"] },
@@ -147,6 +148,7 @@ export function newBlock(type: BlockType): Block {
     case "products": return { ...base, type, title: "Our picks", source: "all", category: "", tag: "featured", count: 4 };
     case "categories": return { ...base, type, title: "Shop by category" };
     case "banners": return { ...base, type, title: "" };
+    case "offers": return { ...base, type, slot: "home", size: "hero" };
     case "banner": return { ...base, type, title: "Banner title", sub: "", image: "", button: "Learn more", link: "/shop" };
     case "bannerfull": return { ...base, type, title: "Banner title", sub: "", image: "", button: "Learn more", link: "/shop" };
     case "features": return { ...base, type, title: "Why shop with us", items: [{ title: "Cash on delivery", text: "Pay when it arrives." }, { title: "Real stock", text: "Sold out options are marked." }, { title: "Fast support", text: "We answer questions quickly." }] };

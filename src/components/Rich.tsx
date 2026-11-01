@@ -1,3 +1,6 @@
+import { OfferSlot } from "./OfferSlider";
+import { shortcodeSlot } from "@/lib/banner-config";
+
 /** Plain text with blank lines between paragraphs and "- " bullet lists. Never treated as HTML. */
 export function Rich({ text, className = "" }: { text: string; className?: string }) {
   return (
@@ -5,6 +8,8 @@ export function Rich({ text, className = "" }: { text: string; className?: strin
       {text.split(/\n{2,}/).map((p, i) => {
         const lines = p.split("\n").map((l) => l.trim()).filter(Boolean);
         if (!lines.length) return null;
+        const slot = lines.length === 1 ? shortcodeSlot(lines[0]) : null;
+        if (slot) return <OfferSlot key={i} slot={slot} size="band" />;
         const bullets = lines.filter((l) => l.startsWith("- "));
         const rest = lines.filter((l) => !l.startsWith("- "));
         return (

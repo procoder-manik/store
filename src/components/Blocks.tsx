@@ -16,6 +16,8 @@ import { ProductArt } from "./ProductArt";
 import { ProductCard } from "./ProductCard";
 import { ProductHero } from "./ProductHero";
 import { Rich } from "./Rich";
+import { OfferSlot } from "./OfferSlider";
+import { shortcodeSlot } from "@/lib/banner-config";
 import { SliderBlock } from "./SliderBlock";
 import { Storefront } from "./Storefront";
 
@@ -174,6 +176,7 @@ export function BlockView({ b, ctx }: { b: Block; ctx: BlockCtx }) {
           <div className={`grid gap-4 ${b.width === "narrow" ? "max-w-3xl" : ""}`}>
             {b.parts.map((x, i) => {
               if (x.t === "heading") return <Heading key={i} as={x.level} className={`font-display font-semibold tracking-tight ${x.level === "h1" ? "text-4xl md:text-5xl" : x.level === "h2" ? "text-2xl md:text-3xl" : "text-xl md:text-2xl"} ${i > 0 ? "mt-4" : ""}`}>{x.text}</Heading>;
+              if (x.t === "paragraph" && shortcodeSlot(x.text)) return <OfferSlot key={i} slot={shortcodeSlot(x.text) as string} size="band" />;
               if (x.t === "paragraph") return <p key={i} className="text-[15px] leading-relaxed text-muted md:text-base">{x.text}</p>;
               if (x.t === "list") return <ul key={i} className="grid gap-2 pl-5 text-[15px] leading-relaxed text-muted [&>li]:list-disc">{x.items.map((l, k) => <li key={k}>{l}</li>)}</ul>;
               if (x.t === "quote") return <blockquote key={i} className="border-l-4 border-accent pl-5 text-lg italic leading-relaxed">{x.text}{x.by && <footer className="mt-2 text-sm not-italic text-muted">{x.by}</footer>}</blockquote>;
@@ -224,8 +227,10 @@ export function BlockView({ b, ctx }: { b: Block; ctx: BlockCtx }) {
         </section>
       );
     }
+    case "offers":
+      return <section className="w-full"><OfferSlot slot={b.slot} size={b.size} banners={ctx.banners} /></section>;
     case "banners": {
-      const banners = ctx.banners ?? [];
+      const banners = (ctx.banners ?? []).filter((x) => x.slot === "home");
       if (!banners.length) return null;
       return (
         <section className={wrap}>

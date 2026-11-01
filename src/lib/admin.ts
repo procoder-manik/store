@@ -26,5 +26,8 @@ async function guard(roles: string[], action?: string) {
 /** Server-side gate for every admin write. RLS enforces the same rule in the database. */
 export const requireAdmin = (action?: string) => guard(["manager", "super_admin"], action);
 
+/** Creating users and changing roles. */
+export const requireSuperAdmin = (action?: string) => guard(["super_admin"], action);
+
 /** Order handling is allowed for staff and above. */
 export const requireStaff = (action?: string) => guard(["staff", "manager", "super_admin"], action);

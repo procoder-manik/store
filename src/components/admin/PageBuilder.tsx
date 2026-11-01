@@ -18,7 +18,7 @@ const EMPTY: PageInitial = { slug: "", title: "", description: "", status: "draf
 const input = "w-full rounded-xl border border-line bg-surface px-3 py-2 text-sm";
 const label = "mb-1 block text-xs font-medium text-muted";
 const ALL = BLOCK_GROUPS.flatMap((g) => g.types);
-const LANDING: BlockType[] = ["showcase", "showcasefull", "rail3d", "rail3dfull", "hero", "herofull", "slider", "sliderfull", "split", "trust", "html", "bannerfull", "spotlight", "richtext", "text", "image", "features", "faq", "cta", "banner", "products", "newsletter", "order", "marquee", "stats", "countdown", "gallery", "testimonials"];
+const LANDING: BlockType[] = ["offers", "showcase", "showcasefull", "rail3d", "rail3dfull", "hero", "herofull", "slider", "sliderfull", "split", "trust", "html", "bannerfull", "spotlight", "richtext", "text", "image", "features", "faq", "cta", "banner", "products", "newsletter", "order", "marquee", "stats", "countdown", "gallery", "testimonials"];
 
 function F({ l, children }: { l: string; children: React.ReactNode }) { return <div><label className={label}>{l}</label>{children}</div>; }
 type Setter = (p: Record<string, unknown>) => void;
@@ -204,6 +204,7 @@ function Fields({ b, set, cats, products }: { b: Block; set: Setter; cats: Cat[]
     }
     case "products": return <>{t("title", b.title, "Title", 80)}{source(b)}<F l="How many (2 to 12)"><input type="number" min={2} max={12} className={input} value={b.count} onChange={(e) => set({ count: Math.min(12, Math.max(2, Number(e.target.value) || 4)) })} /></F></>;
     case "categories": return t("title", b.title, "Title", 80);
+    case "offers": return <>{t("slot", b.slot, "Banner group (home, or your own group name)", 40)}<F l="Height"><select className={input} value={b.size} onChange={(e) => set({ size: e.target.value })}><option value="hero">Large</option><option value="band">Medium</option><option value="strip">Slim strip</option></select></F><p className="text-xs text-muted">Shows the banners of this group from Banners, changing by themselves.</p></>;
     case "banners": return <>{t("title", b.title, "Title (optional)", 80)}<p className="text-xs text-muted">Shows the banners you manage under Banners.</p></>;
     case "banner":
     case "bannerfull": return <>{t("title", b.title, "Title", 80)}{t("sub", b.sub, "Sub text", 160)}{ti("image", b.image, "Picture")}{pair("button", b.button, "Button text", "link", b.link, "Link")}</>;
