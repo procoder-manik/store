@@ -4,6 +4,16 @@ import { SITE_URL } from "@/lib/config";
 
 export const emailConfigured = () => !!(process.env.RESEND_API_KEY && process.env.EMAIL_FROM);
 
+/** The sender always shows the current store name from Admin, Site and menu. Only the address comes from EMAIL_FROM. */
+async function senderLine() {
+  const raw = process.env.EMAIL_FROM ?? "";
+  const address = raw.match(/<([^>]+)>/)?.[1] ?? raw.trim();
+  const { getPublicSettings } = await import("@/lib/settings");
+  const { brand } = await getPublicSettings();
+  const name = brand.name.replace(/["<>]/g, "").trim();
+  return name ? `${name} <${address}>` : address;
+}
+
 export type Outgoing = { to: string; subject: string; html: string; text: string };
 
 /** Turns the email service's raw error into a sentence the store owner can act on. */
@@ -24,10 +34,11 @@ export async function sendEmails(msgs: Outgoing[], kind = "other"): Promise<{ se
     return { sent: 0, failed: msgs.length, error: "Add RESEND_API_KEY and EMAIL_FROM to .env.local." };
   }
   let sent = 0, failed = 0, error: string | undefined;
+  const from = await senderLine();
   for (let i = 0; i < msgs.length; i += 100) {
     const chunk = msgs.slice(i, i + 100);
     try {
-      const payload = chunk.map((m) => ({ from: process.env.EMAIL_FROM, to: [m.to], subject: m.subject, html: m.html, text: m.text }));
+      const payload = chunk.map((m) => ({ from, to: [m.to], subject: m.subject, html: m.html, text: m.text }));
       const res = await fetch(payload.length === 1 ? "https://api.resend.com/emails" : "https://api.resend.com/emails/batch", {
         method: "POST",
         headers: { "content-type": "application/json", authorization: `Bearer ${process.env.RESEND_API_KEY}` },

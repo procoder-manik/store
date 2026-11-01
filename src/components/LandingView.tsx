@@ -1,5 +1,7 @@
 "use client";
 
+import { DistrictFields } from "./DistrictFields";
+import { fullAddress } from "@/lib/districts";
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { Check } from "lucide-react";
@@ -41,7 +43,7 @@ export function LandingView({ landing, product, zones }: { landing: LandingData;
     start(async () => {
       const r = await placeLandingOrder({
         slug: landing.slug, qty: offer.qty, variantId: variant?.id, name: String(f.get("name")), phone: String(f.get("phone")), zoneId,
-        district: String(f.get("district")), address: String(f.get("address")), note: String(f.get("note") ?? ""), website: String(f.get("qz_hp") ?? ""),
+        district: String(f.get("district")), address: fullAddress(f), note: String(f.get("note") ?? ""), website: String(f.get("qz_hp") ?? ""),
       });
       if (!r.ok) return setError(r.error);
       router.push(`/thank-you/${r.id}`);
@@ -94,7 +96,7 @@ export function LandingView({ landing, product, zones }: { landing: LandingData;
           <input name="phone" required inputMode="tel" placeholder="Mobile number, like 01712345678" autoComplete="tel" className={input} />
           <div className="grid gap-3 sm:grid-cols-2">
             <select aria-label="Delivery area" value={zoneId} onChange={(e) => setZoneId(e.target.value)} className={input}>{zones.map((z) => <option key={z.id} value={z.id}>{z.name}</option>)}</select>
-            <input name="district" required placeholder="District" className={input} />
+            <DistrictFields className={input} zones={zones} setZoneId={setZoneId} />
           </div>
           <textarea name="address" required minLength={6} rows={2} placeholder="Full address" autoComplete="street-address" className={input} />
           <input name="note" placeholder="Note (optional)" maxLength={300} className={input} />

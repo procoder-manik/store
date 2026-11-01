@@ -26,11 +26,11 @@ export function ProductDetail({ product, related, pairs, reviews, bundle, whatsa
         <div className="md:sticky md:top-24 md:self-start">
           {images.length > 0 ? (
             <div
-              className="overflow-hidden rounded-3xl bg-surface"
+              style={{ background: `color-mix(in srgb, ${product.colors[colorIdx]?.hex ?? product.colors[0].hex} 17%, var(--surface))` }} className="overflow-hidden rounded-[18px]"
               onMouseMove={(e) => { const r = e.currentTarget.getBoundingClientRect(); setZoom(`${((e.clientX - r.left) / r.width) * 100}% ${((e.clientY - r.top) / r.height) * 100}%`); }}
               onMouseLeave={() => setZoom(null)}
             >
-              <img src={images[img]?.url} alt={images[img]?.alt} style={zoom ? { transformOrigin: zoom, transform: "scale(1.7)" } : undefined} className="aspect-[4/5] w-full cursor-zoom-in object-cover transition-transform duration-200" />
+              <img src={images[img]?.url} alt={images[img]?.alt} style={zoom ? { transformOrigin: zoom, transform: "scale(1.7)" } : undefined} className="aspect-[4/5] w-full cursor-zoom-in object-contain p-[8%] drop-shadow-[0_22px_24px_rgba(15,31,28,0.22)] transition-transform duration-200" />
             </div>
           ) : (
             <ProductArt kind={product.kind} color={product.colors[colorIdx]?.hex ?? product.colors[0].hex} className="aspect-[4/5] w-full rounded-3xl" />

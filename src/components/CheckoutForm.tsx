@@ -1,6 +1,8 @@
 "use client";
 
 import Link from "next/link";
+import { DistrictFields } from "./DistrictFields";
+import { fullAddress } from "@/lib/districts";
 import { useEffect, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { useCart } from "@/lib/cart";
@@ -72,7 +74,7 @@ export function CheckoutForm({ zones, bump = null, prefill = null, methods = [] 
     const f = new FormData(e.currentTarget);
     const payload = {
       name: String(f.get("name")), phone: String(f.get("phone")), email: String(f.get("email") ?? ""),
-      zoneId, district: String(f.get("district")), address: String(f.get("address")), note: String(f.get("note") ?? ""),
+      zoneId, district: String(f.get("district")), address: fullAddress(f), note: String(f.get("note") ?? ""),
       coupon, bump: bumpOn, useCredit, ref: readRef(), paymentMethod: method, payerNumber: String(f.get("payer") ?? ""), trxId: String(f.get("trxId") ?? ""), website: String(f.get("qz_hp") ?? ""), items: cartInput,
     };
     start(async () => {
@@ -113,7 +115,7 @@ export function CheckoutForm({ zones, bump = null, prefill = null, methods = [] 
                 {zones.map((z) => <option key={z.id} value={z.id}>{z.name}</option>)}
               </select>
             </div>
-            <div><label className={label} htmlFor="district">District</label><input id="district" name="district" defaultValue={prefill?.district} required maxLength={60} autoComplete="address-level2" className={input} /></div>
+            <DistrictFields className={input} labelClass={label} zones={zones} setZoneId={setZoneId} defaultDistrict={prefill?.district} />
           </div>
           <div><label className={label} htmlFor="address">Full address</label><textarea id="address" name="address" defaultValue={prefill?.address} required minLength={6} maxLength={300} rows={3} autoComplete="street-address" className={input} /></div>
           <div><label className={label} htmlFor="note">Order note (optional)</label><input id="note" name="note" maxLength={300} className={input} /></div>

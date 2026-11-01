@@ -1,5 +1,7 @@
 "use client";
 
+import { DistrictFields } from "./DistrictFields";
+import { fullAddress } from "@/lib/districts";
 import { useMemo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { Check } from "lucide-react";
@@ -68,7 +70,7 @@ export function OrderBlock({ block, products, zones, slug, preview = false }: { 
     const f = new FormData(e.currentTarget);
     const selections = sel.map((o) => ({ offerId: o.id, picks: Object.fromEntries(o.items.flatMap((it) => { const p = byId.get(it.productId) as Product; const v = p.variants?.length ? variantFor(p, pickFor(o.id, p)) : undefined; return v ? [[p.id, v.id]] : []; })) }));
     start(async () => {
-      const r = await placeLandingOrderV2({ slug, selections, zoneId, name: String(f.get("name")), phone: String(f.get("phone")), district: String(f.get("district")), address: String(f.get("address")), note: String(f.get("note") ?? ""), website: String(f.get("qz_hp") ?? "") });
+      const r = await placeLandingOrderV2({ slug, selections, zoneId, name: String(f.get("name")), phone: String(f.get("phone")), district: String(f.get("district")), address: fullAddress(f), note: String(f.get("note") ?? ""), website: String(f.get("qz_hp") ?? "") });
       if (!r.ok) return setError(r.error);
       router.push(`/thank-you/${r.id}`);
     });
@@ -125,7 +127,7 @@ export function OrderBlock({ block, products, zones, slug, preview = false }: { 
           <input name="phone" required inputMode="tel" placeholder="Mobile number, like 01712345678" autoComplete="tel" className={input} />
           <div className="grid gap-3 sm:grid-cols-2">
             <select aria-label="Delivery area" value={zoneId} onChange={(e) => setZoneId(e.target.value)} className={input}>{zones.map((z) => <option key={z.id} value={z.id}>{z.name}</option>)}</select>
-            <input name="district" required placeholder="District" className={input} />
+            <DistrictFields className={input} zones={zones} setZoneId={setZoneId} />
           </div>
           <textarea name="address" required minLength={6} rows={2} placeholder="Full address" autoComplete="street-address" className={input} />
           <input name="note" placeholder="Note (optional)" maxLength={300} className={input} />

@@ -141,10 +141,10 @@ export function Header({ brand, logo = "", links, categories = [], themePicker =
               {links.map((l) => <Link key={l.label + l.href} href={l.href} aria-current={active(l.href) ? "page" : undefined} className={`rounded-xl px-3 py-3 font-display text-3xl hover:bg-paper ${active(l.href) ? "text-accent" : ""}`}>{l.label}</Link>)}
               {cfg.cta.label && cfg.cta.href && <Link href={cfg.cta.href} className="mt-2 rounded-pill bg-accent px-5 py-3 text-center text-sm font-semibold text-accent-ink">{cfg.cta.label}</Link>}
             </div>
-            {categories.length > 0 && (
+            {categories.some((c) => !links.some((l) => l.href === `/category/${c.id}`)) && (
               <div className="mt-6 border-t border-line pt-5">
                 <p className="px-3 text-xs text-muted">Categories</p>
-                <div className="mt-2 grid gap-1">{categories.map((c) => <Link key={c.id} href={`/category/${c.id}`} className="rounded-xl px-3 py-2.5 hover:bg-paper">{c.label}</Link>)}</div>
+                <div className="mt-2 grid gap-1">{categories.filter((c) => !links.some((l) => l.href === `/category/${c.id}`)).map((c) => <Link key={c.id} href={`/category/${c.id}`} className="rounded-xl px-3 py-2.5 hover:bg-paper">{c.label}</Link>)}</div>
               </div>
             )}
             <div className="mt-auto grid gap-1 border-t border-line pt-5 text-sm">

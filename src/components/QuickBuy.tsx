@@ -1,5 +1,7 @@
 "use client";
 
+import { DistrictFields } from "./DistrictFields";
+import { fullAddress } from "@/lib/districts";
 import { useEffect, useMemo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { Check, Minus, Plus, X } from "lucide-react";
@@ -65,7 +67,7 @@ export function QuickBuy({ product, zones, onClose }: { product: Product; zones:
     start(async () => {
       const r = await placeOrder({
         name: String(f.get("name")), phone: String(f.get("phone")), email: String(f.get("email") ?? ""),
-        zoneId, district: String(f.get("district")), address: String(f.get("address")), note: "", coupon: "",
+        zoneId, district: String(f.get("district")), address: fullAddress(f), note: "", coupon: "",
         bump: false, useCredit: true, ref: readRef(), paymentMethod: method, payerNumber: String(f.get("payer") ?? ""), trxId: String(f.get("trxId") ?? ""), website: String(f.get("qz_hp") ?? ""),
         items: [{ productId: product.id, variantId: variant?.id, qty }],
       });
@@ -135,7 +137,7 @@ export function QuickBuy({ product, zones, onClose }: { product: Product; zones:
           </div>
           <div className="grid gap-2.5 sm:grid-cols-2">
             <select aria-label="Delivery area" value={zoneId} onChange={(e) => setZoneId(e.target.value)} className={field}>{zones.map((z) => <option key={z.id} value={z.id}>{z.name}</option>)}</select>
-            <input name="district" required placeholder="District" className={field} />
+            <DistrictFields className={field} zones={zones} setZoneId={setZoneId} />
           </div>
           <textarea name="address" required minLength={6} rows={3} placeholder="Full address" autoComplete="street-address" className={`${field} min-h-[96px] resize-none`} />
           <input name="email" type="email" placeholder="Email (optional, for your invoice)" autoComplete="email" className={field} />

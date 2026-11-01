@@ -43,6 +43,9 @@ export const viewport: Viewport = { width: "device-width", initialScale: 1, view
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const [{ categories }, s, zones] = await Promise.all([getCatalog(), getPublicSettings(), getZones()]);
   const a = s.announcement;
+  // The menu always lists the live categories first, then any extra links added in Admin, Site and menu.
+  const categoryLinks = categories.map((c) => ({ label: c.label, href: `/category/${c.id}` }));
+  const menuLinks = [...categoryLinks, ...s.header.links.filter((l) => !categoryLinks.some((c) => c.href === l.href))];
   const methods = availableMethods(s.payments, { sslReady: sslConfigured() });
   return (
     <html lang="en" suppressHydrationWarning data-theme={isTheme(s.appearance.theme) ? s.appearance.theme : "padma"} data-buttons={s.appearance.buttons ?? "round"} {...(isPalette(s.appearance.accent) ? { "data-palette": s.appearance.accent } : {})} className={fontClasses}>
@@ -56,7 +59,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           <Suspense fallback={null}><RefCapture /></Suspense>
           <StoreOnly>
             {a.enabled && a.text && <AnnouncementBar text={a.text} link={a.link} />}
-            <Header brand={s.brand.name} logo={s.brand.logo} links={s.header.links} categories={categories} themePicker={s.appearance.visitorPicker} cfg={s.headerStyle} contact={{ phone: s.contact.phone, whatsapp: s.contact.whatsapp }} />
+            <Header brand={s.brand.name} logo={s.brand.logo} links={menuLinks} categories={categories} themePicker={s.appearance.visitorPicker} cfg={s.headerStyle} contact={{ phone: s.contact.phone, whatsapp: s.contact.whatsapp }} />
           </StoreOnly>
           {children}
           <StoreOnly><Footer categories={categories} brand={s.brand} footer={s.footer} contact={s.contact} cfg={s.footerStyle} payments={methods.map((m) => m.name)} /></StoreOnly>

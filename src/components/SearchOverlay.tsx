@@ -51,7 +51,7 @@ export function SearchOverlay({ bar = false }: { bar?: boolean }) {
           <div onClick={(e) => e.stopPropagation()} className="pop-in mx-auto max-w-xl overflow-hidden rounded-3xl border border-line bg-surface shadow-2xl">
             <form onSubmit={(e) => { e.preventDefault(); if (q.trim()) { router.push(`/shop?q=${encodeURIComponent(q.trim())}`); close(); } }} className="flex items-center gap-3 border-b border-line px-5">
               <Search size={18} className="text-muted" />
-              <input ref={input} value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search saris, shirts, bags..." aria-label="Search" type="search" enterKeyHint="search" className="h-16 min-w-0 flex-1 bg-transparent text-base outline-none" />
+              <input ref={input} value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search bedsheets, cushions, vases..." aria-label="Search" type="search" enterKeyHint="search" className="h-16 min-w-0 flex-1 bg-transparent text-base outline-none" />
               <button type="button" aria-label="Close search" onClick={close} className="grid h-9 w-9 place-items-center rounded-full hover:bg-paper"><X size={16} /></button>
             </form>
             <div className="max-h-[55vh] overflow-y-auto p-2">
@@ -59,7 +59,7 @@ export function SearchOverlay({ bar = false }: { bar?: boolean }) {
               {q.trim().length >= 2 && !busy && hits.length === 0 && <p className="px-4 py-6 text-sm text-muted">No products match. Try another word.</p>}
               {hits.map((h) => (
                 <Link key={h.slug} href={`/product/${h.slug}`} onClick={close} className="flex items-center gap-4 rounded-2xl p-2 transition hover:bg-paper">
-                  {h.image ? <img src={h.image} alt="" className="h-14 w-12 rounded-lg border border-line object-cover" /> : <ProductArt kind={h.kind} color={h.color} className="h-14 w-12 rounded-lg border border-line" />}
+                  {h.image ? <img src={h.image} alt="" className="h-14 w-12 rounded-lg border border-line object-contain bg-paper p-1" /> : <ProductArt kind={h.kind} color={h.color} className="h-14 w-12 rounded-lg border border-line" />}
                   <span className="min-w-0 flex-1 truncate text-sm font-medium">{h.name}</span>
                   <span className="text-sm text-muted">{formatPrice(h.price)}</span>
                 </Link>

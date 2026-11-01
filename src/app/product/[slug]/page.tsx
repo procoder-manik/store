@@ -12,6 +12,11 @@ import { BundleBox } from "@/components/BundleBox";
 
 export const revalidate = 60;
 
+// An empty list means: build each page on its first visit, then serve it from the cache. Without this, every visit hits the database.
+export async function generateStaticParams() {
+  return [];
+}
+
 type Params = { params: Promise<{ slug: string }> };
 
 export async function generateMetadata({ params }: Params): Promise<Metadata> {

@@ -13,8 +13,8 @@ export function infoDefault(slug: InfoSlug, brand: string, email: string): InfoD
   const mail = email || "us through the Contact page";
   switch (slug) {
     case "about":
-      return { title: "About us", description: `${brand} sells clothing, accessories and home pieces in Bangladesh, with cash on delivery.`, intro: `${brand} takes its name from the golden boat in Tagore\'s poem, which carries away only what is worth keeping. We sell clothing, accessories and home pieces. We want shopping to be simple: see the real product, pick your color and size, and pay when it arrives.`, sections: [
-        { heading: "What we sell", body: "Saris, dresses and shirts, bags for every day, and linen and ceramics for your home. Every product page shows the colors, sizes and what is in stock right now." },
+      return { title: "About us", description: `${brand} sells bedsheets, pillows, home decor and accessories in Bangladesh, with cash on delivery.`, intro: `${brand} takes its name from the golden boat in Tagore\'s poem, which carries away only what is worth keeping. We sell bedsheets, pillows, home decor and accessories. We want shopping to be simple: see the real product, pick your color and size, and pay when it arrives.`, sections: [
+        { heading: "What we sell", body: "Bedsheets and quilts in good fabric, pillows and cushions, and decor and small accessories for every room. Every product page shows the colors, sizes and what is in stock right now." },
         { heading: "How ordering works", body: "- Choose your product, color and size, then place your order.\n- We call to confirm it.\n- A courier brings it to your door.\n- You check the parcel and pay in cash, or you pay online before delivery if you prefer." },
         { heading: "We are here to help", body: `If you have a question about a product, an order or a delivery, reach out on the Contact page. We would rather answer a question before you order than fix a problem after.` },
       ] };
@@ -48,11 +48,11 @@ export function infoDefault(slug: InfoSlug, brand: string, email: string): InfoD
         { heading: "Items we cannot take back", body: "For hygiene reasons, items that have been used or washed cannot be returned unless they arrived faulty." },
       ] };
     case "size-guide":
-      return { title: "Size guide", description: `How to measure yourself and pick the right size at ${brand}.`, intro: "Sizes differ a little between brands and cuts, so measure once and compare with the details on the product page.", sections: [
-        { heading: "How to measure", body: "- Chest: around the fullest part of your chest, under your arms, keeping the tape level.\n- Waist: around your natural waist.\n- Length: from the top of the shoulder to where you want the item to end.\n- Measure over light clothing, and keep the tape snug but not tight." },
-        { heading: "Choosing between two sizes", body: "Pick the larger size for a relaxed fit, or if you plan to wear layers. Pick the smaller size for a closer fit. Boxy and oversized items are cut wide on purpose, so many people choose their usual size or one size down." },
-        { heading: "Bedding", body: "Check the bed size named on the product (Single, Double or King) and measure your mattress length, width and depth. If your mattress is deep, ask us before you order." },
-        { heading: "Still not sure?", body: "Send us your height and usual size on the Contact page or WhatsApp and we will help you choose." },
+      return { title: "Size guide", description: `How to choose the right bedsheet and cushion size at ${brand}.`, intro: "Sizes differ a little between products, so measure once and compare with the details on the product page.", sections: [
+        { heading: "Bedsheets and quilts", body: "Measure your mattress length, width and depth, then compare them with the size named on the product. If your mattress is deep, ask us before you order." },
+        { heading: "Pillows and cushions", body: "Measure your cushion from seam to seam. For a full, plump look, choose a cover the same size as the cushion or slightly smaller." },
+        { heading: "Decor", body: "Check the measurements on the product page and hold a tape where the piece will go. It is the quickest way to see how it will fit the room." },
+        { heading: "Still not sure?", body: "Send us your measurements on the Contact page or WhatsApp and we will help you choose." },
       ] };
     case "privacy":
       return { title: "Privacy policy", description: `How ${brand} collects, uses and protects your personal information.`, intro: `This page explains what ${brand} collects when you shop with us and what we do with it.`, sections: [

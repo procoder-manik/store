@@ -188,28 +188,33 @@ export function BlockView({ b, ctx }: { b: Block; ctx: BlockCtx }) {
       const list = pick(products, b.source, b.category, b.tag).slice(0, b.count);
       return (
         <section className={wrap}>
-          {b.title && <Heading as={b.level} className="mb-6 font-display text-2xl font-semibold md:text-3xl">{b.title}</Heading>}
+          {b.title && (
+            <div className="mb-8 flex items-end justify-between gap-4">
+              <Heading as={b.level} className="font-display text-2xl font-semibold md:text-3xl">{b.title}</Heading>
+              <Link href={b.source === "category" && b.category ? `/category/${b.category}` : "/shop"} className="shrink-0 pb-1 text-sm underline underline-offset-4 hover:text-accent">See all</Link>
+            </div>
+          )}
           {list.length === 0 ? <p className="text-sm text-muted">No products match yet.</p> : <div className="grid grid-cols-2 gap-x-3 gap-y-10 md:grid-cols-4 md:gap-x-6 md:gap-y-14">{list.map((p) => <ProductCard key={p.id} p={p} />)}</div>}
         </section>
       );
     }
     case "categories": {
-      const lead = categories.length % 2 === 1;
+      // Four categories make a mosaic: one large panel, two small, one wide. Other counts use an even grid.
+      const mosaic = categories.length === 4;
       return (
         <section className={wrap}>
-          {b.title && <Heading as={b.level} className="mb-6 font-display text-2xl font-semibold md:text-3xl">{b.title}</Heading>}
-          <div className={`grid grid-cols-2 gap-3 md:gap-4 ${categories.length >= 5 && categories.length !== 5 ? "md:grid-cols-4 lg:grid-cols-5" : "md:grid-cols-4"}`}>
+          {b.title && <Heading as={b.level} className="mb-8 font-display text-2xl font-semibold md:text-3xl">{b.title}</Heading>}
+          <div className={`grid grid-cols-2 gap-3 md:gap-4 ${mosaic ? "md:auto-rows-[300px] md:grid-cols-4" : "md:grid-cols-4"}`}>
             {categories.map((c, i) => {
-              const first = products.find((p) => p.category === c.id);
-              const n = products.filter((p) => p.category === c.id).length;
-              const big = lead && i === 0;
-              const shape = big ? "aspect-[16/10] md:aspect-auto" : "aspect-[3/4]";
+              const first = products.find((p) => p.category === c.id && p.image) ?? products.find((p) => p.category === c.id);
+              const hex = first?.colors[0]?.hex ?? "#d9dbe0";
+              const shape = mosaic && i === 0 ? "col-span-2 md:row-span-2 aspect-[4/3] md:aspect-auto" : mosaic && i === 3 ? "col-span-2 aspect-[16/9] md:aspect-auto" : "aspect-[4/5] md:aspect-auto";
               return (
-                <Link key={c.id} href={`/category/${c.id}`} className={`group relative block overflow-hidden rounded-2xl bg-surface ${big ? `col-span-2 ${categories.length === 5 ? "md:row-span-2" : ""}` : ""}`}>
-                  {first?.image ? <img src={first.image} alt="" loading="lazy" className={`${shape} h-full w-full object-cover transition duration-700 group-hover:scale-[1.04]`} /> : first ? <ProductArt kind={first.kind} color={first.colors[0].hex} className={`${shape} h-full w-full transition duration-700 group-hover:scale-[1.04]`} /> : <div className="aspect-[4/5] w-full" />}
-                  <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/65 to-transparent p-4 pt-16 text-white md:p-5">
-                    <p className={`font-display font-normal leading-tight ${big ? "text-3xl md:text-5xl" : "text-2xl md:text-3xl"}`}>{c.label}</p>
-                    
+                <Link key={c.id} href={`/category/${c.id}`} style={{ background: `color-mix(in srgb, ${hex} 22%, var(--surface))` }} className={`group relative block overflow-hidden rounded-[14px] ${mosaic ? shape : "aspect-[4/5]"}`}>
+                  {first?.image && <img src={first.image} alt="" loading="lazy" className="absolute inset-0 h-full w-full object-contain p-[9%] pt-[22%] drop-shadow-[0_18px_20px_rgba(15,31,28,0.22)] transition duration-700 ease-out group-hover:scale-[1.05]" />}
+                  <div className="absolute left-4 right-4 top-4 flex items-start justify-between gap-3 md:left-6 md:right-6 md:top-5">
+                    <p className={`font-display font-normal leading-[1.05] ${mosaic && i === 0 ? "text-3xl md:text-5xl" : "text-2xl md:text-3xl"}`}>{c.label}</p>
+                    <span aria-hidden className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-surface text-sm transition duration-300 group-hover:bg-accent group-hover:text-accent-ink">{"\u2197"}</span>
                   </div>
                 </Link>
               );
@@ -261,10 +266,10 @@ export function BlockView({ b, ctx }: { b: Block; ctx: BlockCtx }) {
       );
     case "faq":
       return (
-        <section className={wrap}>
-          {b.title && <Heading as={b.level} className="mb-6 font-display text-2xl font-semibold md:text-3xl">{b.title}</Heading>}
-          <div className="max-w-3xl divide-y divide-line rounded-2xl border border-line bg-surface">
-            {b.items.map((f, i) => <details key={i} className="group p-5"><summary className="flex cursor-pointer list-none items-center justify-between gap-4 font-medium">{f.q}<span className="text-xl text-muted transition group-open:rotate-45" aria-hidden>+</span></summary><p className="mt-2 whitespace-pre-line text-sm leading-relaxed text-muted">{f.a}</p></details>)}
+        <section className={`${wrap} grid gap-8 md:grid-cols-[1fr_1.6fr] md:gap-14`}>
+          {b.title ? <Heading as={b.level} className="font-display text-2xl font-semibold md:text-3xl">{b.title}</Heading> : <span />}
+          <div className="divide-y divide-line border-y border-line">
+            {b.items.map((f, i) => <details key={i} className="group py-5"><summary className="flex cursor-pointer list-none items-center justify-between gap-4 font-medium">{f.q}<span className="text-xl text-muted transition group-open:rotate-45" aria-hidden>+</span></summary><p className="mt-2 whitespace-pre-line text-sm leading-relaxed text-muted">{f.a}</p></details>)}
           </div>
         </section>
       );
@@ -299,7 +304,7 @@ export function BlockView({ b, ctx }: { b: Block; ctx: BlockCtx }) {
       return (
         <section className={wrap}>
           <div className={`grid items-center gap-8 md:grid-cols-2 md:gap-14 ${b.imageSide === "right" ? "md:[&>*:first-child]:order-2" : ""}`}>
-            <div className="overflow-hidden bg-surface">{b.image ? <img src={b.image} alt="" loading="lazy" className="aspect-[4/5] w-full object-cover" /> : <div className="aspect-[4/3] bg-gradient-to-br from-accent/25 to-paper" />}</div>
+            <div className="overflow-hidden rounded-[14px] bg-surface">{b.image ? <img src={b.image} alt="" loading="lazy" className="aspect-[4/5] w-full object-cover" /> : <div className="aspect-[4/3] bg-gradient-to-br from-accent/25 to-paper" />}</div>
             <div>
               {b.heading && <Heading as={b.level} className="font-display text-3xl font-semibold tracking-tight md:text-4xl">{b.heading}</Heading>}
               <div className="mt-4 grid gap-3 text-[15px] leading-relaxed text-muted md:text-base"><Rich text={b.body} /></div>
@@ -386,9 +391,9 @@ export function BlockView({ b, ctx }: { b: Block; ctx: BlockCtx }) {
           {imgs.length === 0 ? <div className="grid aspect-[16/6] place-items-center rounded-3xl border border-dashed border-line text-sm text-muted">Add photo links</div> : (
             <div className="grid auto-rows-[160px] grid-cols-2 gap-3 md:auto-rows-[220px] md:grid-cols-4">
               {imgs.map((x, i) => (
-                <figure key={i} className={`group relative overflow-hidden rounded-2xl ${i % 5 === 0 ? "row-span-2" : ""} ${i % 7 === 3 ? "md:col-span-2" : ""}`}>
+                <figure key={i} className={`group relative overflow-hidden rounded-[14px] ${i % 5 === 0 ? "row-span-2" : ""} ${i % 7 === 3 ? "md:col-span-2" : ""}`}>
                   <img src={x.src} alt={x.caption} loading="lazy" className="h-full w-full object-cover transition duration-700 group-hover:scale-110" />
-                  {x.caption && <figcaption className="absolute inset-x-0 bottom-0 translate-y-full bg-gradient-to-t from-black/70 to-transparent p-3 text-sm text-white transition duration-300 group-hover:translate-y-0">{x.caption}</figcaption>}
+                  {x.caption && <figcaption className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 to-transparent p-4 pt-10 font-display text-xl text-white">{x.caption}</figcaption>}
                 </figure>
               ))}
             </div>
