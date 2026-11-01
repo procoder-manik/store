@@ -47,9 +47,9 @@ export function ProductDetail({ product, related, pairs, reviews, bundle, whatsa
         </div>
         <div>
           <h1 className="font-display text-[clamp(2rem,1.4rem+2.4vw,3.25rem)] font-bold leading-[1.02]">{product.name}</h1>
-          {product.tags.length > 0 && (
+          {product.tags.some((t) => t === "new" || t === "bestseller" || t === "sale") && (
             <div className="mt-3 flex gap-1.5">
-              {product.tags.map((t) => <TagBadge key={t} tag={t} size="md" />)}
+              {product.tags.filter((t) => t === "new" || t === "bestseller" || t === "sale").map((t) => <TagBadge key={t} tag={t} size="md" />)}
             </div>
           )}
           {product.offerEndsAt && <div className="mt-5"><OfferCountdown endsAt={product.offerEndsAt} /></div>}

@@ -22,7 +22,7 @@ export function ProductCard({ p, zones }: { p: Product; zones?: Zone[] }) {
   const soldOut = (p.variants?.length ?? 0) > 0 && p.variants!.every((v) => v.stock <= 0);
   const onSale = (p.compareAt ?? 0) > p.basePrice || p.tags.includes("sale");
   const off = (p.compareAt ?? 0) > p.basePrice ? Math.round((1 - p.basePrice / (p.compareAt as number)) * 100) : 0;
-  const tagOrder = ["sale", "hot", "bestseller", "new", "featured"] as const;
+  const tagOrder = ["sale", "bestseller", "new"] as const;
   const badges = tagOrder.filter((t) => (t === "sale" ? onSale : p.tags.includes(t))).slice(0, 1);
   const swatches = p.hasColors === false ? [] : p.colors;
   // "Add to cart" never opens a popup: it drops the first in-stock option straight into the cart.
