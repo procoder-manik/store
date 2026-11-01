@@ -18,7 +18,7 @@ const EMPTY: PageInitial = { slug: "", title: "", description: "", status: "draf
 const input = "w-full rounded-xl border border-line bg-surface px-3 py-2 text-sm";
 const label = "mb-1 block text-xs font-medium text-muted";
 const ALL = BLOCK_GROUPS.flatMap((g) => g.types);
-const LANDING: BlockType[] = ["hero", "herofull", "slider", "sliderfull", "split", "trust", "html", "bannerfull", "spotlight", "richtext", "text", "image", "features", "faq", "cta", "banner", "products", "newsletter", "order", "marquee", "stats", "countdown", "gallery", "testimonials"];
+const LANDING: BlockType[] = ["showcase", "showcasefull", "rail3d", "rail3dfull", "hero", "herofull", "slider", "sliderfull", "split", "trust", "html", "bannerfull", "spotlight", "richtext", "text", "image", "features", "faq", "cta", "banner", "products", "newsletter", "order", "marquee", "stats", "countdown", "gallery", "testimonials"];
 
 function F({ l, children }: { l: string; children: React.ReactNode }) { return <div><label className={label}>{l}</label>{children}</div>; }
 type Setter = (p: Record<string, unknown>) => void;
