@@ -34,7 +34,7 @@ export function SocialProof() {
 
   if (!cur || off || blocked) return null;
   return (
-    <div role="status" aria-live="polite" className="pop-in fixed bottom-20 left-3 z-40 flex max-w-[300px] items-start gap-3 rounded-2xl border border-line bg-surface/95 p-3 pr-9 shadow-xl backdrop-blur md:bottom-5 md:left-5">
+    <div role="status" aria-live="polite" className="float-lift pop-in fixed bottom-20 left-3 z-40 flex max-w-[min(300px,calc(100vw-7rem))] items-start gap-3 rounded-2xl border border-line bg-surface/95 p-3 pr-9 shadow-xl backdrop-blur md:bottom-5 md:left-5">
       <span className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-accent font-display text-lg font-semibold text-accent-ink">{cur.name.charAt(0).toUpperCase()}</span>
       <p className="text-sm leading-snug">
         <span className="font-medium">{cur.name}</span> from {cur.city} bought <span className="font-medium">{cur.product}</span> for {formatPrice(cur.price)}

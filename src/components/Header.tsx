@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import { useTheme } from "next-themes";
 import { Heart, Menu, Monitor, Moon, Phone, ShoppingBag, Sun, User, X } from "lucide-react";
@@ -12,6 +12,7 @@ import type { HeaderStyleCfg } from "@/lib/layout-styles";
 import { DEFAULT_HEADER_STYLE } from "@/lib/layout-styles";
 import { ThemePicker } from "./ThemePicker";
 import { SearchOverlay } from "./SearchOverlay";
+import { Portal, useOverlay } from "./Portal";
 
 const ORDER = ["light", "dark", "system"] as const;
 type L = { label: string; href: string };
@@ -27,6 +28,8 @@ export function Header({ brand, logo = "", links, categories = [], themePicker =
   const wish = useWishlist((s) => s.ids.length);
   useEffect(() => setMounted(true), []);
   useEffect(() => setMenu(false), [path]);
+  const closeMenu = useCallback(() => setMenu(false), []);
+  useOverlay(menu, closeMenu);
 
   const dark = cfg.style === "bold";
   const next = ORDER[(ORDER.indexOf((theme ?? "light") as (typeof ORDER)[number]) + 1) % ORDER.length];
@@ -39,7 +42,7 @@ export function Header({ brand, logo = "", links, categories = [], themePicker =
     <Link key={l.label + l.href} href={l.href} className={`rounded-pill px-3.5 py-2 transition ${cfg.uppercaseMenu ? "text-xs font-semibold uppercase tracking-wider" : "text-sm"} ${active(l.href) ? (dark ? "bg-white/15 font-medium" : "bg-surface font-medium text-ink") : dark ? "text-paper/70 hover:text-paper" : "text-muted hover:text-ink"}`}>{l.label}</Link>
   );
   const logoEl = (big = false) => <Link href="/" className={`font-display font-semibold tracking-tight ${big ? "text-2xl md:text-3xl" : "text-xl"}`}>{logo ? <img src={logo} alt={brand} className={`${big ? "h-10" : "h-8"} max-w-[180px] object-contain`} /> : brand}</Link>;
-  const burger = (cls = "") => <button aria-label="Open menu" onClick={() => setMenu(true)} className={`${icon} md:hidden ${cls}`}><Menu size={20} /></button>;
+  const burger = (cls = "") => <button aria-label="Open menu" aria-expanded={menu} onClick={() => setMenu(true)} className={`${icon} shrink-0 md:hidden ${cls}`}><Menu size={20} /></button>;
 
   const tools = (
     <div className="flex items-center">
@@ -119,12 +122,13 @@ export function Header({ brand, logo = "", links, categories = [], themePicker =
       {strip}
       {body}
       {menu && (
-        <div className="fixed inset-0 z-50 md:hidden" role="dialog" aria-modal="true" aria-label="Menu">
-          <div className="absolute inset-0 bg-black/40" onClick={() => setMenu(false)} />
-          <nav className="panel-in absolute inset-y-0 left-0 flex w-[82%] max-w-sm flex-col overflow-y-auto bg-surface p-5 text-ink shadow-2xl">
+        <Portal>
+        <div className="fixed inset-0 z-[70] md:hidden" role="dialog" aria-modal="true" aria-label="Menu">
+          <div className="fade-in absolute inset-0 bg-black/45 backdrop-blur-[2px]" onClick={closeMenu} />
+          <nav className="drawer-left absolute inset-y-0 left-0 flex h-dvh w-[84%] max-w-sm flex-col overflow-y-auto overscroll-contain bg-surface p-5 pb-[max(1.25rem,env(safe-area-inset-bottom))] text-ink shadow-2xl">
             <div className="flex items-center justify-between">
               <span className="font-display text-xl font-semibold">{brand}</span>
-              <button aria-label="Close menu" onClick={() => setMenu(false)} className="grid h-10 w-10 place-items-center rounded-full hover:bg-paper"><X size={18} /></button>
+              <button aria-label="Close menu" onClick={closeMenu} className="grid h-10 w-10 place-items-center rounded-full hover:bg-paper"><X size={18} /></button>
             </div>
             <div className="mt-6 grid gap-1">
               {links.map((l) => <Link key={l.label + l.href} href={l.href} className="rounded-xl px-3 py-3 text-lg font-medium hover:bg-paper">{l.label}</Link>)}
@@ -143,6 +147,7 @@ export function Header({ brand, logo = "", links, categories = [], themePicker =
             </div>
           </nav>
         </div>
+        </Portal>
       )}
     </header>
   );

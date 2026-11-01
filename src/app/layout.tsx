@@ -39,7 +39,7 @@ export async function generateMetadata(): Promise<Metadata> {
     verification: s.tracking.gscToken ? { google: s.tracking.gscToken } : undefined,
   };
 }
-export const viewport: Viewport = { width: "device-width", initialScale: 1 };
+export const viewport: Viewport = { width: "device-width", initialScale: 1, viewportFit: "cover" };
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const [{ categories }, s, zones] = await Promise.all([getCatalog(), getPublicSettings(), getZones()]);

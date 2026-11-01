@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Check, Minus, Plus, Truck } from "lucide-react";
 import type { Product } from "@/lib/demo-products";
@@ -8,6 +8,7 @@ import { formatPrice } from "@/lib/config";
 import { useCart } from "@/lib/cart";
 import { trackAddToCart } from "@/lib/track";
 import { ListButtons } from "./ListButtons";
+import { Portal } from "./Portal";
 
 type Props = { product: Product; colorIdx: number; onColor: (i: number) => void; compact?: boolean };
 
@@ -17,6 +18,8 @@ export function ProductBuy({ product, colorIdx, onColor, compact = false }: Prop
   const [qty, setQty] = useState(1);
   const [added, setAdded] = useState(false);
   const add = useCart((s) => s.add);
+  const buttons = useRef<HTMLDivElement>(null);
+  const [pinned, setPinned] = useState(false);
   const setOpen = useCart((s) => s.setOpen);
 
   const hasColors = product.hasColors !== false;
@@ -37,6 +40,15 @@ export function ProductBuy({ product, colorIdx, onColor, compact = false }: Prop
   };
   const onAdd = () => { addToCart(); setAdded(true); setOpen(true); window.setTimeout(() => setAdded(false), 1800); };
   const buyNow = () => { addToCart(); router.push("/checkout"); };
+
+  // On phones, keep a buy bar on screen once the main buttons have scrolled up out of view.
+  useEffect(() => {
+    const el = buttons.current;
+    if (compact || !el || !("IntersectionObserver" in window)) return;
+    const io = new IntersectionObserver(([e]) => setPinned(!e.isIntersecting && e.boundingClientRect.top < 0));
+    io.observe(el);
+    return () => io.disconnect();
+  }, [compact]);
 
   const stepper = (
     <div className="inline-flex shrink-0 items-center rounded-pill border border-line">
@@ -92,13 +104,27 @@ export function ProductBuy({ product, colorIdx, onColor, compact = false }: Prop
       ) : (
         <>
           <div className="mt-5 flex items-center gap-4">{stepper}{stockNote && <p className={`text-sm ${available ? "text-muted" : "text-red-600"}`}>{stockNote}</p>}</div>
-          <div className="mt-5 grid gap-2.5">
+          <div ref={buttons} className="mt-5 grid gap-2.5">
             <button disabled={!available} onClick={onAdd} className="flex items-center justify-center gap-2 rounded-pill bg-accent py-3.5 text-sm font-semibold text-accent-ink transition active:scale-[0.99] disabled:opacity-40">
               {added ? <><Check size={16} /> Added to cart</> : available ? "Add to cart" : "Sold out"}
             </button>
             <button disabled={!available} onClick={buyNow} className="rounded-pill bg-ink py-3.5 text-sm font-semibold text-paper transition active:scale-[0.99] disabled:opacity-40">Buy now</button>
           </div>
         </>
+      )}
+      {pinned && (
+        <Portal>
+          <div className="buy-bar pop-in fixed inset-x-0 bottom-0 z-30 border-t border-line bg-surface/95 px-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-3 shadow-[0_-12px_30px_-12px_rgba(0,0,0,0.25)] backdrop-blur-xl md:hidden">
+            <div className="flex items-center gap-2">
+              <div className="min-w-0 flex-1 pr-1">
+                <p className="truncate text-xs text-muted">{product.name}{size ? ` · ${size}` : ""}</p>
+                <p className="font-display text-lg font-semibold leading-tight tabular-nums">{formatPrice(price)}</p>
+              </div>
+              <button disabled={!available} onClick={onAdd} className="rounded-pill bg-accent px-4 py-3 text-sm font-semibold text-accent-ink transition active:scale-[0.98] disabled:opacity-40">{added ? <Check size={16} /> : available ? "Add" : "Sold out"}</button>
+              <button disabled={!available} onClick={buyNow} className="rounded-pill bg-ink px-4 py-3 text-sm font-semibold text-paper transition active:scale-[0.98] disabled:opacity-40">Buy now</button>
+            </div>
+          </div>
+        </Portal>
       )}
       <p className="mt-3 flex items-center gap-2 text-xs text-muted"><Truck size={14} /> Cash on delivery. Pay when it arrives.</p>
       <ListButtons id={product.id} />
