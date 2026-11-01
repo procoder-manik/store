@@ -52,6 +52,7 @@ export default async function Account() {
           <h1 className="font-display text-3xl font-semibold">Hello, {profile?.full_name?.split(" ")[0] ?? "there"}</h1>
           <p className="mt-1 text-sm text-muted">{user.email}</p>
         </div>
+        <Link href="/reset-password" className="text-sm text-muted underline hover:text-ink">Change password</Link>
         <SignOutButton />
       </div>
 

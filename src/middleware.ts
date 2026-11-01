@@ -2,6 +2,8 @@ import { NextResponse, type NextRequest } from "next/server";
 import { createServerClient } from "@supabase/ssr";
 
 export async function middleware(req: NextRequest) {
+  // Preview pages exist only on a developer's computer.
+  if (req.nextUrl.pathname.startsWith("/dev") && process.env.NODE_ENV === "production") return new NextResponse("Not found", { status: 404 });
   if (req.nextUrl.pathname === "/shop") {
     const cat = req.nextUrl.searchParams.get("cat");
     if (cat && /^[a-z0-9-]{1,80}$/.test(cat)) {
@@ -41,4 +43,4 @@ export async function middleware(req: NextRequest) {
   return res;
 }
 
-export const config = { matcher: ["/admin/:path*", "/account/:path*", "/login", "/shop"] };
+export const config = { matcher: ["/admin/:path*", "/account/:path*", "/login", "/shop", "/dev/:path*"] };

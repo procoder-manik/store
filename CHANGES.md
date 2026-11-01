@@ -1,5 +1,12 @@
 # What changed
 
+## Launch redesign (Nov 2026)
+- New house theme, Nil: Bengal indigo, marigold thread and a woven band. It is listed in Admin > Settings with the other themes. `supabase/migrations/0020_launch_content.sql` switches the live site to it.
+- Storefront: bigger hero, product cards with one clear "Buy now" and a cart button, category mosaic, new footer, sale prices in red, picture zoom, loading placeholders, order confirmation with next steps. Share picture, site icon and app manifest added.
+- Accounts: redesigned sign-in, forgot password, change password (`/reset-password`). Supabase must allow that address under Authentication > URL Configuration.
+- Admin: Ctrl+K search for any page, order or product; phone tab bar; pending order count; quick actions on the dashboard.
+- Security: sign-in links can no longer redirect to other sites; made-up purchase notifications removed; private pages are not cached or indexed; `/dev` blocked in production; rate limit on purchase notifications.
+
 ## Mobile and UX fixes (Nov 2026)
 - Mobile menu (hamburger) now opens full screen. It used to open squeezed under the header because the blurred header trapped it. The search popup had the same problem and is fixed too.
 - Menu, search and cart lock the page behind them and close with Escape. The closed cart no longer leaves a shadow on the right edge and can no longer be reached with the keyboard.

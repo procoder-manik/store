@@ -174,28 +174,35 @@ export function BlockView({ b, ctx }: { b: Block; ctx: BlockCtx }) {
       return (
         <section className={wrap}>
           {b.title && <Heading as={b.level} className="mb-6 font-display text-2xl font-semibold md:text-3xl">{b.title}</Heading>}
-          {list.length === 0 ? <p className="text-sm text-muted">No products match yet.</p> : <div className="grid grid-cols-2 gap-x-4 gap-y-9 md:grid-cols-4">{list.map((p) => <ProductCard key={p.id} p={p} />)}</div>}
+          {list.length === 0 ? <p className="text-sm text-muted">No products match yet.</p> : <div className="grid grid-cols-2 gap-x-3 gap-y-8 md:grid-cols-4 md:gap-x-5">{list.map((p) => <ProductCard key={p.id} p={p} />)}</div>}
         </section>
       );
     }
-    case "categories":
+    case "categories": {
+      const lead = categories.length % 2 === 1;
       return (
         <section className={wrap}>
           {b.title && <Heading as={b.level} className="mb-6 font-display text-2xl font-semibold md:text-3xl">{b.title}</Heading>}
-          <div className="grid grid-cols-2 gap-4 md:grid-cols-5">
-            {categories.map((c) => {
+          <div className={`grid grid-cols-2 gap-3 md:gap-4 ${categories.length === 5 ? "md:grid-cols-4" : "md:grid-cols-4 lg:grid-cols-5"}`}>
+            {categories.map((c, i) => {
               const first = products.find((p) => p.category === c.id);
               const n = products.filter((p) => p.category === c.id).length;
+              const big = lead && i === 0;
+              const shape = big ? "aspect-[16/10] md:aspect-auto" : "aspect-[4/5]";
               return (
-                <Link key={c.id} href={`/category/${c.id}`} className="group relative block overflow-hidden rounded-2xl border border-line bg-surface">
-                  {first?.image ? <img src={first.image} alt="" loading="lazy" className="aspect-[4/5] w-full object-cover transition duration-500 group-hover:scale-105" /> : first ? <ProductArt kind={first.kind} color={first.colors[0].hex} className="aspect-[4/5] w-full transition duration-500 group-hover:scale-105" /> : <div className="aspect-[4/5]" />}
-                  <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/60 to-transparent p-4 pt-12 text-white"><p className="text-sm font-medium">{c.label}</p><p className="text-xs opacity-80">{n} {n === 1 ? "item" : "items"}</p></div>
+                <Link key={c.id} href={`/category/${c.id}`} className={`group relative block overflow-hidden rounded-2xl bg-surface ${big ? `col-span-2 ${categories.length === 5 ? "md:row-span-2" : ""}` : ""}`}>
+                  {first?.image ? <img src={first.image} alt="" loading="lazy" className={`${shape} h-full w-full object-cover transition duration-700 group-hover:scale-[1.04]`} /> : first ? <ProductArt kind={first.kind} color={first.colors[0].hex} className={`${shape} h-full w-full transition duration-700 group-hover:scale-[1.04]`} /> : <div className="aspect-[4/5] w-full" />}
+                  <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-[#10163a]/85 to-transparent p-4 pt-14 text-white">
+                    <p className={`font-display font-bold leading-tight tracking-tight ${big ? "text-2xl md:text-4xl" : "text-lg md:text-xl"}`}>{c.label}</p>
+                    <p className="mt-0.5 text-xs text-white/80">{n} {n === 1 ? "item" : "items"}</p>
+                  </div>
                 </Link>
               );
             })}
           </div>
         </section>
       );
+    }
     case "banners": {
       const banners = ctx.banners ?? [];
       if (!banners.length) return null;
@@ -290,7 +297,7 @@ export function BlockView({ b, ctx }: { b: Block; ctx: BlockCtx }) {
       const ICONS = { truck: Truck, shield: ShieldCheck, refresh: RefreshCcw, headset: Headset, gift: Gift, card: CreditCard, clock: Clock, star: Star };
       return (
         <section className={wrap}>
-          <ul className="grid gap-5 rounded-3xl border border-line bg-surface p-6 sm:grid-cols-2 lg:grid-cols-4">
+          <ul className="grid gap-5 rounded-3xl bg-surface p-6 sm:grid-cols-2 lg:grid-cols-4">
             {b.items.map((x, i) => { const I = ICONS[x.icon]; return (
               <li key={i} className="flex items-start gap-3"><span className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-accent/10 text-accent"><I size={20} /></span><span><span className="block text-sm font-semibold">{x.title}</span><span className="text-sm text-muted">{x.text}</span></span></li>
             ); })}

@@ -69,6 +69,13 @@ export function DashboardView(d: DashData) {
         </div>
       </div>
 
+      <div className="no-scrollbar -mx-4 mt-5 flex gap-2 overflow-x-auto px-4 md:mx-0 md:px-0">
+        <Link href="/admin/products/new" className="shrink-0 rounded-pill bg-accent px-4 py-2.5 text-sm font-semibold text-accent-ink">Add a product</Link>
+        <Link href="/admin/orders/new" className="shrink-0 rounded-pill border border-line bg-surface px-4 py-2.5 text-sm font-medium hover:border-ink/40">Enter a phone order</Link>
+        <Link href="/admin/coupons" className="shrink-0 rounded-pill border border-line bg-surface px-4 py-2.5 text-sm font-medium hover:border-ink/40">Create a coupon</Link>
+        <Link href="/admin/banners" className="shrink-0 rounded-pill border border-line bg-surface px-4 py-2.5 text-sm font-medium hover:border-ink/40">Change banners</Link>
+      </div>
+
       <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-3">
         <Stat label={`Sales, ${d.rangeLabel}`} value={formatPrice(d.revenue)} delta={pct(d.revenue, d.revenuePrev)} spark={d.points.map((p) => p.value)} up={d.revenue >= d.revenuePrev} />
         <Stat label="Orders" value={String(d.orders)} delta={pct(d.orders, d.ordersPrev)} spark={d.points.map((p) => p.orders)} up={d.orders >= d.ordersPrev} />

@@ -20,11 +20,11 @@ const HangerRail = dynamic(() => import("./3d/HangerRail"), {
   loading: () => <div className="absolute inset-0 grid place-items-center text-sm text-muted"><span className="animate-pulse">Hanging the rail...</span></div>,
 });
 
-/** Mixes a colour with black, so any product colour becomes a deep background that white text can sit on. */
+/** Mixes a colour with deep indigo, so any product colour becomes a deep background that white text can sit on. */
 function deep(hex: string, amount: number) {
   const n = parseInt((hex || "#444444").replace("#", "").padEnd(6, "0").slice(0, 6), 16);
-  const c = (v: number) => Math.round(v * (1 - amount)).toString(16).padStart(2, "0");
-  return `#${c(n >> 16)}${c((n >> 8) & 255)}${c(n & 255)}`;
+  const c = (v: number, to: number) => Math.round(v * (1 - amount) + to * amount).toString(16).padStart(2, "0");
+  return `#${c(n >> 16, 13)}${c((n >> 8) & 255, 18)}${c(n & 255, 52)}`;
 }
 
 export type RailVariant = "hanger" | "hanger-wire" | "hanger-gold" | "hanger-velvet" | "arc" | "coverflow" | "diagonal" | "stack" | "wave";
@@ -220,5 +220,5 @@ export function Storefront({ products, categories, variant = "hanger", showHero 
     </>
   );
 
-  return full && ui ? <div className="relative isolate overflow-hidden bg-[#10141b] text-white">{bg}{content}</div> : content;
+  return full && ui ? <div className="relative isolate overflow-hidden bg-[#0d1234] text-white">{bg}{content}</div> : content;
 }

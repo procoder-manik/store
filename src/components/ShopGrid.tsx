@@ -7,7 +7,7 @@ import type { Product } from "@/lib/demo-products";
 import type { Cat } from "@/lib/catalog";
 import { ProductCard } from "./ProductCard";
 
-const field = "rounded-pill border border-line bg-surface px-3 py-2 text-sm";
+const field = "min-w-0 flex-1 basis-[40%] rounded-pill border border-line bg-surface px-3 py-2 text-sm sm:flex-none sm:basis-auto";
 
 export function ShopGrid({ products, categories, active = "all", title = "Shop", intro }: { products: Product[]; categories: Cat[]; active?: string; title?: string; intro?: string }) {
   const sp = useSearchParams();
@@ -33,9 +33,9 @@ export function ShopGrid({ products, categories, active = "all", title = "Shop",
         <div><h1 className="font-display text-4xl font-semibold tracking-tight md:text-5xl">{title}</h1>{intro && <p className="mt-3 max-w-2xl text-muted">{intro}</p>}</div>
         <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search this shop" aria-label="Search products" className="w-full rounded-pill border border-line bg-surface px-5 py-2.5 text-sm sm:w-72" />
       </div>
-      <nav aria-label="Categories" className="mt-5 flex flex-wrap gap-2">
+      <nav aria-label="Categories" className="no-scrollbar -mx-5 mt-5 flex gap-2 overflow-x-auto px-5 md:mx-0 md:flex-wrap md:px-0">
         {[{ id: "all", label: "All" }, ...categories].map((c) => (
-          <Link key={c.id} href={c.id === "all" ? "/shop" : `/category/${c.id}`} aria-current={active === c.id ? "page" : undefined} className={`rounded-pill border px-4 py-2 text-sm transition ${active === c.id ? "border-ink bg-ink text-paper" : "border-line bg-surface hover:border-ink"}`}>{c.label}</Link>
+          <Link key={c.id} href={c.id === "all" ? "/shop" : `/category/${c.id}`} aria-current={active === c.id ? "page" : undefined} className={`shrink-0 rounded-pill border px-4 py-2 text-sm transition ${active === c.id ? "border-ink bg-ink text-paper" : "border-line bg-surface hover:border-ink"}`}>{c.label}</Link>
         ))}
       </nav>
       <div className="mt-4 flex flex-wrap items-center gap-3">
@@ -49,9 +49,9 @@ export function ShopGrid({ products, categories, active = "all", title = "Shop",
         <p className="ml-auto text-sm text-muted">{list.length} {list.length === 1 ? "product" : "products"}</p>
       </div>
       {list.length === 0 ? (
-        <p className="py-16 text-center text-sm text-muted">Nothing matches these filters. Try clearing one.</p>
+        <div className="grid place-items-center gap-3 py-16 text-center"><p className="text-sm text-muted">Nothing matches these filters.</p><button onClick={() => { setQ(""); setTag("all"); setInStock(false); }} className="rounded-pill border border-line px-5 py-2.5 text-sm font-medium hover:bg-surface">Clear filters</button></div>
       ) : (
-        <div className="mt-8 grid grid-cols-2 gap-x-4 gap-y-9 md:grid-cols-3 lg:grid-cols-4">
+        <div className="mt-8 grid grid-cols-2 gap-x-3 gap-y-8 md:grid-cols-3 md:gap-x-5 lg:grid-cols-4">
           {list.map((p) => <ProductCard key={p.id} p={p} />)}
         </div>
       )}

@@ -10,6 +10,7 @@ import { createPublicClient } from "@/lib/supabase/public";
 import { SITE_URL } from "@/lib/config";
 
 export const revalidate = 60;
+export const metadata = { alternates: { canonical: "/" } };
 
 export default async function Home() {
   const [{ products, categories }, banners] = await Promise.all([getCatalog(), getBanners()]);
@@ -32,7 +33,7 @@ export default async function Home() {
         <BlockRenderer blocks={blocks} products={products} categories={categories} banners={banners} />
       ) : (
         <>
-          <ProductHero products={products} categories={categories} eyebrow="New season" heading="Stand out without trying" sub="Clothing, bedding and home decor made to last, delivered across Bangladesh. Pay in cash when it arrives." button="Get the look" tagline="Comfort, wrapped in good design" autoplay={5} />
+          <ProductHero products={products} categories={categories} eyebrow="New season" heading="Stand out without trying" sub="Clothing, bedding and home decor made to last, delivered across Bangladesh. Pay in cash when it arrives." button="Get the look" tagline="Comfort, wrapped in good design" autoplay={5} full />
           <Storefront products={products} categories={categories} heading="Browse the rail." sub="Drag to explore, then tap anything to see it up close." level="h2" />
           <HomeSections products={products} categories={categories} banners={banners} />
         </>

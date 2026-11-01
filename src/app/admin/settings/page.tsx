@@ -171,10 +171,10 @@ export default async function Settings() {
         </form>
 
         <form action={saveProof} className={`${card} grid gap-4`}>
-          <h2 className="font-display text-base font-semibold">Recent purchase notifications<InfoTip text="Small pop-ups like Someone in Dhaka just ordered. They build trust. Use real orders only." /></h2>
-          <p className="text-xs text-muted">Real mode shows only the first name, district, product and price from actual orders. Demo mode shows made-up purchases. Demo mode can mislead customers and may break advertising rules, so switch to Real once you have orders.</p>
+          <h2 className="font-display text-base font-semibold">Recent purchase notifications<InfoTip text="Small pop-ups like Someone in Dhaka just ordered. They build trust." /></h2>
+          <p className="text-xs text-muted">Real mode shows only the first name, district, product and price from actual orders.</p>
           <select name="mode" defaultValue={s.proof.mode} className={input}>
-            <option value="off">Off</option><option value="real">Real orders</option><option value="demo">Demo (made-up)</option>
+            <option value="off">Off</option><option value="real">Real orders</option>
           </select>
           <button className={`${save} w-fit`}>Save notifications</button>
         </form>

@@ -54,7 +54,7 @@ export async function savePopup(fd: FormData) {
 }
 
 export async function saveProof(fd: FormData) {
-  const d = parse(z.object({ mode: z.enum(["off", "demo", "real"]) }), { mode: fd.get("mode") });
+  const d = parse(z.object({ mode: z.enum(["off", "real"]) }), { mode: fd.get("mode") });
   await save("proof", d);
 }
 

@@ -193,3 +193,42 @@ body { @apply bg-paper font-body text-ink antialiased; }
 /* Floating buttons step up while the phone buy bar is showing, so nothing covers it. */
 .float-lift { transition: translate 0.25s ease; }
 @media (max-width: 767px) { body:has(.buy-bar) .float-lift { translate: 0 -64px; } }
+
+/* Nil: the Loomhaus house theme. Bengal indigo cloth, marigold thread, madder red for prices that have dropped. */
+[data-theme="nil"] { --paper: #f1f2f8; --surface: #ffffff; --ink: #10163a; --muted: #565d7e; --line: #d9dcea; --accent: #2a34a8; --accent-ink: #ffffff; --ff-display: var(--font-bricolage), var(--font-bn), system-ui, sans-serif; --ff-body: var(--font-instrument), var(--font-bn), system-ui, sans-serif; --r-xl: 0.625rem; --r-2xl: 1rem; --r-3xl: 1.75rem; --r-pill: 9999px; }
+.dark[data-theme="nil"], .dark [data-theme="nil"] { --paper: #0b0f2a; --surface: #141a3d; --ink: #eef0fa; --muted: #a2a8c9; --line: #272e58; --accent: #f5b83d; --accent-ink: #141a3d; }
+:root { --nil: #1b2380; --gada: #f5a623; --madder: #b3262e; }
+.dark { --madder: #ff8f88; }
+[data-theme="nil"] section h2.font-display:not(.font-extrabold):not(.text-lg):not(.text-base) { font-size: clamp(1.85rem, 1.2rem + 2.6vw, 3.1rem); font-weight: 700; letter-spacing: -0.025em; line-height: 1.05; }
+[data-theme="nil"] h1.font-display:not(.font-extrabold) { letter-spacing: -0.025em; font-weight: 700; }
+::selection { background: var(--gada); color: #10163a; }
+html { scroll-behavior: smooth; -webkit-tap-highlight-color: transparent; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+
+/* The weave: warp and weft crossing, drawn once and repeated. This is the store's one decorative signature. */
+.weave {
+  height: 21px; background-color: var(--nil); background-size: 21px 21px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14'%3E%3Cg fill='%23f5a623'%3E%3Crect x='0' y='1' width='6' height='2'/%3E%3Crect x='0' y='4' width='6' height='2'/%3E%3Crect x='8' y='0' width='2' height='6'/%3E%3Crect x='11' y='0' width='2' height='6'/%3E%3Crect x='1' y='7' width='2' height='6'/%3E%3Crect x='4' y='7' width='2' height='6'/%3E%3Crect x='7' y='8' width='6' height='2'/%3E%3Crect x='7' y='11' width='6' height='2'/%3E%3C/g%3E%3C/svg%3E");
+}
+/* The shuttle passes once when the page opens. */
+@keyframes shuttle { from { clip-path: inset(0 100% 0 0); } to { clip-path: inset(0 0 0 0); } }
+.weave-in { animation: shuttle 1.5s 0.2s cubic-bezier(0.65, 0, 0.2, 1) both; }
+
+/* A running stitch that appears on a product when the pointer rests on it, like the seam on a garment label. */
+.stitch { position: relative; }
+.stitch::after { content: ""; position: absolute; inset: 8px; border: 1.5px dashed rgba(255, 255, 255, 0.85); border-radius: calc(var(--r-2xl) - 6px); opacity: 0; transform: scale(1.02); transition: opacity 0.25s, transform 0.25s; pointer-events: none; mix-blend-mode: difference; }
+@media (hover: hover) { .group:hover .stitch::after { opacity: 1; transform: none; } }
+
+/* Links in the main menu get a thread underline. */
+.thread { position: relative; }
+.thread::after { content: ""; position: absolute; left: 0.875rem; right: 0.875rem; bottom: 0.2rem; height: 2px; background: var(--gada); transform: scaleX(0); transform-origin: left; transition: transform 0.25s cubic-bezier(0.2, 0.8, 0.2, 1); }
+.thread:hover::after, .thread[aria-current="page"]::after { transform: scaleX(1); }
+
+/* The cart badge answers each item added. */
+@keyframes bump { 40% { transform: scale(1.45); } }
+.bump { animation: bump 0.35s ease-out; }
+@keyframes checkIn { from { stroke-dashoffset: 40; } to { stroke-dashoffset: 0; } }
+.check-in { stroke-dasharray: 40; animation: checkIn 0.6s 0.15s ease-out both; }
+@keyframes skeleton { 50% { opacity: 0.55; } }
+.skeleton { background: color-mix(in srgb, var(--muted) 14%, transparent); border-radius: var(--r-2xl); animation: skeleton 1.4s ease-in-out infinite; }
+@media (prefers-reduced-motion: reduce) { .weave-in, .bump, .check-in, .skeleton { animation: none; } .check-in { stroke-dashoffset: 0; } }

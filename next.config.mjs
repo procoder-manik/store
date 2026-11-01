@@ -28,6 +28,7 @@ const securityHeaders = [
   { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=(), payment=(), usb=()" },
   { key: "Cross-Origin-Opener-Policy", value: "same-origin" },
   { key: "X-DNS-Prefetch-Control", value: "on" },
+  { key: "X-Permitted-Cross-Domain-Policies", value: "none" },
 ];
 
 /** @type {import('next').NextConfig} */
@@ -37,7 +38,14 @@ const nextConfig = {
   outputFileTracingRoot: dirname(fileURLToPath(import.meta.url)),
   reactStrictMode: true,
   async headers() {
-    return [{ source: "/:path*", headers: securityHeaders }];
+    return [
+      { source: "/:path*", headers: securityHeaders },
+      // Private areas stay out of search engines and shared caches.
+      ...["/admin/:path*", "/account/:path*", "/login", "/mfa/:path*", "/reset-password", "/thank-you/:path*", "/pay/:path*", "/invoice/:path*"].map((source) => ({
+        source,
+        headers: [{ key: "X-Robots-Tag", value: "noindex, nofollow" }, { key: "Cache-Control", value: "private, no-store" }],
+      })),
+    ];
   },
 };
 export default nextConfig;

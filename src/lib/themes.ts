@@ -1,4 +1,4 @@
-export type ThemeId = "studio" | "editorial" | "noir" | "pastel" | "sunset" | "forest" | "ocean" | "mono";
+export type ThemeId = "nil" | "studio" | "editorial" | "noir" | "pastel" | "sunset" | "forest" | "ocean" | "mono";
 
 export type Theme = {
   id: ThemeId;
@@ -11,6 +11,7 @@ export type Theme = {
 };
 
 export const THEMES: Theme[] = [
+  { id: "nil", name: "Nil", about: "The house look. Bengal indigo with marigold thread.", display: "--font-bricolage", body: "--font-instrument", light: { paper: "#f1f2f8", surface: "#ffffff", ink: "#10163a", accent: "#2a34a8" }, dark: { paper: "#0b0f2a", surface: "#141a3d", ink: "#eef0fa", accent: "#f5b83d" } },
   { id: "studio", name: "Studio", about: "Clean and modern. Cool greys and teal.", display: "--font-bricolage", body: "--font-instrument", light: { paper: "#f5f6f8", surface: "#ffffff", ink: "#15171c", accent: "#1f6f78" }, dark: { paper: "#0f1114", surface: "#171a1f", ink: "#eceef2", accent: "#4fb3bf" } },
   { id: "editorial", name: "Editorial", about: "Warm paper, serif headings, sharp corners.", display: "--font-fraunces", body: "--font-karla", light: { paper: "#f6f1e8", surface: "#fffcf6", ink: "#241a12", accent: "#8c2f2f" }, dark: { paper: "#17120e", surface: "#201a15", ink: "#f3ece1", accent: "#e08a7a" } },
   { id: "noir", name: "Noir", about: "Luxury feel. Black and gold, elegant serif.", display: "--font-cormorant", body: "--font-inter", light: { paper: "#f3efe8", surface: "#fbf9f5", ink: "#131110", accent: "#1a1612" }, dark: { paper: "#0c0c0e", surface: "#161619", ink: "#f4f1ea", accent: "#d7a74a" } },

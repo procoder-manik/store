@@ -8,7 +8,7 @@ export function TagBadge({ tag, text, size = "sm" }: { tag: ProductTag; text?: s
   const t = TAG_INFO[tag];
   const Icon = ICONS[t.icon];
   return (
-    <span className={`inline-flex items-center gap-1 rounded-full font-semibold shadow-sm ${size === "md" ? "px-3 py-1 text-xs" : "px-2.5 py-1 text-[11px]"} ${t.className}`}>
+    <span className={`inline-flex items-center gap-1 rounded-full font-semibold ${size === "md" ? "px-3 py-1 text-xs" : "px-2.5 py-1 text-[11px]"} ${t.className}`}>
       <Icon size={size === "md" ? 12 : 11} strokeWidth={2.4} />{text ?? t.label}
     </span>
   );

@@ -15,6 +15,7 @@ export function ProductDetail({ product, related, pairs, reviews, bundle, whatsa
   const [colorIdx, setColorIdx] = useState(0);
   const [img, setImg] = useState(0);
   const images = product.images ?? [];
+  const [zoom, setZoom] = useState<string | null>(null);
 
   return (
     <main className="mx-auto max-w-6xl px-5 py-8 md:py-12">
@@ -24,9 +25,15 @@ export function ProductDetail({ product, related, pairs, reviews, bundle, whatsa
       <div className="grid gap-8 md:grid-cols-2 md:gap-14">
         <div className="md:sticky md:top-24 md:self-start">
           {images.length > 0 ? (
-            <img src={images[img]?.url} alt={images[img]?.alt} className="aspect-[4/5] w-full rounded-3xl border border-line object-cover" />
+            <div
+              className="overflow-hidden rounded-3xl bg-surface"
+              onMouseMove={(e) => { const r = e.currentTarget.getBoundingClientRect(); setZoom(`${((e.clientX - r.left) / r.width) * 100}% ${((e.clientY - r.top) / r.height) * 100}%`); }}
+              onMouseLeave={() => setZoom(null)}
+            >
+              <img src={images[img]?.url} alt={images[img]?.alt} style={zoom ? { transformOrigin: zoom, transform: "scale(1.7)" } : undefined} className="aspect-[4/5] w-full cursor-zoom-in object-cover transition-transform duration-200" />
+            </div>
           ) : (
-            <ProductArt kind={product.kind} color={product.colors[colorIdx]?.hex ?? product.colors[0].hex} className="aspect-[4/5] w-full rounded-3xl border border-line" />
+            <ProductArt kind={product.kind} color={product.colors[colorIdx]?.hex ?? product.colors[0].hex} className="aspect-[4/5] w-full rounded-3xl" />
           )}
           {images.length > 1 && (
             <div className="mt-3 flex gap-2 no-scrollbar overflow-x-auto">
@@ -39,7 +46,7 @@ export function ProductDetail({ product, related, pairs, reviews, bundle, whatsa
           )}
         </div>
         <div>
-          <h1 className="font-display text-3xl font-semibold leading-tight md:text-4xl">{product.name}</h1>
+          <h1 className="font-display text-[clamp(2rem,1.4rem+2.4vw,3.25rem)] font-bold leading-[1.02]">{product.name}</h1>
           {product.tags.length > 0 && (
             <div className="mt-3 flex gap-1.5">
               {product.tags.map((t) => <TagBadge key={t} tag={t} size="md" />)}
@@ -52,7 +59,7 @@ export function ProductDetail({ product, related, pairs, reviews, bundle, whatsa
             <h2 className="text-sm font-medium">About this product</h2>
             <p className="mt-2 max-w-prose whitespace-pre-line text-sm leading-relaxed text-muted">{product.description}</p>
           </div>
-          <ul className="mt-6 grid gap-3 rounded-2xl border border-line bg-surface p-4 text-sm">
+          <ul className="mt-6 grid gap-3 rounded-2xl bg-surface p-4 text-sm">
             {[[Banknote, "Cash on delivery", "Check your parcel, then pay."], [Truck, "Delivery across Bangladesh", "The fee is shown at checkout."], [RotateCcw, "Wrong or damaged item?", "Tell us and we will make it right."]].map(([Icon, t, d]) => {
               const I = Icon as typeof Truck;
               return <li key={t as string} className="flex items-center gap-3"><span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-accent/10 text-accent"><I size={16} /></span><span><span className="block font-medium">{t as string}</span><span className="text-muted">{d as string}</span></span></li>;

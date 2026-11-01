@@ -1,14 +1,10 @@
 import { NextResponse } from "next/server";
-import { getCatalog } from "@/lib/catalog";
+import { clientIp, rateLimit } from "@/lib/ratelimit";
 import { getPublicSettings } from "@/lib/settings";
 import { createAdminClient } from "@/lib/supabase/admin";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
-
-const NAMES = ["Rahim", "Karim", "Sumaiya", "Nusrat", "Tanvir", "Mitu", "Arif", "Farhana", "Imran", "Sadia", "Rifat", "Jannat", "Hasan", "Tania", "Shakib", "Mim"];
-const CITIES = ["Dhaka", "Chattogram", "Rangpur", "Sylhet", "Khulna", "Rajshahi", "Barishal", "Cumilla", "Gazipur", "Mymensingh", "Bogura", "Narayanganj"];
-const AGO = ["12 minutes ago", "35 minutes ago", "1 hour ago", "2 hours ago", "3 hours ago", "5 hours ago", "Yesterday"];
 
 function ago(iso: string) {
   const m = Math.max(1, Math.round((Date.now() - new Date(iso).getTime()) / 60000));
@@ -22,18 +18,9 @@ function ago(iso: string) {
 type OrderRow = { guest_name: string; shipping_address: { district?: string } | null; created_at: string; order_items: { name_snapshot: string; unit_price: number | string }[] };
 
 export async function GET() {
+  if (!(await rateLimit(`proof:${await clientIp()}`, 30, 60))) return NextResponse.json({ items: [] }, { status: 429 });
   const { proof } = await getPublicSettings();
-  if (proof.mode === "off") return NextResponse.json({ items: [] });
-
-  if (proof.mode === "demo") {
-    const { products } = await getCatalog();
-    if (products.length === 0) return NextResponse.json({ items: [] });
-    const items = Array.from({ length: 10 }, (_, k) => {
-      const p = products[Math.floor(Math.random() * products.length)];
-      return { name: NAMES[Math.floor(Math.random() * NAMES.length)], city: CITIES[(k + Math.floor(Math.random() * CITIES.length)) % CITIES.length], product: p.name, price: p.basePrice, ago: AGO[k % AGO.length] };
-    });
-    return NextResponse.json({ items });
-  }
+  if (proof.mode !== "real") return NextResponse.json({ items: [] });
 
   try {
     const { data } = await createAdminClient()
