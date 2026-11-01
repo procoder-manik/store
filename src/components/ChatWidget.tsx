@@ -84,7 +84,7 @@ export function ChatWidget({ name, greeting, avatar = "", whatsapp = "", waNote 
   return (
     <>
       {!open && (
-        <button aria-label="Open chat" onClick={() => setOpen(true)} className="float-lift fixed bottom-4 right-3 z-40 flex flex-col items-center gap-1 transition hover:scale-105 md:bottom-5 md:right-5"><span className="grid h-12 w-12 place-items-center rounded-full bg-accent text-accent-ink shadow-xl md:h-14 md:w-14">{avatar ? <img src={avatar} alt="" className="h-full w-full rounded-full object-cover" /> : <MessageCircle size={24} />}</span><span className="rounded-pill bg-surface px-2.5 py-0.5 text-[11px] font-semibold shadow">Chat with us</span></button>
+        <button aria-label="Open chat" onClick={() => setOpen(true)} className="float-lift fixed bottom-4 right-3 z-40 flex flex-col items-center gap-1 transition hover:scale-105 md:bottom-5 md:right-5"><span className="grid h-12 w-12 place-items-center rounded-full bg-accent text-accent-ink shadow-xl md:h-14 md:w-14">{avatar ? <img src={avatar} alt="" className="h-full w-full rounded-full object-cover" /> : <MessageCircle size={24} />}</span><span className="hidden rounded-pill bg-surface px-2.5 py-0.5 text-[11px] font-semibold shadow md:block">Chat with us</span></button>
       )}
       {open && (
         <section aria-label={name} className="pop-in fixed inset-x-3 bottom-3 z-50 flex h-[min(560px,80dvh)] flex-col overflow-hidden rounded-3xl border border-line bg-surface shadow-2xl md:inset-x-auto md:bottom-5 md:right-5 md:w-[380px]">
