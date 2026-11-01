@@ -18,6 +18,22 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
+      # Fails with a plain message instead of a pg_dump error when a secret is missing or the wrong URL is used.
+      - name: Check the backup secrets
+        env:
+          DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+          PASS: ${{ secrets.BACKUP_PASSPHRASE }}
+          RCLONE_CONF: ${{ secrets.RCLONE_CONF }}
+        run: |
+          ok=1
+          [ -n "$DB_URL" ] || { echo "::error::Secret SUPABASE_DB_URL is missing."; ok=0; }
+          [ -n "$PASS" ] || { echo "::error::Secret BACKUP_PASSPHRASE is missing."; ok=0; }
+          [ -n "$RCLONE_CONF" ] || { echo "::error::Secret RCLONE_CONF is missing."; ok=0; }
+          case "$DB_URL" in
+            *@db.*.supabase.co*) echo "::error::SUPABASE_DB_URL is the direct connection, which GitHub cannot reach. Use the Session pooler URI (host ends in pooler.supabase.com)."; ok=0 ;;
+          esac
+          [ "$ok" = 1 ]
+
       - name: Dump the database
         env:
           DB_URL: ${{ secrets.SUPABASE_DB_URL }}
