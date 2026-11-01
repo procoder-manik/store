@@ -391,7 +391,7 @@ export function BlockView({ b, ctx }: { b: Block; ctx: BlockCtx }) {
           {imgs.length === 0 ? <div className="grid aspect-[16/6] place-items-center rounded-3xl border border-dashed border-line text-sm text-muted">Add photo links</div> : (
             <div className="grid auto-rows-[160px] grid-cols-2 gap-3 md:auto-rows-[220px] md:grid-cols-4">
               {imgs.map((x, i) => (
-                <figure key={i} className={`group relative overflow-hidden rounded-[14px] ${i % 5 === 0 ? "row-span-2" : ""} ${i % 7 === 3 ? "md:col-span-2" : ""}`}>
+                <figure key={i} className={`group relative overflow-hidden rounded-[14px] ${i % 5 === 0 ? "row-span-2" : ""} ${i % 5 === 2 || i % 5 === 4 ? "md:col-span-2" : ""}`}>
                   <img src={x.src} alt={x.caption} loading="lazy" className="h-full w-full object-cover transition duration-700 group-hover:scale-110" />
                   {x.caption && <figcaption className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 to-transparent p-4 pt-10 font-display text-xl text-white">{x.caption}</figcaption>}
                 </figure>
