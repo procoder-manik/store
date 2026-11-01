@@ -144,7 +144,7 @@ export function QuickBuy({ product, zones, onClose }: { product: Product; zones:
           <input name="email" type="email" placeholder="Email (optional, for your invoice)" autoComplete="email" className={field} />
           <input name="qz_hp" tabIndex={-1} autoComplete="off" aria-hidden data-lpignore="true" data-1p-ignore="true" data-bwignore="true" data-form-type="other" style={{ position: "absolute", left: "-9999px", width: 1, height: 1, opacity: 0 }} />
           <p className="mt-1 text-sm font-medium">Payment</p>
-          <PaymentPicker methods={methods} value={method} onChange={setMethod} amount={quote?.total ?? price * qty} shipping={quote?.shipping ?? 0} hasPreorder={quote?.hasPreorder ?? product.preorder} />
+          <PaymentPicker methods={methods} value={method} onChange={setMethod} amount={quote?.total} shipping={quote?.shipping} hasPreorder={quote?.hasPreorder ?? product.preorder} />
 
           <dl className="mt-1 grid gap-1.5 rounded-2xl border border-line bg-paper p-4 text-sm">
             <div className="flex justify-between"><dt className="text-muted">Items</dt><dd className="tabular-nums">{formatPrice(quote?.subtotal ?? price * qty)}</dd></div>
@@ -152,7 +152,7 @@ export function QuickBuy({ product, zones, onClose }: { product: Product; zones:
             <div className="mt-1 flex justify-between border-t border-line pt-2.5 text-base font-semibold"><dt>Total</dt><dd className="tabular-nums">{formatPrice(quote?.total ?? price * qty)}</dd></div>
           </dl>
           {error && <p role="alert" className="text-sm text-[var(--madder)]">{error}</p>}
-          <button disabled={pending || stock <= 0 || !picked} className="mb-1 mt-3 flex min-h-[56px] items-center justify-center gap-2 rounded-full bg-accent px-6 py-4 text-[15px] font-semibold text-accent-ink shadow-lg transition hover:-translate-y-0.5 disabled:opacity-50">{pending ? "Placing order..." : <><Check size={16} /> {method === "sslcommerz" ? "Continue to payment" : "Place order"}</>}</button>
+          <button disabled={pending || stock <= 0 || !picked || (!quote && !demo)} className="mb-1 mt-3 flex min-h-[56px] items-center justify-center gap-2 rounded-full bg-accent px-6 py-4 text-[15px] font-semibold text-accent-ink shadow-lg transition hover:-translate-y-0.5 disabled:opacity-50">{pending ? "Placing order..." : <><Check size={16} /> {method === "sslcommerz" ? "Continue to payment" : "Place order"}</>}</button>
           <p className="pb-1 text-center text-xs text-muted">We will call you to confirm. {method === "cod" ? "Any cash due is paid when it arrives." : picked?.manual ? "We check your payment before we send the order." : ""}</p>
         </form>
       </div>

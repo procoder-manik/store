@@ -14,7 +14,7 @@ type Props = { methods: PublicMethod[]; value: string; onChange: (id: string) =>
  * or a percentage plus the delivery charge, as set in Admin, Payment methods.
  * The form reads the plain fields `payer`, `trxId`, `plan` and `advanceMethod`. The server checks all of them again.
  */
-export function PaymentPicker({ methods, value, onChange, amount, shipping = 0, hasPreorder = false }: Props) {
+export function PaymentPicker({ methods, value, onChange, amount, shipping, hasPreorder = false }: Props) {
   const cfg = useAdvance();
   const [copied, setCopied] = useState(false);
   const wallets = methods.filter((m) => m.manual);
@@ -24,10 +24,12 @@ export function PaymentPicker({ methods, value, onChange, amount, shipping = 0, 
   const [walletId, setWalletId] = useState(wallets[0]?.id ?? "");
   useEffect(() => { setPlan((p) => (plansKey.split(",").includes(p) ? p : (plansKey.split(",")[0] as AdvancePlan))); }, [plansKey]);
 
+  // Until the server has priced the order, no advance amount is shown.
+  const priced = shipping !== undefined && amount !== undefined;
   const total = amount ?? 0;
   const cod = value === "cod";
-  const due = (p: AdvancePlan) => advanceAmount(p, cfg, { total, shipping });
-  const advance = cod ? due(plan) : 0;
+  const due = (p: AdvancePlan) => advanceAmount(p, cfg, { total, shipping: shipping ?? 0 });
+  const advance = cod && priced ? due(plan) : 0;
   const picked = methods.find((m) => m.id === value);
   const payWith = cod ? (advance > 0 ? wallets.find((w) => w.id === walletId) ?? wallets[0] : undefined) : picked?.manual ? picked : undefined;
   const payAmount = cod ? advance : amount;
@@ -67,7 +69,7 @@ export function PaymentPicker({ methods, value, onChange, amount, shipping = 0, 
           {plans.map((p) => (
             <label key={p} className={`flex cursor-pointer items-center justify-between gap-3 rounded-lg border bg-surface p-2.5 ${plan === p ? "border-accent" : "border-line"}`}>
               <span className="flex items-center gap-2.5"><input type="radio" name="advance-plan" checked={plan === p} onChange={() => setPlan(p)} /><span>{planText[p]}</span></span>
-              <span className="shrink-0 font-semibold tabular-nums">{formatPrice(due(p))}</span>
+              <span className="shrink-0 font-semibold tabular-nums">{priced ? formatPrice(due(p)) : "..."}</span>
             </label>
           ))}
           {advance > 0 && <p className={`text-xs ${muted}`}>Pay now <span className="font-semibold text-ink">{formatPrice(advance)}</span>. Pay on delivery <span className="font-semibold text-ink">{formatPrice(Math.max(0, total - advance))}</span>.</p>}
