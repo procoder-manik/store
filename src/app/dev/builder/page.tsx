@@ -43,7 +43,7 @@ export default async function BuilderPreview({ searchParams }: { searchParams: P
   if (view === "page") return <BlockRenderer blocks={blocks} products={products} categories={categories} zones={zones} slug="demo" />;
   const initial: PageInitial = { slug: "tee-offer", title: "Tee offer", description: "", status: "draft", blocks };
   return (
-    <div data-theme="studio" className="min-h-dvh bg-paper p-6 text-ink">
+    <div data-theme="padma" className="min-h-dvh bg-paper p-6 text-ink">
       <h1 className="mb-6 font-display text-2xl font-semibold">New landing page</h1>
       <PageBuilder initial={initial} products={products} categories={categories} kind="landing" />
     </div>

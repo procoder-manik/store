@@ -139,7 +139,7 @@ function Fields({ b, set, cats, products }: { b: Block; set: Setter; cats: Cat[]
   switch (b.type) {
     case "hero":
     case "herofull": return <>{t("heading", b.heading, "Heading", 120)}{t("sub", b.sub, "Sub text", 240)}{ti("image", b.image, "Picture")}{pair("button", b.button, "Button text", "link", b.link, "Button link")}
-      <F l="Layout"><select className={input} value={b.variant} onChange={(e) => set({ variant: e.target.value })}><option value="overlay">Image behind the text, text on the left</option><option value="center">Image behind the text, centered</option><option value="split">Text on one side, image on the other</option><option value="aurora">Moving glow, centered (modern)</option><option value="bold">Giant bold type with floating shapes</option></select></F></>;
+      <F l="Layout"><select className={input} value={b.variant} onChange={(e) => set({ variant: e.target.value })}><option value="editorial">Full-screen photo with a very large title</option><option value="overlay">Image behind the text, text on the left</option><option value="center">Image behind the text, centered</option><option value="split">Text on one side, image on the other</option><option value="aurora">Moving glow, centered (modern)</option><option value="bold">Giant bold type with floating shapes</option></select></F></>;
     case "showcase":
     case "showcasefull": return <>{t("eyebrow", b.eyebrow, "Small label, top left", 40)}{t("heading", b.heading, "Heading", 120)}<F l="Text under the heading"><textarea className={input} rows={3} maxLength={300} value={b.sub} onChange={(e) => set({ sub: e.target.value })} /></F>{t("button", b.button, "Button text (opens the product on show)", 30)}{t("tagline", b.tagline, "Line at the bottom", 100)}
       {source(b)}

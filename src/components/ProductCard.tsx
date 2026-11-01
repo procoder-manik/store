@@ -41,38 +41,36 @@ export function ProductCard({ p, zones }: { p: Product; zones?: Zone[] }) {
 
   return (
     <div className="group relative flex flex-col">
-      <Link href={`/product/${p.slug}`} className="block">
-        <div className="stitch relative overflow-hidden rounded-2xl bg-surface">
+      <div className="relative overflow-hidden bg-surface">
+        <Link href={`/product/${p.slug}`} className="block" aria-label={p.name}>
           {p.image ? (
             <>
-              <img src={p.image} alt={p.name} loading="lazy" className="aspect-[4/5] w-full object-cover transition duration-700 group-hover:scale-[1.04]" />
-              {p.images?.[1] && <img src={p.images[1].url} alt="" loading="lazy" className="absolute inset-0 h-full w-full object-cover opacity-0 transition duration-500 group-hover:opacity-100" />}
+              <img src={p.image} alt={p.name} loading="lazy" className="aspect-[3/4] w-full object-cover transition duration-[1200ms] ease-out group-hover:scale-[1.03]" />
+              {p.images?.[1] && <img src={p.images[1].url} alt="" loading="lazy" className="absolute inset-0 h-full w-full object-cover opacity-0 transition duration-700 group-hover:opacity-100" />}
             </>
           ) : (
-            <ProductArt kind={p.kind} color={p.colors[0].hex} className="aspect-[4/5] w-full transition duration-700 group-hover:scale-[1.04]" />
+            <ProductArt kind={p.kind} color={p.colors[0].hex} className="aspect-[3/4] w-full" />
           )}
-          <div className="absolute left-2.5 top-2.5 flex flex-col items-start gap-1.5">
-            {soldOut ? <span className="rounded-full bg-ink px-2.5 py-1 text-[11px] font-semibold text-paper">Sold out</span> : badges.map((t) => <TagBadge key={t} tag={t} text={t === "sale" && off > 0 ? `${off}% off` : undefined} />)}
-          </div>
-          {p.offerEndsAt && !soldOut && <span className="absolute bottom-3 left-3"><OfferCountdown endsAt={p.offerEndsAt} compact /></span>}
+        </Link>
+        <div className="pointer-events-none absolute left-2 top-2">
+          {soldOut ? <span className="bg-ink px-2 py-0.5 text-[11px] font-medium text-paper">Sold out</span> : badges.map((t) => <TagBadge key={t} tag={t} text={t === "sale" && off > 0 ? `${off}% off` : undefined} />)}
         </div>
-        <p className="mt-3 text-sm font-medium leading-snug md:text-[15px]">{p.name}</p>
-      </Link>
-      <div className="mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-1">
-        <p className={`text-[15px] font-bold tabular-nums ${off > 0 ? "text-[var(--madder)]" : ""}`}>{formatPrice(p.basePrice)}</p>
-        {off > 0 && <p className="text-sm tabular-nums text-muted line-through">{formatPrice(p.compareAt as number)}</p>}
-        {swatches.length > 1 && (
-          <div className="ml-auto flex items-center gap-1" aria-label={`${swatches.length} colours`}>
-            {swatches.slice(0, 3).map((c) => <span key={c.name} title={c.name} style={{ background: c.hex }} className="h-3 w-3 rounded-full ring-1 ring-ink/15" />)}
-            {swatches.length > 3 && <span className="text-xs text-muted">+{swatches.length - 3}</span>}
-          </div>
-        )}
+        {p.offerEndsAt && !soldOut && <span className="absolute bottom-3 left-3"><OfferCountdown endsAt={p.offerEndsAt} compact /></span>}
+        <div className="absolute inset-x-0 bottom-0 hidden translate-y-full gap-px transition duration-300 group-focus-within:translate-y-0 group-hover:translate-y-0 md:flex">
+          <button onClick={quickAdd} disabled={soldOut} className="h-11 flex-1 bg-surface text-[13px] font-medium text-ink transition hover:bg-ink hover:text-paper disabled:opacity-50">{added ? "Added" : "Add to cart"}</button>
+          <button onClick={() => !soldOut && setQuick(true)} disabled={soldOut} className="h-11 flex-1 bg-accent text-[13px] font-medium text-accent-ink transition hover:opacity-90 disabled:opacity-50">Buy now</button>
+        </div>
       </div>
-      <div className="mt-auto flex gap-2 pt-3">
-        <button onClick={() => !soldOut && setQuick(true)} disabled={soldOut} className="h-11 min-w-0 flex-1 rounded-pill bg-accent text-sm font-semibold text-accent-ink transition active:scale-[0.98] disabled:opacity-40 md:hover:bg-ink md:hover:text-paper">Buy now</button>
-        <button onClick={quickAdd} disabled={soldOut} aria-label={added ? `${p.name} added to cart` : `Add ${p.name} to cart`} className="grid h-11 w-11 shrink-0 place-items-center rounded-full border border-line bg-surface transition hover:border-ink active:scale-95 disabled:opacity-40">{added ? <Check size={17} className="text-accent" /> : <ShoppingBag size={17} />}</button>
+      <Link href={`/product/${p.slug}`} className="mt-3 block text-[14px] leading-snug md:text-[15px]">{p.name}</Link>
+      <div className="mt-1 flex flex-wrap items-baseline gap-x-2">
+        <p className={`text-[14px] tabular-nums ${off > 0 ? "text-[var(--madder)]" : "text-muted"}`}>{formatPrice(p.basePrice)}</p>
+        {off > 0 && <p className="text-[13px] tabular-nums text-muted line-through">{formatPrice(p.compareAt as number)}</p>}
       </div>
-      <HeartButton id={p.id} className="absolute right-2.5 top-2.5" />
+      <div className="mt-auto flex items-center justify-between gap-2 pt-2 md:hidden">
+        <button onClick={() => !soldOut && setQuick(true)} disabled={soldOut} className="py-2 text-[13px] font-medium underline underline-offset-4 disabled:opacity-40">Buy now</button>
+        <button onClick={quickAdd} disabled={soldOut} aria-label={added ? `${p.name} added to cart` : `Add ${p.name} to cart`} className="grid h-10 w-10 place-items-center disabled:opacity-40">{added ? <Check size={17} /> : <ShoppingBag size={17} strokeWidth={1.5} />}</button>
+      </div>
+      <HeartButton id={p.id} className="absolute right-2 top-2" />
       {quick && <QuickBuy product={p} zones={areas} onClose={() => setQuick(false)} />}
     </div>
   );

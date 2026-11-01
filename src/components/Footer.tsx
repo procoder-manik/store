@@ -115,7 +115,6 @@ export function Footer({ categories, brand, footer, contact, cfg = DEFAULT_FOOTE
 
   return (
     <footer className={`mt-24 pb-24 md:pb-0 ${wrapCls}`}>
-      <div aria-hidden className="weave" />
       {dark && footer.newsletter && (
         <div className="border-b border-white/10 bg-accent/15">
           <div className="mx-auto grid max-w-6xl items-center gap-5 px-5 py-9 md:grid-cols-2">
@@ -137,7 +136,7 @@ export function Footer({ categories, brand, footer, contact, cfg = DEFAULT_FOOTE
       </div>
       {pay && <div className="mx-auto max-w-6xl px-5 pb-8">{pay}</div>}
       {bottom}
-      <p aria-hidden className="select-none overflow-hidden whitespace-nowrap text-center font-display text-[clamp(4rem,19vw,17rem)] font-extrabold leading-[0.82] tracking-[-0.05em] text-accent/10">{brand.name}</p>
+      <p aria-hidden className="select-none overflow-hidden whitespace-nowrap text-center font-display text-[clamp(3.5rem,15vw,15rem)] font-normal leading-[0.9] text-ink/[0.07]">{brand.name}</p>
     </footer>
   );
 }

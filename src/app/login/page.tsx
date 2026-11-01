@@ -65,9 +65,8 @@ function LoginForm() {
 
   return (
     <main className="grid min-h-[calc(100dvh-4rem)] md:grid-cols-2">
-      <div aria-hidden className="relative hidden flex-col justify-end overflow-hidden bg-[var(--nil)] p-12 text-white md:flex">
-        <p className="font-display text-[clamp(3rem,6vw,5.5rem)] font-extrabold leading-[0.95] tracking-[-0.035em]">Good cloth, delivered to your door.</p>
-        <div className="weave weave-in absolute inset-x-0 bottom-0" />
+      <div aria-hidden className="relative hidden flex-col justify-end overflow-hidden bg-accent p-12 text-accent-ink md:flex">
+        <p className="font-display text-[clamp(3rem,6vw,5.5rem)] font-normal leading-[0.98]">Good things, carried to your door.</p>
       </div>
       <div className="flex items-center justify-center px-5 py-12">
         <div className="w-full max-w-sm">

@@ -20,7 +20,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   const { brand } = await getPublicSettings();
   const { count: pending } = await supabase.from("orders").select("id", { count: "exact", head: true }).eq("status", "pending");
   return (
-    <div data-theme="nil" className="min-h-dvh bg-paper text-ink lg:grid lg:grid-cols-[264px_minmax(0,1fr)]">
+    <div data-theme="padma" data-admin-shell className="min-h-dvh bg-paper text-ink lg:grid lg:grid-cols-[264px_minmax(0,1fr)]">
       <AdminSidebar brand={brand.name} pending={pending ?? 0} />
       <main data-admin-main className="min-w-0 px-4 pb-24 pt-6 md:px-8 lg:px-12 lg:py-10">
         <div className="mx-auto max-w-6xl">{children}</div>

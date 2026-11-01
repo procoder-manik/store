@@ -1,6 +1,6 @@
 export const BRAND = {
-  name: process.env.NEXT_PUBLIC_BRAND_NAME ?? "Loomhaus",
-  tagline: "Clothing, bedding and home decor",
+  name: process.env.NEXT_PUBLIC_BRAND_NAME ?? "Sonar Tori",
+  tagline: "Clothing and home pieces chosen to last",
 };
 
 export const formatPrice = (n: number) => `৳${n.toLocaleString("en-US")}`;

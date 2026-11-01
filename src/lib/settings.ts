@@ -30,7 +30,7 @@ export const DEFAULTS: Settings = {
   bump: { enabled: false, variantId: "", headline: "Add this to your order", text: "", price: null },
   chat: { enabled: false, name: "Shopping assistant", greeting: "Hi! Ask me about products, sizes, delivery or your order.", knowledge: "", avatar: "", waNote: "Hi, I need help with an order.", waEnabled: true, waNumber: "" },
   contact: { phone: "", whatsapp: "", email: "", address: "", hours: "", businessName: "", phone2: "", mapUrl: "" },
-  appearance: { theme: "nil", accent: "", visitorPicker: false, mode: "light", buttons: "round" },
+  appearance: { theme: "padma", accent: "", visitorPicker: false, mode: "light", buttons: "theme" },
   brand: { name: BRAND.name, tagline: BRAND.tagline, logo: "" },
   header: { links: [{ label: "Shop", href: "/shop" }] },
   footer: { about: "", columns: [], copyright: "", newsletter: true },

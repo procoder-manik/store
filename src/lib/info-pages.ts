@@ -13,8 +13,8 @@ export function infoDefault(slug: InfoSlug, brand: string, email: string): InfoD
   const mail = email || "us through the Contact page";
   switch (slug) {
     case "about":
-      return { title: "About us", description: `${brand} sells clothing, bedding and home decor in Bangladesh, with cash on delivery.`, intro: `${brand} is an online shop for clothing, bedding and home decor. We want shopping to be simple: see the real product, pick your color and size, and pay when it arrives.`, sections: [
-        { heading: "What we sell", body: "T-shirts and hoodies for every day, bedsheets and covers for your bed, and decor and lighting for your home. Every product page shows the colors, sizes and what is in stock right now." },
+      return { title: "About us", description: `${brand} sells clothing, accessories and home pieces in Bangladesh, with cash on delivery.`, intro: `${brand} takes its name from the golden boat in Tagore\'s poem, which carries away only what is worth keeping. We sell clothing, accessories and home pieces. We want shopping to be simple: see the real product, pick your color and size, and pay when it arrives.`, sections: [
+        { heading: "What we sell", body: "Saris, dresses and shirts, bags for every day, and linen and ceramics for your home. Every product page shows the colors, sizes and what is in stock right now." },
         { heading: "How ordering works", body: "- Choose your product, color and size, then place your order.\n- We call to confirm it.\n- A courier brings it to your door.\n- You check the parcel and pay in cash, or you pay online before delivery if you prefer." },
         { heading: "We are here to help", body: `If you have a question about a product, an order or a delivery, reach out on the Contact page. We would rather answer a question before you order than fix a problem after.` },
       ] };

@@ -19,10 +19,10 @@ import { Rich } from "./Rich";
 import { SliderBlock } from "./SliderBlock";
 import { Storefront } from "./Storefront";
 
-const wrap = "mx-auto max-w-6xl px-5 py-8 md:py-10";
+const wrap = "mx-auto max-w-7xl px-5 py-12 md:px-8 md:py-20";
 const btn = "rounded-pill bg-white px-6 py-3 text-sm font-semibold text-black transition hover:-translate-y-0.5";
 
-export type BlockCtx = { products: Product[]; categories: Cat[]; banners?: Banner[]; zones?: Zone[]; slug?: string; preview?: boolean };
+export type BlockCtx = { products: Product[]; categories: Cat[]; banners?: Banner[]; zones?: Zone[]; slug?: string; preview?: boolean; first?: boolean };
 
 function pick(products: Product[], source: "all" | "category" | "tag", category: string, tag: Product["tags"][number]) {
   return source === "category" ? products.filter((p) => p.category === category) : source === "tag" ? products.filter((p) => p.tags.includes(tag)) : products;
@@ -33,6 +33,21 @@ export function BlockView({ b, ctx }: { b: Block; ctx: BlockCtx }) {
   switch (b.type) {
     case "hero":
     case "herofull": {
+      if (b.variant === "editorial") {
+        return (
+          <section {...(ctx.first ? { "data-overhero": "" } : {})} className={`relative isolate flex h-[92svh] min-h-[560px] flex-col justify-end overflow-hidden bg-[#0b1513] text-white ${ctx.first ? "-mt-16" : ""}`}>
+            {b.image && <img src={b.image} alt="" fetchPriority="high" className="settle absolute inset-0 -z-20 h-full w-full object-cover" />}
+            <div aria-hidden className="absolute inset-0 -z-10 bg-gradient-to-t from-black/70 via-black/10 to-black/30" />
+            <div className="mx-auto w-full max-w-7xl px-5 pb-10 md:px-8 md:pb-16">
+              <Heading as={b.level} className="rise font-display text-[clamp(3.75rem,13.5vw,12.5rem)] font-normal leading-[0.92]">{b.heading}</Heading>
+              <div className="rise-2 mt-5 flex flex-col gap-5 md:mt-8 md:flex-row md:items-end md:justify-between">
+                {b.sub && <p className="max-w-md text-[15px] leading-relaxed text-white/85 md:text-lg">{b.sub}</p>}
+                {b.button && b.link && <Link href={b.link} className="w-fit shrink-0 border border-white/70 px-8 py-3.5 text-sm font-medium transition hover:bg-white hover:text-black">{b.button}</Link>}
+              </div>
+            </div>
+          </section>
+        );
+      }
       if (b.variant === "aurora") {
         return (
           <section className={wrap}>
@@ -174,7 +189,7 @@ export function BlockView({ b, ctx }: { b: Block; ctx: BlockCtx }) {
       return (
         <section className={wrap}>
           {b.title && <Heading as={b.level} className="mb-6 font-display text-2xl font-semibold md:text-3xl">{b.title}</Heading>}
-          {list.length === 0 ? <p className="text-sm text-muted">No products match yet.</p> : <div className="grid grid-cols-2 gap-x-3 gap-y-8 md:grid-cols-4 md:gap-x-5">{list.map((p) => <ProductCard key={p.id} p={p} />)}</div>}
+          {list.length === 0 ? <p className="text-sm text-muted">No products match yet.</p> : <div className="grid grid-cols-2 gap-x-3 gap-y-10 md:grid-cols-4 md:gap-x-6 md:gap-y-14">{list.map((p) => <ProductCard key={p.id} p={p} />)}</div>}
         </section>
       );
     }
@@ -183,18 +198,18 @@ export function BlockView({ b, ctx }: { b: Block; ctx: BlockCtx }) {
       return (
         <section className={wrap}>
           {b.title && <Heading as={b.level} className="mb-6 font-display text-2xl font-semibold md:text-3xl">{b.title}</Heading>}
-          <div className={`grid grid-cols-2 gap-3 md:gap-4 ${categories.length === 5 ? "md:grid-cols-4" : "md:grid-cols-4 lg:grid-cols-5"}`}>
+          <div className={`grid grid-cols-2 gap-3 md:gap-4 ${categories.length >= 5 && categories.length !== 5 ? "md:grid-cols-4 lg:grid-cols-5" : "md:grid-cols-4"}`}>
             {categories.map((c, i) => {
               const first = products.find((p) => p.category === c.id);
               const n = products.filter((p) => p.category === c.id).length;
               const big = lead && i === 0;
-              const shape = big ? "aspect-[16/10] md:aspect-auto" : "aspect-[4/5]";
+              const shape = big ? "aspect-[16/10] md:aspect-auto" : "aspect-[3/4]";
               return (
                 <Link key={c.id} href={`/category/${c.id}`} className={`group relative block overflow-hidden rounded-2xl bg-surface ${big ? `col-span-2 ${categories.length === 5 ? "md:row-span-2" : ""}` : ""}`}>
                   {first?.image ? <img src={first.image} alt="" loading="lazy" className={`${shape} h-full w-full object-cover transition duration-700 group-hover:scale-[1.04]`} /> : first ? <ProductArt kind={first.kind} color={first.colors[0].hex} className={`${shape} h-full w-full transition duration-700 group-hover:scale-[1.04]`} /> : <div className="aspect-[4/5] w-full" />}
-                  <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-[#10163a]/85 to-transparent p-4 pt-14 text-white">
-                    <p className={`font-display font-bold leading-tight tracking-tight ${big ? "text-2xl md:text-4xl" : "text-lg md:text-xl"}`}>{c.label}</p>
-                    <p className="mt-0.5 text-xs text-white/80">{n} {n === 1 ? "item" : "items"}</p>
+                  <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/65 to-transparent p-4 pt-16 text-white md:p-5">
+                    <p className={`font-display font-normal leading-tight ${big ? "text-3xl md:text-5xl" : "text-2xl md:text-3xl"}`}>{c.label}</p>
+                    
                   </div>
                 </Link>
               );
@@ -284,11 +299,11 @@ export function BlockView({ b, ctx }: { b: Block; ctx: BlockCtx }) {
       return (
         <section className={wrap}>
           <div className={`grid items-center gap-8 md:grid-cols-2 md:gap-14 ${b.imageSide === "right" ? "md:[&>*:first-child]:order-2" : ""}`}>
-            <div className="overflow-hidden rounded-3xl border border-line bg-surface">{b.image ? <img src={b.image} alt="" loading="lazy" className="aspect-[4/3] w-full object-cover" /> : <div className="aspect-[4/3] bg-gradient-to-br from-accent/25 to-paper" />}</div>
+            <div className="overflow-hidden bg-surface">{b.image ? <img src={b.image} alt="" loading="lazy" className="aspect-[4/5] w-full object-cover" /> : <div className="aspect-[4/3] bg-gradient-to-br from-accent/25 to-paper" />}</div>
             <div>
               {b.heading && <Heading as={b.level} className="font-display text-3xl font-semibold tracking-tight md:text-4xl">{b.heading}</Heading>}
               <div className="mt-4 grid gap-3 text-[15px] leading-relaxed text-muted md:text-base"><Rich text={b.body} /></div>
-              {b.button && b.link && <Link href={b.link} className="mt-6 inline-block rounded-pill bg-accent px-7 py-3.5 text-sm font-semibold text-accent-ink transition hover:-translate-y-0.5">{b.button}</Link>}
+              {b.button && b.link && <Link href={b.link} className="mt-8 inline-block border border-ink px-8 py-3.5 text-sm font-medium transition hover:bg-ink hover:text-paper">{b.button}</Link>}
             </div>
           </div>
         </section>
@@ -297,7 +312,7 @@ export function BlockView({ b, ctx }: { b: Block; ctx: BlockCtx }) {
       const ICONS = { truck: Truck, shield: ShieldCheck, refresh: RefreshCcw, headset: Headset, gift: Gift, card: CreditCard, clock: Clock, star: Star };
       return (
         <section className={wrap}>
-          <ul className="grid gap-5 rounded-3xl bg-surface p-6 sm:grid-cols-2 lg:grid-cols-4">
+          <ul className="grid gap-6 border-y border-line py-8 sm:grid-cols-2 lg:grid-cols-4">
             {b.items.map((x, i) => { const I = ICONS[x.icon]; return (
               <li key={i} className="flex items-start gap-3"><span className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-accent/10 text-accent"><I size={20} /></span><span><span className="block text-sm font-semibold">{x.title}</span><span className="text-sm text-muted">{x.text}</span></span></li>
             ); })}
@@ -410,7 +425,7 @@ export function BlockRenderer({ blocks, ...ctx }: { blocks: Block[] } & BlockCtx
     <>
       {blocks.map((b, i) => {
         const bleed = b.type === "herofull" || b.type === "sliderfull" || b.type === "bannerfull" ? "tight" : b.type === "rail3dfull" ? "wide" : undefined;
-        const view = <TypoScope b={b}><BlockView b={b} ctx={ctx} /></TypoScope>;
+        const view = <TypoScope b={b}><BlockView b={b} ctx={{ ...ctx, first: i === 0 }} /></TypoScope>;
         // Full width versions: the same section with the page's side margins and rounded corners removed (see globals.css).
         const full = bleed ? <div data-fullbleed={bleed}>{view}</div> : view;
         // Space above and below, set per section in the builder. Sections with none set get no extra wrapper.

@@ -38,14 +38,14 @@ export async function generateMetadata(): Promise<Metadata> {
     verification: s.tracking.gscToken ? { google: s.tracking.gscToken } : undefined,
   };
 }
-export const viewport: Viewport = { width: "device-width", initialScale: 1, viewportFit: "cover", themeColor: [{ media: "(prefers-color-scheme: light)", color: "#f1f2f8" }, { media: "(prefers-color-scheme: dark)", color: "#0b0f2a" }] };
+export const viewport: Viewport = { width: "device-width", initialScale: 1, viewportFit: "cover", themeColor: [{ media: "(prefers-color-scheme: light)", color: "#f5f5f1" }, { media: "(prefers-color-scheme: dark)", color: "#0b1513" }] };
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const [{ categories }, s, zones] = await Promise.all([getCatalog(), getPublicSettings(), getZones()]);
   const a = s.announcement;
   const methods = availableMethods(s.payments, { sslReady: sslConfigured() });
   return (
-    <html lang="en" suppressHydrationWarning data-theme={isTheme(s.appearance.theme) ? s.appearance.theme : "nil"} data-buttons={s.appearance.buttons ?? "round"} {...(isPalette(s.appearance.accent) ? { "data-palette": s.appearance.accent } : {})} className={fontClasses}>
+    <html lang="en" suppressHydrationWarning data-theme={isTheme(s.appearance.theme) ? s.appearance.theme : "padma"} data-buttons={s.appearance.buttons ?? "round"} {...(isPalette(s.appearance.accent) ? { "data-palette": s.appearance.accent } : {})} className={fontClasses}>
       <head>
         {s.appearance.visitorPicker && <script dangerouslySetInnerHTML={{ __html: "try{var t=localStorage.getItem('theme-pick');if(t&&/^[a-z]{3,12}$/.test(t)){var e=document.documentElement;e.setAttribute('data-theme',t);e.removeAttribute('data-palette')}}catch(e){}" }} />}
       </head>

@@ -27,8 +27,8 @@ export default function Preview() {
     attention: { pending: 6, reviews: 2, abandoned: 3, lowStock: 3 },
   };
   return (
-    <div data-theme="studio" className="min-h-dvh bg-paper text-ink lg:grid lg:grid-cols-[264px_minmax(0,1fr)]">
-      <AdminSidebar brand="Loomhaus" />
+    <div data-theme="padma" className="min-h-dvh bg-paper text-ink lg:grid lg:grid-cols-[264px_minmax(0,1fr)]">
+      <AdminSidebar brand="Sonar Tori" />
       <main data-admin-main className="min-w-0 px-4 py-6 md:px-8 lg:px-12 lg:py-10"><div className="mx-auto max-w-6xl"><DashboardView {...data} /></div></main>
     </div>
   );

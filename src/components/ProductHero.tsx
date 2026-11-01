@@ -143,7 +143,7 @@ export function ProductHero({ products, categories, eyebrow = "", heading, sub, 
           </div>
           <Heading as={level} className="font-display text-[clamp(2.55rem,5vw,4.75rem)] font-extrabold leading-[0.96] tracking-[-0.035em]">{heading}</Heading>
           <p className="mt-4 max-w-sm text-[15px] leading-relaxed text-white/80">{sub}</p>
-          <Link href={`/product/${p.slug}`} className="group mt-6 inline-flex items-center gap-2 rounded-full bg-[var(--gada)] px-7 py-3.5 text-sm font-bold text-[#10163a] shadow-lg transition hover:-translate-y-0.5">
+          <Link href={`/product/${p.slug}`} className="group mt-6 inline-flex items-center gap-2 bg-white px-7 py-3.5 text-sm font-medium text-black transition hover:-translate-y-0.5">
             {button} <ChevronRight size={15} className="transition group-hover:translate-x-0.5" />
           </Link>
         </div>
@@ -218,9 +218,7 @@ export function ProductHero({ products, categories, eyebrow = "", heading, sub, 
           </div>
           <span className="hidden min-w-24 md:block" />
         </div>
-        {full && <div aria-hidden className="weave weave-in absolute inset-x-0 bottom-0 z-30 hidden md:block" />}
       </div>
-      {full && <div aria-hidden className="weave weave-in md:hidden" />}
     </section>
   );
 }

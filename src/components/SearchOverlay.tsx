@@ -51,7 +51,7 @@ export function SearchOverlay({ bar = false }: { bar?: boolean }) {
           <div onClick={(e) => e.stopPropagation()} className="pop-in mx-auto max-w-xl overflow-hidden rounded-3xl border border-line bg-surface shadow-2xl">
             <form onSubmit={(e) => { e.preventDefault(); if (q.trim()) { router.push(`/shop?q=${encodeURIComponent(q.trim())}`); close(); } }} className="flex items-center gap-3 border-b border-line px-5">
               <Search size={18} className="text-muted" />
-              <input ref={input} value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search hoodies, bedsheets, lamps..." aria-label="Search" type="search" enterKeyHint="search" className="h-16 min-w-0 flex-1 bg-transparent text-base outline-none" />
+              <input ref={input} value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search saris, shirts, bags..." aria-label="Search" type="search" enterKeyHint="search" className="h-16 min-w-0 flex-1 bg-transparent text-base outline-none" />
               <button type="button" aria-label="Close search" onClick={close} className="grid h-9 w-9 place-items-center rounded-full hover:bg-paper"><X size={16} /></button>
             </form>
             <div className="max-h-[55vh] overflow-y-auto p-2">

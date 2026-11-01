@@ -29,7 +29,7 @@ export function CartDrawer() {
         {items.length > 0 && Number.isFinite(freeAt) && (
           <div className="border-b border-line px-5 py-3 text-xs">
             <p className="font-medium">{total >= freeAt ? "You get free delivery on this order." : `Add ${formatPrice(freeAt - total)} more for free delivery.`}</p>
-            <div className="mt-2 h-1.5 overflow-hidden rounded-pill bg-paper"><div style={{ width: `${Math.min(100, (total / freeAt) * 100)}%` }} className="h-full rounded-pill bg-[var(--gada)] transition-[width] duration-500" /></div>
+            <div className="mt-2 h-1.5 overflow-hidden rounded-pill bg-paper"><div style={{ width: `${Math.min(100, (total / freeAt) * 100)}%` }} className="h-full rounded-pill bg-[var(--gold)] transition-[width] duration-500" /></div>
           </div>
         )}
         <div className="no-scrollbar flex-1 overflow-y-auto px-5">

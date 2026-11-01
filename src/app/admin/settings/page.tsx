@@ -44,13 +44,7 @@ export default async function Settings() {
             ))}
           </div>
           <div className="grid gap-4 sm:grid-cols-2">
-            <div>
-              <label className={label}>Accent color (optional, overrides the theme color)</label>
-              <select name="accent" defaultValue={s.appearance.accent} className={input}>
-                <option value="">Use the theme color</option>
-                {PALETTES.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
-              </select>
-            </div>
+            
             <div>
               <label className={label}>Light or dark by default</label>
               <select name="mode" defaultValue={s.appearance.mode} className={input}>
