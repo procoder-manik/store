@@ -1,12 +1,13 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Search, X } from "lucide-react";
 import type { Kind } from "@/lib/demo-products";
 import { formatPrice } from "@/lib/config";
 import { ProductArt } from "./ProductArt";
+import { Portal, useOverlay } from "./Portal";
 
 type Hit = { name: string; slug: string; price: number; image: string; kind: Kind; color: string };
 
@@ -20,7 +21,6 @@ export function SearchOverlay({ bar = false }: { bar?: boolean }) {
 
   useEffect(() => {
     const key = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setOpen(false);
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") { e.preventDefault(); setOpen(true); }
     };
     window.addEventListener("keydown", key);
@@ -36,7 +36,8 @@ export function SearchOverlay({ bar = false }: { bar?: boolean }) {
     return () => window.clearTimeout(t);
   }, [q]);
 
-  const close = () => { setOpen(false); setQ(""); };
+  const close = useCallback(() => { setOpen(false); setQ(""); }, []);
+  useOverlay(open, close);
   return (
     <>
       {bar ? (
@@ -45,11 +46,12 @@ export function SearchOverlay({ bar = false }: { bar?: boolean }) {
         <button aria-label="Search products" onClick={() => setOpen(true)} className="grid h-10 w-10 place-items-center rounded-full transition hover:bg-surface"><Search size={18} /></button>
       )}
       {open && (
-        <div role="dialog" aria-modal="true" aria-label="Search" onClick={close} className="fixed inset-0 z-[60] bg-black/40 px-4 pt-[12vh] backdrop-blur-sm">
+        <Portal>
+        <div role="dialog" aria-modal="true" aria-label="Search" onClick={close} className="fixed inset-0 z-[70] bg-black/40 px-3 pt-[max(1rem,8vh)] backdrop-blur-sm sm:px-4 sm:pt-[12vh]">
           <div onClick={(e) => e.stopPropagation()} className="pop-in mx-auto max-w-xl overflow-hidden rounded-3xl border border-line bg-surface shadow-2xl">
             <form onSubmit={(e) => { e.preventDefault(); if (q.trim()) { router.push(`/shop?q=${encodeURIComponent(q.trim())}`); close(); } }} className="flex items-center gap-3 border-b border-line px-5">
               <Search size={18} className="text-muted" />
-              <input ref={input} value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search hoodies, bedsheets, lamps..." aria-label="Search" className="h-16 min-w-0 flex-1 bg-transparent text-base outline-none" />
+              <input ref={input} value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search hoodies, bedsheets, lamps..." aria-label="Search" type="search" enterKeyHint="search" className="h-16 min-w-0 flex-1 bg-transparent text-base outline-none" />
               <button type="button" aria-label="Close search" onClick={close} className="grid h-9 w-9 place-items-center rounded-full hover:bg-paper"><X size={16} /></button>
             </form>
             <div className="max-h-[55vh] overflow-y-auto p-2">
@@ -65,6 +67,7 @@ export function SearchOverlay({ bar = false }: { bar?: boolean }) {
             </div>
           </div>
         </div>
+        </Portal>
       )}
     </>
   );

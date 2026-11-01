@@ -183,3 +183,13 @@ body { @apply bg-paper font-body text-ink antialiased; }
 [data-fullbleed] [data-bleed="both"] { padding-left: var(--g); padding-right: var(--g); }
 [data-fullbleed] [data-bleed="left"] { padding-left: var(--g); }
 [data-fullbleed] [data-bleed="slide"] { padding-left: var(--g); max-width: calc(var(--g) + 36rem); }
+
+/* Mobile drawers slide in from their own edge. */
+@keyframes drawerLeft { from { transform: translateX(-100%); } }
+@keyframes fadeIn { from { opacity: 0; } }
+.drawer-left { animation: drawerLeft 0.32s cubic-bezier(0.2, 0.8, 0.2, 1); }
+.fade-in { animation: fadeIn 0.25s ease-out; }
+
+/* Floating buttons step up while the phone buy bar is showing, so nothing covers it. */
+.float-lift { transition: translate 0.25s ease; }
+@media (max-width: 767px) { body:has(.buy-bar) .float-lift { translate: 0 -64px; } }

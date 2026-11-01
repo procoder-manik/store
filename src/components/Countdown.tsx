@@ -24,3 +24,15 @@ export function Countdown({ endsAt }: { endsAt: string }) {
     </div>
   );
 }
+
+/** Shows a time-limited section only while its offer is running, so visitors never see an expired "ends soon" banner. */
+export function UntilEnded({ endsAt, children }: { endsAt: string; children: React.ReactNode }) {
+  const end = new Date(endsAt).getTime();
+  const [over, setOver] = useState(() => !Number.isNaN(end) && end <= Date.now());
+  useEffect(() => {
+    if (Number.isNaN(end) || over) return;
+    const t = window.setTimeout(() => setOver(true), Math.min(end - Date.now(), 2 ** 31 - 1));
+    return () => window.clearTimeout(t);
+  }, [end, over]);
+  return over ? null : <>{children}</>;
+}

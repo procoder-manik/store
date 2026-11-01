@@ -6,7 +6,7 @@ import type { Block } from "@/lib/blocks";
 import { formatPrice } from "@/lib/config";
 import { Clock, CreditCard, Gift, Headset, RefreshCcw, ShieldCheck, Star, Truck } from "lucide-react";
 import { HtmlBlock } from "./HtmlBlock";
-import { Countdown } from "./Countdown";
+import { Countdown, UntilEnded } from "./Countdown";
 import { CountUp } from "./CountUp";
 import { Heading } from "./Heading";
 import { NewsletterForm } from "./NewsletterForm";
@@ -343,6 +343,7 @@ export function BlockView({ b, ctx }: { b: Block; ctx: BlockCtx }) {
       );
     case "countdown":
       return (
+        <UntilEnded endsAt={b.endsAt}>
         <section className={wrap}>
           <div className="relative isolate overflow-hidden rounded-3xl bg-ink px-6 py-12 text-center text-white md:py-16">
             <div aria-hidden className="animate-aurora-a absolute -left-16 -top-20 -z-10 h-72 w-72 rounded-full bg-accent opacity-60 blur-3xl" />
@@ -353,6 +354,7 @@ export function BlockView({ b, ctx }: { b: Block; ctx: BlockCtx }) {
             {b.button && b.link && <Link href={b.link} className="shine mt-8 inline-block rounded-pill bg-white px-8 py-3.5 text-sm font-semibold text-black transition hover:-translate-y-0.5">{b.button}</Link>}
           </div>
         </section>
+        </UntilEnded>
       );
     case "gallery": {
       const imgs = b.images.filter((x) => x.src);

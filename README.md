@@ -344,7 +344,7 @@ Work from the top. Tick each box when done and keep this list updated.
 ### A. Do now (security, about 10 minutes)
 - [ ] Remove `REQUIRE_ADMIN_MFA` from Vercel, then Redeploy. First check that the authenticator app on your phone works.
 - [ ] Set `NEXT_PUBLIC_SITE_URL` to `https://store.manikhossain.in` (it was `http://`), then Redeploy.
-- [ ] Delete the folder `src/app/api/debug-env` and push. It is a temporary check page.
+- [x] Delete the folder `src/app/api/debug-env` and push. It is a temporary check page.
 - [ ] If the admin password was ever set to a simple temporary one, replace it with a strong private one.
 - [ ] Replace keys that were pasted in chat: a new `EMAIL_SECRET`, a new `GEMINI_API_KEY`, and any other key that was ever shown in full.
 
@@ -352,7 +352,7 @@ Work from the top. Tick each box when done and keep this list updated.
 - [ ] Add the GitHub secret `RCLONE_CONF` (output of `rclone config show gdrive`). Check the other two secrets are named exactly `SUPABASE_DB_URL` and `BACKUP_PASSPHRASE`.
 - [ ] Run **Actions → Daily database backup → Run workflow** once and check that a `.gpg` file appears in Google Drive. Write `BACKUP_PASSPHRASE` down somewhere safe outside GitHub.
 - [ ] A GitHub secret named `STORE_DB_CLONE` exists and nothing here uses it. Find out who made it, or delete it.
-- [ ] If the repository has an older `backup.yml` workflow (mentioned in `docs/GO-LIVE.md`), remove it so only one backup runs.
+- [x] If the repository has an older `backup.yml` workflow (mentioned in `docs/GO-LIVE.md`), remove it so only one backup runs.
 - [ ] Keep the original product photos outside Supabase. They are not in the database backup.
 
 ### C. Confirm these are done (not known)
