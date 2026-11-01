@@ -51,7 +51,7 @@ export function Footer({ categories, brand, footer, contact, cfg = DEFAULT_FOOTE
 
   if (cfg.style === "minimal") {
     return (
-      <footer className={`mt-24 ${wrapCls}`}>
+      <footer className={`mt-24 pb-24 md:pb-0 ${wrapCls}`}>
         <div className="mx-auto grid max-w-4xl justify-items-center gap-6 px-5 py-12 text-center">
           <p className="font-display text-2xl font-semibold">{brand.name}</p>
           <p className={`max-w-md text-sm ${mute}`}>{about}</p>
@@ -67,7 +67,7 @@ export function Footer({ categories, brand, footer, contact, cfg = DEFAULT_FOOTE
 
   if (cfg.style === "compact") {
     return (
-      <footer className={`mt-24 ${wrapCls}`}>
+      <footer className={`mt-24 pb-24 md:pb-0 ${wrapCls}`}>
         <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-4 px-5 py-6 md:flex-row">
           <p className="font-display text-lg font-semibold">{brand.name}</p>
           <ul className={`flex flex-wrap justify-center gap-x-5 gap-y-1.5 text-sm ${mute}`}>{flat.slice(0, 8).map((l) => <li key={l.label + l.href}><Link href={l.href} className={hover}>{l.label}</Link></li>)}</ul>
@@ -81,7 +81,7 @@ export function Footer({ categories, brand, footer, contact, cfg = DEFAULT_FOOTE
   if (cfg.style === "contact") {
     const rows = [["Phone", contact.phone ? <a key="p" href={`tel:${contact.phone}`} className="hover:underline">{contact.phone}</a> : null], ["WhatsApp", contact.whatsapp ? <a key="w" href={`https://wa.me/${contact.whatsapp}`} target="_blank" rel="noopener noreferrer" className="hover:underline">Chat with us</a> : null], ["Email", contact.email ? <a key="e" href={`mailto:${contact.email}`} className="hover:underline">{contact.email}</a> : null], ["Address", contact.address || null], ["Hours", contact.hours || null]].filter(([, v]) => v);
     return (
-      <footer className={`mt-24 ${wrapCls}`}>
+      <footer className={`mt-24 pb-24 md:pb-0 ${wrapCls}`}>
         <div style={{ ["--n" as string]: Math.min(cols.length, 3) } as React.CSSProperties} className="mx-auto grid max-w-6xl gap-10 px-5 py-12 md:[grid-template-columns:1.3fr_repeat(var(--n),minmax(0,1fr))]">
           <div className="rounded-3xl border border-line bg-paper p-6">
             <p className="font-display text-xl font-semibold">Talk to us</p>
@@ -114,7 +114,7 @@ export function Footer({ categories, brand, footer, contact, cfg = DEFAULT_FOOTE
   );
 
   return (
-    <footer className={`mt-24 ${wrapCls}`}>
+    <footer className={`mt-24 pb-24 md:pb-0 ${wrapCls}`}>
       {dark && footer.newsletter && (
         <div className="border-b border-white/10 bg-accent/15">
           <div className="mx-auto grid max-w-6xl items-center gap-5 px-5 py-9 md:grid-cols-2">

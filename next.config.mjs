@@ -1,3 +1,6 @@
+import { dirname } from "node:path";
+import { fileURLToPath } from "node:url";
+
 const isDev = process.env.NODE_ENV !== "production";
 
 // Phase 1 CSP. Inline scripts are allowed for the theme bootstrap.
@@ -30,6 +33,8 @@ const securityHeaders = [
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   poweredByHeader: false,
+  // Pin the project root so a stray package-lock.json higher up the disk is never picked as the workspace.
+  outputFileTracingRoot: dirname(fileURLToPath(import.meta.url)),
   reactStrictMode: true,
   async headers() {
     return [{ source: "/:path*", headers: securityHeaders }];

@@ -103,7 +103,7 @@ export function CheckoutForm({ zones, bump = null, prefill = null, methods = [] 
           <h2 className="font-display text-lg font-semibold">Delivery details</h2>
           <div><label className={label} htmlFor="name">Full name</label><input id="name" name="name" defaultValue={prefill?.name} required minLength={2} maxLength={80} autoComplete="name" className={input} /></div>
           <div className="grid gap-4 sm:grid-cols-2">
-            <div><label className={label} htmlFor="phone">Mobile number</label><input id="phone" name="phone" onBlur={capture} defaultValue={prefill?.phone} required inputMode="tel" placeholder="01712345678" autoComplete="tel" className={input} /></div>
+            <div><label className={label} htmlFor="phone">Mobile number</label><input id="phone" name="phone" onBlur={capture} defaultValue={prefill?.phone} required type="tel" inputMode="tel" placeholder="01712345678" autoComplete="tel" className={input} /></div>
             <div><label className={label} htmlFor="email">Email (optional)</label><input id="email" name="email" type="email" onBlur={capture} defaultValue={prefill?.email} autoComplete="email" className={input} /></div>
           </div>
           <div className="grid gap-4 sm:grid-cols-2">
@@ -113,7 +113,7 @@ export function CheckoutForm({ zones, bump = null, prefill = null, methods = [] 
                 {zones.map((z) => <option key={z.id} value={z.id}>{z.name}</option>)}
               </select>
             </div>
-            <div><label className={label} htmlFor="district">District</label><input id="district" name="district" defaultValue={prefill?.district} required maxLength={60} className={input} /></div>
+            <div><label className={label} htmlFor="district">District</label><input id="district" name="district" defaultValue={prefill?.district} required maxLength={60} autoComplete="address-level2" className={input} /></div>
           </div>
           <div><label className={label} htmlFor="address">Full address</label><textarea id="address" name="address" defaultValue={prefill?.address} required minLength={6} maxLength={300} rows={3} autoComplete="street-address" className={input} /></div>
           <div><label className={label} htmlFor="note">Order note (optional)</label><input id="note" name="note" maxLength={300} className={input} /></div>

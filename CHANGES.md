@@ -1,5 +1,19 @@
 # What changed
 
+## Mobile and UX fixes (Nov 2026)
+- Mobile menu (hamburger) now opens full screen. It used to open squeezed under the header because the blurred header trapped it. The search popup had the same problem and is fixed too.
+- Menu, search and cart lock the page behind them and close with Escape. The closed cart no longer leaves a shadow on the right edge and can no longer be reached with the keyboard.
+- Product page on phones: a buy bar ("Add" / "Buy now") stays at the bottom once the main buttons scroll away. Chat, back-to-top and sale popups move up so they never cover it.
+- Countdown sections hide themselves when the offer ends, instead of showing "Offer ends soon" next to "This offer has ended".
+- Footer has room at the bottom on phones, so the floating buttons no longer cover it. Notch and home-bar safe areas are respected.
+- Checkout: phone, district and address fields tell the phone which keyboard and autofill to use.
+
+## Security and packaging
+- Removed `/api/debug-env` (temporary, public).
+- Removed the unencrypted `backup.yml` workflow. Use the encrypted `db-backup.yml` (see docs/GO-LIVE.md section 7).
+- `.gitignore` now blocks every `.env` file except `.env.example`, plus zip files.
+- PostCSS pinned to a patched version (`npm audit` shows 0 vulnerabilities). Node 20.9+ is required. New scripts: `npm run typecheck`, `npm run check`.
+
 ## Before you deploy
 1. Run `supabase/migrations/0017_manual_payments.sql` in Supabase (adds payment_trx_id and payment_sender to orders).
 2. Open Admin > Payment methods, turn on the ones you want, add your bKash/Nagad/Rocket numbers, save.

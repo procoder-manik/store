@@ -44,7 +44,8 @@ Run these files in the SQL Editor, in order, once each: `0001_init`, `0002_stora
 - Add a rate limiting rule for `/login`, `/checkout` and `/api/chat` (for example 30 requests per minute per IP).
 
 ## 7. Backups
-- The file `.github/workflows/backup.yml` makes a nightly database backup in a private GitHub repository. Add a repository secret named `DATABASE_URL` (Supabase, Database, Connection string, Session pooler). It has not been run yet, so run it once manually from the Actions tab and check that `backup.dump` appears.
+- The file `.github/workflows/db-backup.yml` makes an encrypted nightly backup and copies it to Google Drive. It needs three repository secrets: `SUPABASE_DB_URL` (Supabase, Database, Connection string, Session pooler), `BACKUP_PASSPHRASE` (a long password you keep safe) and `RCLONE_CONF` (the output of `rclone config show gdrive`). Run it once from the Actions tab and check that a `.sql.gz.gpg` file appears in Drive.
+- The older unencrypted `backup.yml` was removed: it stored customer data in plain form as a GitHub artifact.
 - Supabase paid plans add point-in-time recovery if you later want it.
 - Product photos live in Supabase Storage. Keep the originals on your computer too.
 
