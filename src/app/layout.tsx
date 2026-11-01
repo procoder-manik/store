@@ -68,7 +68,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           <CartDrawer />
           <PromoPopup p={s.popup} />
           <CompareBar />
-          {s.extras.backToTop && <StoreOnly><BackToTop /></StoreOnly>}
+          {s.extras.backToTop && <StoreOnly><BackToTop withText={s.extras.backToTopText} /></StoreOnly>}
           {s.chat.enabled && <ChatWidget name={s.chat.name} greeting={s.chat.greeting} avatar={s.chat.avatar || s.brand.logo} whatsapp={s.chat.waEnabled ? s.chat.waNumber || s.contact.whatsapp : ""} waNote={s.chat.waNote} />}
           {s.proof.mode !== "off" && <SocialProof />}
           </PaymentsProvider>

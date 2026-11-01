@@ -113,5 +113,5 @@ export async function saveAppearance(fd: FormData) {
 }
 
 export async function saveExtras(fd: FormData) {
-  await save("extras", { backToTop: on(fd.get("backToTop")), catalog: on(fd.get("catalog")) });
+  await save("extras", { backToTop: on(fd.get("backToTop")), backToTopText: fd.get("backToTopStyle") === "text", catalog: on(fd.get("catalog")) });
 }

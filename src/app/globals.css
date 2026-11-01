@@ -211,3 +211,7 @@ body:has([data-overhero]) .site-header:not(.scrolled) :is(a, button):hover { bac
 @keyframes skeleton { 50% { opacity: 0.55; } }
 .skeleton { background: color-mix(in srgb, var(--muted) 14%, transparent); border-radius: var(--r-2xl); animation: skeleton 1.4s ease-in-out infinite; }
 @media (prefers-reduced-motion: reduce) { .settle, .rise, .rise-2, .bump, .check-in, .skeleton { animation: none; } .check-in { stroke-dashoffset: 0; } }
+
+/* Browser autofill stays in the theme's colours. */
+input:-webkit-autofill, input:-webkit-autofill:hover, input:-webkit-autofill:focus, textarea:-webkit-autofill, select:-webkit-autofill { -webkit-text-fill-color: var(--ink); caret-color: var(--ink); box-shadow: 0 0 0 100px var(--paper) inset; transition: background-color 9999s; }
+select option { background: var(--surface); color: var(--ink); }

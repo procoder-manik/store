@@ -144,6 +144,7 @@ export default async function Settings() {
         <form action={saveExtras} className={`${card} grid gap-4`}>
           <h2 className="font-display text-base font-semibold">Back to Top button and catalog<InfoTip text="Two small extras for visitors: a jump-to-top button and a price-free product catalog page." /></h2>
           <label className="flex items-center gap-2 text-sm"><input type="checkbox" name="backToTop" defaultChecked={s.extras.backToTop} /> Show a Back to Top button when visitors scroll down<InfoTip text="A small button that jumps back to the top of a long page. It helps on phones, where scrolling back up takes a while." /></label>
+          <label className="grid gap-1 text-sm"><span className="text-xs font-medium text-muted">Back to Top button shows</span><select name="backToTopStyle" defaultValue={s.extras.backToTopText ? "text" : "icon"} className={input}><option value="icon">Only the arrow</option><option value="text">The arrow and the words Back to Top</option></select></label>
           <label className="flex items-center gap-2 text-sm"><input type="checkbox" name="catalog" defaultChecked={s.extras.catalog} /> Turn on the public Catalog page at /catalog<InfoTip text="A product book with pictures and names only, no prices. Useful when prices change often, when you send it to wholesale buyers, or when you want customers to message you for a price. Add /catalog to your menu under Site and menu." /></label>
           <button className={`${save} w-fit`}>Save</button>
         </form>

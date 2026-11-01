@@ -82,20 +82,20 @@ export function QuickBuy({ product, zones, onClose }: { product: Product; zones:
   const base = color?.hex ?? "#3a3f48";
   const n = parseInt(base.replace("#", "").padEnd(6, "0").slice(0, 6), 16);
   const mix = (k: number) => `rgb(${Math.round((n >> 16) * (1 - k))}, ${Math.round(((n >> 8) & 255) * (1 - k))}, ${Math.round((n & 255) * (1 - k))})`;
-  const field = "w-full rounded-xl border border-white/40 bg-white/60 px-3.5 py-2.5 text-sm text-ink placeholder:text-ink/45 backdrop-blur focus-visible:bg-white/85 dark:border-white/15 dark:bg-white/10 dark:text-white dark:placeholder:text-white/45";
+  const field = "w-full rounded-xl border border-line bg-paper px-3.5 py-2.5 text-sm text-ink";
   const chip = (on: boolean) => `grid h-9 min-w-10 place-items-center rounded-full border px-3 text-sm transition ${on ? "border-white bg-white font-semibold text-black" : "border-white/25 bg-white/10 text-white hover:bg-white/20"}`;
 
   return (
     <div className="fixed inset-0 z-50 grid place-items-end sm:place-items-center">
       <div className="absolute inset-0 bg-black/55 backdrop-blur-md" onClick={onClose} />
-      <div role="dialog" aria-modal="true" aria-label={`Order ${product.name}`} className="panel-in relative grid max-h-[94dvh] w-full overflow-y-auto overscroll-contain rounded-t-[28px] border border-white/25 shadow-[0_30px_80px_-20px_rgba(0,0,0,0.6)] sm:max-w-3xl sm:rounded-[28px] md:grid-cols-[0.92fr_1.08fr] md:overflow-hidden">
+      <div role="dialog" aria-modal="true" aria-label={`Order ${product.name}`} className="panel-in relative grid max-h-[94dvh] w-full overflow-y-auto overscroll-contain rounded-t-[28px] border border-line shadow-[0_30px_80px_-20px_rgba(0,0,0,0.6)] sm:max-w-3xl sm:rounded-[28px] md:grid-cols-[0.92fr_1.08fr] md:overflow-hidden">
         <button aria-label="Close" onClick={onClose} className="absolute right-3.5 top-3.5 z-20 grid h-9 w-9 place-items-center rounded-full border border-white/30 bg-black/25 text-white backdrop-blur transition hover:bg-black/40"><X size={16} /></button>
 
         {/* The product side: its own colour, with white text */}
         <div className="no-scrollbar relative flex flex-col gap-4 overflow-y-auto p-5 text-white md:max-h-[94dvh] md:p-7" style={{ background: `radial-gradient(ellipse 90% 70% at 50% 25%, ${mix(0.35)} 0%, ${mix(0.75)} 70%, ${mix(0.88)} 100%)` }}>
           <div className="flex items-center gap-4 md:flex-col md:items-start md:gap-5">
             <div className="relative w-24 shrink-0 md:mx-auto md:w-[62%]">
-              {product.image ? <img src={product.image} alt="" className="aspect-[4/5] w-full rounded-2xl object-cover shadow-2xl" /> : <ProductArt bare kind={product.kind} color={color?.hex ?? "#ccc"} className="aspect-[4/5] w-full" />}
+              {product.image ? <img src={product.image} alt="" className="aspect-[4/5] w-full object-contain drop-shadow-[0_18px_22px_rgba(0,0,0,0.45)]" /> : <ProductArt bare kind={product.kind} color={color?.hex ?? "#ccc"} className="aspect-[4/5] w-full" />}
             </div>
             <div className="min-w-0 pr-8 md:pr-0">
               <h2 className="font-display text-xl font-semibold leading-snug md:text-2xl">{product.name}</h2>
@@ -128,8 +128,8 @@ export function QuickBuy({ product, zones, onClose }: { product: Product; zones:
           <button type="button" onClick={addToCart} disabled={stock <= 0} className="mt-auto rounded-full border border-white/30 bg-white/10 py-3 text-sm font-medium backdrop-blur transition hover:bg-white/20 disabled:opacity-50">Add to cart instead</button>
         </div>
 
-        {/* The form side: frosted glass, with solid enough colour that every word stays easy to read */}
-        <form onSubmit={submit} className="no-scrollbar flex flex-col gap-2.5 overflow-y-auto bg-white/85 p-5 pb-8 backdrop-blur-2xl dark:bg-[#12151a]/88 md:max-h-[94dvh] md:p-7 md:pb-9 [&>*]:shrink-0">
+        {/* The form side uses the theme colours, so every word stays easy to read in light and dark mode. */}
+        <form onSubmit={submit} className="no-scrollbar flex flex-col gap-2.5 overflow-y-auto bg-surface p-5 pb-8 text-ink md:max-h-[94dvh] md:p-7 md:pb-9 [&>*]:shrink-0">
           <p className="font-display text-lg font-semibold">Where should we deliver it?</p>
           <div className="grid gap-2.5 sm:grid-cols-2">
             <input name="name" required minLength={2} placeholder="Full name" autoComplete="name" className={field} />
@@ -143,16 +143,16 @@ export function QuickBuy({ product, zones, onClose }: { product: Product; zones:
           <input name="email" type="email" placeholder="Email (optional, for your invoice)" autoComplete="email" className={field} />
           <input name="qz_hp" tabIndex={-1} autoComplete="off" aria-hidden data-lpignore="true" data-1p-ignore="true" data-bwignore="true" data-form-type="other" style={{ position: "absolute", left: "-9999px", width: 1, height: 1, opacity: 0 }} />
           <p className="mt-1 text-sm font-medium">Payment</p>
-          <PaymentPicker methods={methods} value={method} onChange={setMethod} amount={quote?.total ?? price * qty} tone="glass" />
+          <PaymentPicker methods={methods} value={method} onChange={setMethod} amount={quote?.total ?? price * qty} />
 
-          <dl className="mt-1 grid gap-1.5 rounded-2xl border border-black/5 bg-white/70 p-4 text-sm dark:border-white/10 dark:bg-white/5">
-            <div className="flex justify-between"><dt className="text-ink/65 dark:text-white/65">Items</dt><dd className="tabular-nums">{formatPrice(quote?.subtotal ?? price * qty)}</dd></div>
-            <div className="flex justify-between"><dt className="text-ink/65 dark:text-white/65">Delivery</dt><dd className="tabular-nums">{quote ? (quote.shipping === 0 ? "Free" : formatPrice(quote.shipping)) : "Calculated next"}</dd></div>
-            <div className="mt-1 flex justify-between border-t border-black/10 pt-2.5 text-base font-semibold dark:border-white/10"><dt>{method === "cod" ? "Pay on delivery" : "Total"}</dt><dd className="tabular-nums">{formatPrice(quote?.total ?? price * qty)}</dd></div>
+          <dl className="mt-1 grid gap-1.5 rounded-2xl border border-line bg-paper p-4 text-sm">
+            <div className="flex justify-between"><dt className="text-muted">Items</dt><dd className="tabular-nums">{formatPrice(quote?.subtotal ?? price * qty)}</dd></div>
+            <div className="flex justify-between"><dt className="text-muted">Delivery</dt><dd className="tabular-nums">{quote ? (quote.shipping === 0 ? "Free" : formatPrice(quote.shipping)) : "Calculated next"}</dd></div>
+            <div className="mt-1 flex justify-between border-t border-line pt-2.5 text-base font-semibold"><dt>{method === "cod" ? "Pay on delivery" : "Total"}</dt><dd className="tabular-nums">{formatPrice(quote?.total ?? price * qty)}</dd></div>
           </dl>
-          {error && <p role="alert" className="text-sm text-red-600">{error}</p>}
-          <button disabled={pending || stock <= 0 || !picked} className="shine mb-1 mt-3 flex min-h-[56px] items-center justify-center gap-2 rounded-full bg-ink px-6 py-4 text-[15px] font-semibold text-paper shadow-lg transition hover:-translate-y-0.5 disabled:opacity-50">{pending ? "Placing order..." : <><Check size={16} /> {method === "cod" ? "Place order, pay on delivery" : method === "sslcommerz" ? "Continue to payment" : "Place order"}</>}</button>
-          <p className="pb-1 text-center text-xs text-ink/60 dark:text-white/60">We will call you to confirm. {method === "cod" ? "You pay in cash when it arrives." : picked?.manual ? "We check your payment before we send the order." : ""}</p>
+          {error && <p role="alert" className="text-sm text-[var(--madder)]">{error}</p>}
+          <button disabled={pending || stock <= 0 || !picked} className="mb-1 mt-3 flex min-h-[56px] items-center justify-center gap-2 rounded-full bg-accent px-6 py-4 text-[15px] font-semibold text-accent-ink shadow-lg transition hover:-translate-y-0.5 disabled:opacity-50">{pending ? "Placing order..." : <><Check size={16} /> {method === "cod" ? "Place order, pay on delivery" : method === "sslcommerz" ? "Continue to payment" : "Place order"}</>}</button>
+          <p className="pb-1 text-center text-xs text-muted">We will call you to confirm. {method === "cod" ? "You pay in cash when it arrives." : picked?.manual ? "We check your payment before we send the order." : ""}</p>
         </form>
       </div>
     </div>

@@ -198,7 +198,7 @@ export function ProductHero({ products, categories, eyebrow = "", heading, sub, 
               <p className="mt-5 text-xs text-white/75">Choose your size:</p>
               <div className="mt-2.5 flex flex-wrap gap-2 md:justify-end">
                 {sizeList.map((sz) => (
-                  <button key={sz} onClick={() => setSizes((s) => ({ ...s, [p.id]: sz }))} aria-pressed={sz === size} className={`grid h-11 min-w-11 place-items-center rounded-full px-2 text-sm transition ${sz === size ? "bg-white font-semibold text-black" : "bg-white/10 text-white hover:bg-white/22"} ${sizeOk(sz) ? "" : "line-through opacity-50"}`}>{sz}</button>
+                  <button key={sz} onClick={() => setSizes((s) => ({ ...s, [p.id]: sz }))} aria-pressed={sz === size} className={`grid h-11 min-w-11 place-items-center rounded-full px-2 text-sm transition ${sz === size ? "bg-white font-semibold text-black" : "bg-white/10 text-white hover:bg-white/20"} ${sizeOk(sz) ? "" : "line-through opacity-50"}`}>{sz}</button>
                 ))}
               </div>
             </>

@@ -5,28 +5,21 @@ import { Check, Copy } from "lucide-react";
 import { ACCOUNT_TYPE_LABEL, type PublicMethod } from "@/lib/payments";
 import { formatPrice } from "@/lib/config";
 
-type Tone = "plain" | "glass";
-
 /**
  * The payment choices at checkout. When a manual method (bKash, Nagad, Rocket, Upay, bank) is picked it shows
  * where to send the money and asks for the sender number and transaction ID. Those two boxes are plain form
  * fields named `payer` and `trxId`, so the parent form reads them from its FormData.
  */
-export function PaymentPicker({ methods, value, onChange, amount, tone = "plain" }: { methods: PublicMethod[]; value: string; onChange: (id: string) => void; amount?: number; tone?: Tone }) {
+export function PaymentPicker({ methods, value, onChange, amount }: { methods: PublicMethod[]; value: string; onChange: (id: string) => void; amount?: number }) {
   const [copied, setCopied] = useState(false);
-  const glass = tone === "glass";
   const picked = methods.find((m) => m.id === value);
 
-  const row = (on: boolean) => glass
-    ? `flex cursor-pointer items-center gap-3 rounded-xl border px-3 py-2.5 text-sm ${on ? "border-ink bg-white/80 dark:border-white dark:bg-white/15" : "border-black/10 bg-white/50 dark:border-white/15 dark:bg-white/5"}`
-    : `flex cursor-pointer items-center gap-3 rounded-xl border bg-surface p-3 text-sm ${on ? "border-accent" : "border-line"}`;
-  const field = glass
-    ? "w-full rounded-xl border border-white/40 bg-white/70 px-3.5 py-2.5 text-sm text-ink dark:border-white/15 dark:bg-white/10 dark:text-white"
-    : "w-full rounded-xl border border-line bg-surface px-3 py-2.5 text-sm";
-  const panel = glass ? "rounded-xl border border-black/10 bg-white/60 p-3.5 text-sm dark:border-white/15 dark:bg-white/5" : "rounded-xl border border-line bg-paper p-3.5 text-sm";
-  const muted = glass ? "text-ink/65 dark:text-white/65" : "text-muted";
+  const row = (on: boolean) => `flex cursor-pointer items-center gap-3 rounded-xl border bg-paper p-3 text-sm text-ink ${on ? "border-accent" : "border-line"}`;
+  const field = "w-full rounded-xl border border-line bg-surface px-3 py-2.5 text-sm text-ink";
+  const panel = "rounded-xl border border-line bg-paper p-3.5 text-sm text-ink";
+  const muted = "text-muted";
 
-  if (methods.length === 0) return <p className={`rounded-xl border p-3 text-sm ${glass ? "border-black/10" : "border-line text-muted"}`}>No payment method is open right now. Please call us to place your order.</p>;
+  if (methods.length === 0) return <p className="rounded-xl border border-line p-3 text-sm text-muted">No payment method is open right now. Please call us to place your order.</p>;
 
   async function copy(text: string) {
     try { await navigator.clipboard.writeText(text); setCopied(true); setTimeout(() => setCopied(false), 1500); } catch { /* the number is visible, they can copy it by hand */ }
@@ -49,8 +42,8 @@ export function PaymentPicker({ methods, value, onChange, amount, tone = "plain"
               <pre className={`mt-1.5 whitespace-pre-wrap font-body text-sm ${muted}`}>{picked.account}</pre>
             ) : (
               <p className={`mt-1.5 ${muted}`}>
-                Send {amount ? <span className="font-semibold text-ink dark:text-white">{formatPrice(amount)}</span> : "the total"} to{" "}
-                <button type="button" onClick={() => copy(picked.account)} className="inline-flex items-center gap-1 rounded-md bg-ink/5 px-1.5 py-0.5 font-semibold text-ink dark:bg-white/10 dark:text-white" aria-label={`Copy ${picked.name} number`}>
+                Send {amount ? <span className="font-semibold text-ink">{formatPrice(amount)}</span> : "the total"} to{" "}
+                <button type="button" onClick={() => copy(picked.account)} className="inline-flex items-center gap-1 rounded-md bg-ink/5 px-1.5 py-0.5 font-semibold text-ink" aria-label={`Copy ${picked.name} number`}>
                   {picked.account} {copied ? <Check size={12} /> : <Copy size={12} />}
                 </button>
                 {picked.accountType && <> ({ACCOUNT_TYPE_LABEL[picked.accountType]})</>}.
