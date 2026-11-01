@@ -58,7 +58,7 @@ export const blockSchema = z.discriminatedUnion("type", [
     z.object({ t: z.literal("quote"), text: text(400), by: text(60) }),
     z.object({ t: z.literal("divider") }),
   ])).max(40), width: z.enum(["narrow", "wide"]) }),
-  z.object({ ...common, type: z.literal("products"), title: text(80), source: z.enum(["all", "category", "tag"]), category: text(80), tag: z.enum(["new", "hot", "bestseller", "featured", "sale"]), count: z.number().int().min(2).max(12) }),
+  z.object({ ...common, type: z.literal("products"), title: text(80), source: z.enum(["all", "category", "tag", "preorder"]), category: text(80), tag: z.enum(["new", "hot", "bestseller", "featured", "sale"]), count: z.number().int().min(2).max(12) }),
   z.object({ ...common, type: z.literal("categories"), title: text(80) }),
   z.object({ ...common, type: z.literal("banners"), title: text(80) }),
   z.object({ ...common, type: z.literal("banner"), title: text(80), sub: text(160), image, button: text(30), link }),

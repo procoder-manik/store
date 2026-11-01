@@ -23,6 +23,8 @@ export async function saveProduct(input: unknown): Promise<Result> {
     name: d.name,
     slug: makeSlug(d.slug, d.name, "product"),
     offer_ends_at: d.offerEndsAt ? new Date(d.offerEndsAt).toISOString() : null,
+    preorder: d.preorder,
+    preorder_date: d.preorder && d.preorderDate ? d.preorderDate : null,
     kind: d.kind,
     category_id: d.categoryId,
     description: d.description,

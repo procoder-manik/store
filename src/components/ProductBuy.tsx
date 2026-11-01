@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Check, Minus, Plus, Truck } from "lucide-react";
 import type { Product } from "@/lib/demo-products";
 import { formatPrice } from "@/lib/config";
+import { preorderDate } from "@/lib/utils";
 import { useCart } from "@/lib/cart";
 import { trackAddToCart } from "@/lib/track";
 import { ListButtons } from "./ListButtons";
@@ -92,6 +93,14 @@ export function ProductBuy({ product, colorIdx, onColor, compact = false }: Prop
         </div>
       )}
 
+      {product.preorder && (
+        <div className="mt-5 rounded-2xl border border-accent/40 bg-accent/5 p-4 text-sm">
+          <p className="font-semibold">Pre-order{product.preorderDate ? `, expected ${preorderDate(product.preorderDate)}` : ""}</p>
+          {saving > 0 && <p className="mt-1 text-muted">Pre-order price {formatPrice(price)}. Price after launch {formatPrice(product.compareAt as number)}. You save {formatPrice(saving)}.</p>}
+          <p className="mt-1 text-muted">Pay the advance now to reserve yours, and the rest on delivery.</p>
+        </div>
+      )}
+
       {compact ? (
         <>
           <div className="mt-4 flex items-center gap-2">
@@ -106,7 +115,7 @@ export function ProductBuy({ product, colorIdx, onColor, compact = false }: Prop
           <div className="mt-5 flex items-center gap-4">{stepper}{stockNote && <p className={`text-sm ${available ? "text-muted" : "text-red-600"}`}>{stockNote}</p>}</div>
           <div ref={buttons} className="mt-5 grid gap-2.5">
             <button disabled={!available} onClick={onAdd} className="flex items-center justify-center gap-2 rounded-pill bg-accent py-3.5 text-sm font-semibold text-accent-ink transition active:scale-[0.99] disabled:opacity-40">
-              {added ? <><Check size={16} /> Added to cart</> : available ? "Add to cart" : "Sold out"}
+              {added ? <><Check size={16} /> Added to cart</> : available ? (product.preorder ? "Pre-order now" : "Add to cart") : "Sold out"}
             </button>
             <button disabled={!available} onClick={buyNow} className="rounded-pill bg-ink py-3.5 text-sm font-semibold text-paper transition active:scale-[0.99] disabled:opacity-40">Buy now</button>
           </div>
@@ -126,7 +135,7 @@ export function ProductBuy({ product, colorIdx, onColor, compact = false }: Prop
           </div>
         </Portal>
       )}
-      <p className="mt-3 flex items-center gap-2 text-xs text-muted"><Truck size={14} /> Cash on delivery. Pay when it arrives.</p>
+      <p className="mt-3 flex items-center gap-2 text-xs text-muted"><Truck size={14} /> {product.preorder ? "Delivered when it arrives." : "Pay the rest in cash when it arrives."}</p>
       <ListButtons id={product.id} />
     </div>
   );

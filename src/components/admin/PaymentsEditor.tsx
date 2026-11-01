@@ -1,9 +1,10 @@
 "use client";
 
+import Link from "next/link";
 import { useState, useTransition } from "react";
 import { InfoTip } from "./InfoTip";
 import { savePayments } from "@/app/admin/payments/actions";
-import { CATALOG, type CatalogItem, type MethodCfg, type MethodGroup, type MethodId, type PaymentsSettings } from "@/lib/payments";
+import { CATALOG, type CatalogItem, type MethodCfg, type MethodGroup, type AdvanceCfg, type MethodId, type PaymentsSettings } from "@/lib/payments";
 
 const input = "w-full rounded-xl border border-line bg-surface px-3 py-2 text-sm";
 const label = "mb-1 block text-xs font-medium text-muted";
@@ -25,6 +26,8 @@ function Switch({ on, onChange, disabled, name }: { on: boolean; onChange: (v: b
 
 export function PaymentsEditor({ initial, sslReady }: { initial: PaymentsSettings; sslReady: boolean }) {
   const [m, setM] = useState(initial.methods);
+  const [adv, setAdv] = useState<AdvanceCfg>(initial.advance);
+  const setA = (p: Partial<AdvanceCfg>) => { setMsg(null); setAdv((x) => ({ ...x, ...p })); };
   const [msg, setMsg] = useState<{ ok: boolean; text: string } | null>(null);
   const [pending, start] = useTransition();
   const set = (id: MethodId, p: Partial<MethodCfg>) => { setMsg(null); setM((x) => ({ ...x, [id]: { ...x[id], ...p } })); };
@@ -60,8 +63,29 @@ export function PaymentsEditor({ initial, sslReady }: { initial: PaymentsSetting
     );
   }
 
+  const rule = (name: string, text: string, on: boolean, change: (v: boolean) => void) => (
+    <div className="flex items-start justify-between gap-4 border-t border-line pt-3 first:border-0 first:pt-0">
+      <div><p className="text-sm font-medium">{name}</p><p className="mt-0.5 text-xs text-muted">{text}</p></div>
+      <Switch name={name} on={on} onChange={change} />
+    </div>
+  );
+
   return (
-    <form onSubmit={(e) => { e.preventDefault(); setMsg(null); start(async () => { const r = await savePayments({ methods: m }); setMsg(r.ok ? { ok: true, text: "Saved. Checkout is updated." } : { ok: false, text: r.error ?? "Could not save." }); }); }} className="grid max-w-3xl gap-8">
+    <form onSubmit={(e) => { e.preventDefault(); setMsg(null); start(async () => { const r = await savePayments({ methods: m, advance: adv }); setMsg(r.ok ? { ok: true, text: "Saved. Checkout is updated." } : { ok: false, text: r.error ?? "Could not save." }); }); }} className="grid max-w-3xl gap-8">
+      <section className="grid gap-3">
+        <div><h2 className="font-display text-base font-semibold">Money before delivery<InfoTip text="For cash on delivery orders. The customer sends the advance by a mobile wallet or bank, then enters the transaction ID. You check it on the order page." /></h2><p className="mt-1 text-xs text-muted">Needs at least one wallet or bank turned on below. The delivery charges are set on the <Link href="/admin/shipping" className="underline">Shipping</Link> page. Landing page order forms stay plain cash on delivery.</p></div>
+        <div className="grid gap-3 rounded-xl border border-line bg-surface p-4">
+          {rule("Delivery charge first", "The customer pays the delivery charge now, and the rest to the rider.", adv.deliveryFirst, (v) => setA({ deliveryFirst: v }))}
+          {rule("Partial payment", "The customer can pay a percentage of the products plus the delivery charge now.", adv.partialEnabled, (v) => setA({ partialEnabled: v }))}
+          {adv.partialEnabled && (
+            <div className="grid gap-3 border-t border-line pt-3">
+              <div><label className={label} htmlFor="advance-percent">Percentage paid first</label><input id="advance-percent" className={`${input} max-w-32`} type="number" min={5} max={95} value={adv.percent} onChange={(e) => setA({ percent: Number(e.target.value) })} /></div>
+              {rule("Make partial payment required", "Off: the customer chooses. On: every cash on delivery order must pay this percentage first.", adv.partialRequired, (v) => setA({ partialRequired: v }))}
+            </div>
+          )}
+          {rule("Partial payment for pre-orders", "Orders with a pre-order item must pay the percentage first, even when the other rules are off.", adv.preorderPartial, (v) => setA({ preorderPartial: v }))}
+        </div>
+      </section>
       {GROUPS.map((g) => (
         <section key={g.id} className="grid gap-3">
           <div><h2 className="font-display text-base font-semibold">{g.title}<InfoTip text={g.note || (g.id === "cash" ? "The customer pays the delivery rider in cash. Many customers in Bangladesh prefer it, so keep it on unless you want only prepaid orders." : "Customers send money to your bank account and give you the transfer reference. You check your bank before sending the order.")} /></h2>{g.note && <p className="mt-1 text-xs text-muted">{g.note}</p>}</div>

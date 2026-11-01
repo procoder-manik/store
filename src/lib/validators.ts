@@ -22,6 +22,8 @@ export const productSchema = z.object({
   compareAtPrice: z.number().min(0).max(10_000_000).nullable(),
   tags: z.array(z.enum(["new", "hot", "bestseller", "featured", "sale"])).max(5),
   offerEndsAt: z.string().max(40),
+  preorder: z.boolean().default(false),
+  preorderDate: z.string().max(10).default(""),
   status: z.enum(["draft", "active", "archived"]),
   seoTitle: z.string().max(70),
   seoDescription: z.string().max(170),

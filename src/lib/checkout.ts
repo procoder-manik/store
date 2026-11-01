@@ -2,12 +2,12 @@ import "server-only";
 import { createAdminClient } from "@/lib/supabase/admin";
 
 export type CartInput = { productId: string; variantId?: string; qty: number }[];
-export type Line = { productId: string; variantId: string | null; name: string; unitPrice: number; qty: number };
+export type Line = { productId: string; variantId: string | null; name: string; unitPrice: number; qty: number; preorder?: boolean };
 export type Priced =
-  | { ok: true; lines: Line[]; subtotal: number; shipping: number; discount: number; bundleDiscount: number; total: number; couponCode: string | null; couponError?: string; zoneName: string; creditUsed?: number; creditBalance?: number }
+  | { ok: true; lines: Line[]; subtotal: number; shipping: number; discount: number; bundleDiscount: number; total: number; couponCode: string | null; couponError?: string; zoneName: string; hasPreorder: boolean; creditUsed?: number; creditBalance?: number }
   | { ok: false; error: string };
 
-type Prod = { name: string; base_price: number | string; status: string };
+type Prod = { name: string; base_price: number | string; status: string; preorder?: boolean };
 type VRow = { id: string; product_id: string; color_name: string | null; size: string | null; price_delta: number | string; stock: number; products: Prod | Prod[] | null };
 type PRow = Prod & { id: string; product_variants: { id: string }[] };
 
@@ -31,7 +31,7 @@ export async function priceCart(items: CartInput, zoneId: string, couponRaw?: st
   if (withVariant.length) {
     const { data, error } = await db
       .from("product_variants")
-      .select("id, product_id, color_name, size, price_delta, stock, products(name, base_price, status)")
+      .select("id, product_id, color_name, size, price_delta, stock, products(name, base_price, status, preorder)")
       .in("id", withVariant.map((i) => i.variantId as string));
     if (error) return { ok: false, error: "Could not load your cart. Please try again." };
     const byId = new Map(((data ?? []) as unknown as VRow[]).map((v) => [v.id, v]));
@@ -41,19 +41,20 @@ export async function priceCart(items: CartInput, zoneId: string, couponRaw?: st
       if (!v || !prod || prod.status !== "active" || v.product_id !== i.productId) return { ok: false, error: GONE };
       const label = [v.color_name, v.size].filter(Boolean).join(", ");
       if (v.stock < i.qty) return { ok: false, error: `${prod.name}${label ? ` (${label})` : ""}: only ${v.stock} left in stock.` };
-      lines.push({ productId: v.product_id, variantId: v.id, name: label ? `${prod.name} (${label})` : prod.name, unitPrice: Number(prod.base_price) + Number(v.price_delta), qty: i.qty });
+      const shown = label ? `${prod.name} (${label})` : prod.name;
+      lines.push({ productId: v.product_id, variantId: v.id, name: prod.preorder ? `${shown} [Pre-order]` : shown, unitPrice: Number(prod.base_price) + Number(v.price_delta), qty: i.qty, preorder: !!prod.preorder });
     }
   }
 
   const plain = list.filter((i) => !i.variantId);
   if (plain.length) {
-    const { data } = await db.from("products").select("id, name, base_price, status, product_variants(id)").in("id", plain.map((i) => i.productId));
+    const { data } = await db.from("products").select("id, name, base_price, status, preorder, product_variants(id)").in("id", plain.map((i) => i.productId));
     const byId = new Map(((data ?? []) as unknown as PRow[]).map((p) => [p.id, p]));
     for (const i of plain) {
       const p = byId.get(i.productId);
       if (!p || p.status !== "active") return { ok: false, error: GONE };
       if (p.product_variants.length > 0) return { ok: false, error: `${p.name}: choose a color and size again.` };
-      lines.push({ productId: p.id, variantId: null, name: p.name, unitPrice: Number(p.base_price), qty: i.qty });
+      lines.push({ productId: p.id, variantId: null, name: p.preorder ? `${p.name} [Pre-order]` : p.name, unitPrice: Number(p.base_price), qty: i.qty, preorder: !!p.preorder });
     }
   }
 
@@ -108,5 +109,5 @@ export async function priceCart(items: CartInput, zoneId: string, couponRaw?: st
   }
 
   const allDiscount = Math.min(subtotal, discount + bundleDiscount);
-  return { ok: true, lines, subtotal, shipping, discount: allDiscount, bundleDiscount, total: subtotal + shipping - allDiscount, couponCode, couponError, zoneName: zone.name as string };
+  return { ok: true, lines, subtotal, shipping, discount: allDiscount, bundleDiscount, total: subtotal + shipping - allDiscount, couponCode, couponError, zoneName: zone.name as string, hasPreorder: lines.some((l) => l.preorder) };
 }

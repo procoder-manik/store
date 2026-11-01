@@ -23,6 +23,8 @@ export type Product = {
   related?: string[];
   updatedAt?: string;
   offerEndsAt?: string;
+  preorder?: boolean;
+  preorderDate?: string;
   seo?: { title?: string; description?: string };
 };
 

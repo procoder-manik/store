@@ -16,7 +16,7 @@ export default async function ThankYou({ params }: { params: Promise<{ id: strin
   const db = createAdminClient();
   const { data: o } = await db
     .from("orders")
-    .select("order_no, guest_name, subtotal, shipping_fee, discount, total, status, payment_method, payment_status, shipping_address, order_items(id, name_snapshot, unit_price, qty)")
+    .select("order_no, guest_name, subtotal, shipping_fee, discount, total, status, payment_method, payment_status, advance_amount, advance_status, is_preorder, shipping_address, order_items(id, name_snapshot, unit_price, qty)")
     .eq("id", id)
     .maybeSingle();
   if (!o) notFound();
@@ -41,10 +41,12 @@ export default async function ThankYou({ params }: { params: Promise<{ id: strin
           <div className="flex justify-between"><dt className="text-muted">Delivery</dt><dd>{Number(o.shipping_fee) === 0 ? "Free" : formatPrice(Number(o.shipping_fee))}</dd></div>
           {Number(o.discount) > 0 && <div className="flex justify-between"><dt className="text-muted">Discount</dt><dd>-{formatPrice(Number(o.discount))}</dd></div>}
           <div className="flex justify-between text-base font-semibold"><dt>Total</dt><dd>{formatPrice(Number(o.total))}</dd></div>
+          {Number(o.advance_amount) > 0 && <div className="flex justify-between"><dt className="text-muted">Advance {o.advance_status === "received" ? "received" : "sent, we are checking it"}</dt><dd>{formatPrice(Number(o.advance_amount))}</dd></div>}
+          {Number(o.advance_amount) > 0 && <div className="flex justify-between font-semibold"><dt>Pay on delivery</dt><dd>{formatPrice(Number(o.total) - Number(o.advance_amount))}</dd></div>}
         </dl>
       </div>
       <ol className="mt-6 grid gap-3 text-sm">
-        {["We call you to confirm the order.", "We pack it and hand it to the courier.", "Check your parcel when it arrives, then pay if you chose cash on delivery."].map((t, i) => (
+        {[o.is_preorder ? "We call you to confirm your pre-order, and again when the product arrives." : "We call you to confirm the order.", "We pack it and hand it to the courier.", "Check your parcel when it arrives, then pay if you chose cash on delivery."].map((t: string, i: number) => (
           <li key={t} className="flex items-start gap-3"><span className="grid h-6 w-6 shrink-0 place-items-center rounded-full bg-accent/10 text-xs font-semibold text-accent">{i + 1}</span><span className="pt-0.5">{t}</span></li>
         ))}
       </ol>

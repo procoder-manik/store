@@ -12,6 +12,9 @@ export function isAllowedImageUrl(u: string) {
   }
 }
 
+/** "2027-01-15" becomes "15 January 2027". */
+export const preorderDate = (d: string) => new Date(`${d}T00:00:00Z`).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric", timeZone: "UTC" });
+
 export const imageUrl = (path: string) =>
   path.startsWith("https://") ? path : `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/product-images/${path}`;
 

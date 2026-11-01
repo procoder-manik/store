@@ -17,7 +17,7 @@ import type { PublicMethod } from "@/lib/payments";
 export type Zone = { id: string; name: string; fee: number; freeOver: number | null };
 export type BumpInfo = { headline: string; text: string; name: string; price: number; normalPrice: number };
 export type Prefill = { name: string; phone: string; email: string; district: string; address: string };
-type Quote = { subtotal: number; shipping: number; discount: number; bundleDiscount: number; total: number; couponError?: string; creditUsed?: number; creditBalance?: number };
+type Quote = { hasPreorder?: boolean; subtotal: number; shipping: number; discount: number; bundleDiscount: number; total: number; couponError?: string; creditUsed?: number; creditBalance?: number };
 
 const input = "w-full rounded-xl border border-line bg-surface px-3 py-2.5 text-sm";
 const label = "mb-1 block text-xs font-medium text-muted";
@@ -51,7 +51,7 @@ export function CheckoutForm({ zones, bump = null, prefill = null, methods = [] 
       if (!live) return;
       if (!r.ok) { setQuote(null); setError(r.error); return; }
       setError("");
-      setQuote({ subtotal: r.subtotal, shipping: r.shipping, discount: r.discount, bundleDiscount: r.bundleDiscount, total: r.total, couponError: r.couponError, creditUsed: r.creditUsed, creditBalance: r.creditBalance });
+      setQuote({ hasPreorder: r.hasPreorder, subtotal: r.subtotal, shipping: r.shipping, discount: r.discount, bundleDiscount: r.bundleDiscount, total: r.total, couponError: r.couponError, creditUsed: r.creditUsed, creditBalance: r.creditBalance });
     });
     return () => { live = false; };
   }, [mounted, cartKey, zoneId, coupon, items.length, bumpOn, useCredit]);
@@ -75,7 +75,7 @@ export function CheckoutForm({ zones, bump = null, prefill = null, methods = [] 
     const payload = {
       name: String(f.get("name")), phone: String(f.get("phone")), email: String(f.get("email") ?? ""),
       zoneId, district: String(f.get("district")), address: fullAddress(f), note: String(f.get("note") ?? ""),
-      coupon, bump: bumpOn, useCredit, ref: readRef(), paymentMethod: method, payerNumber: String(f.get("payer") ?? ""), trxId: String(f.get("trxId") ?? ""), website: String(f.get("qz_hp") ?? ""), items: cartInput,
+      coupon, bump: bumpOn, useCredit, ref: readRef(), paymentMethod: method, payerNumber: String(f.get("payer") ?? ""), trxId: String(f.get("trxId") ?? ""), plan: String(f.get("plan") ?? ""), advanceMethod: String(f.get("advanceMethod") ?? ""), website: String(f.get("qz_hp") ?? ""), items: cartInput,
     };
     start(async () => {
       const r = await placeOrder(payload);
@@ -91,7 +91,7 @@ export function CheckoutForm({ zones, bump = null, prefill = null, methods = [] 
     return (
       <main className="mx-auto max-w-xl px-5 py-16">
         <h1 className="font-display text-2xl font-semibold">Your cart is empty</h1>
-        <p className="mt-3 text-sm text-muted">Pick something off the rail, then come back to check out.</p>
+        <p className="mt-3 text-sm text-muted">Add something you like, then come back to check out.</p>
         <Link href="/" className="mt-5 inline-block rounded-pill bg-accent px-6 py-3 text-sm font-semibold text-accent-ink">Keep shopping</Link>
       </main>
     );
@@ -129,7 +129,7 @@ export function CheckoutForm({ zones, bump = null, prefill = null, methods = [] 
           )}
 
           <h2 className="mt-2 font-display text-lg font-semibold">Payment</h2>
-          <PaymentPicker methods={methods} value={method} onChange={setMethod} amount={quote?.total} />
+          <PaymentPicker methods={methods} value={method} onChange={setMethod} amount={quote?.total} shipping={quote?.shipping} hasPreorder={quote?.hasPreorder} />
         </div>
 
         <aside className="h-fit rounded-xl border border-line bg-surface p-5 lg:sticky lg:top-20">
@@ -171,7 +171,7 @@ export function CheckoutForm({ zones, bump = null, prefill = null, methods = [] 
           )}
           {error && <p role="alert" className="mt-3 text-sm text-red-600">{error}</p>}
           <button disabled={pending || !quote || !picked} className="mt-5 w-full rounded-pill bg-accent py-3 text-sm font-semibold text-accent-ink disabled:opacity-50">{pending ? "Placing order..." : online ? "Continue to payment" : "Place order"}</button>
-          <p className="mt-3 text-center text-xs text-muted">We will call you to confirm. {online ? "Your payment is processed on a secure page." : picked?.manual ? "We check your payment before we send the order." : "You pay in cash when it arrives."}</p>
+          <p className="mt-3 text-center text-xs text-muted">We will call you to confirm. {online ? "Your payment is processed on a secure page." : picked?.manual ? "We check your payment before we send the order." : "Any cash due is paid when it arrives."}</p>
         </aside>
       </form>
     </main>

@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { requireStaff } from "@/lib/admin";
+import { amountDue } from "@/lib/payments";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { sendOrderEmail, type OrderEmailKind } from "@/lib/order-emails";
 import { sendAutoEmail } from "@/lib/auto-emails";
@@ -114,8 +115,17 @@ export async function saveShipment(formData: FormData) {
 export async function verifyPayment(formData: FormData) {
   const d = z.object({ id: z.string().uuid(), result: z.enum(["received", "not_found"]) }).parse({ id: formData.get("id"), result: formData.get("result") });
   const { supabase, user } = await requireStaff("order.verify_payment");
-  const { data: o } = await supabase.from("orders").select("status, payment_status, payment_method").eq("id", d.id).maybeSingle();
+  const { data: o } = await supabase.from("orders").select("status, payment_status, payment_method, advance_status").eq("id", d.id).maybeSingle();
   if (!o) throw new Error("Order not found");
+  // Cash on delivery with an advance: the order stays unpaid, because the rest is still due on delivery.
+  if (o.advance_status === "pending") {
+    const { error } = await createAdminClient().from("orders").update({ advance_status: d.result === "received" ? "received" : "not_found" }).eq("id", d.id).eq("advance_status", "pending");
+    if (error) throw new Error(error.message);
+    await supabase.from("order_events").insert({ order_id: d.id, status: o.status, note: d.result === "received" ? "Advance checked and received." : "Advance could not be found. Contact the customer before sending the order." });
+    revalidatePath(`/admin/orders/${d.id}`);
+    revalidatePath("/admin/orders");
+    return;
+  }
   if (o.payment_status !== "unpaid") throw new Error("This payment was already marked.");
   const { error } = await createAdminClient().from("orders").update({ payment_status: d.result === "received" ? "paid" : "failed" }).eq("id", d.id).eq("payment_status", "unpaid");
   if (error) throw new Error(error.message);
@@ -138,11 +148,11 @@ export async function bookSteadfast(formData: FormData) {
   const id = z.string().uuid().parse(formData.get("id"));
   await requireStaff("order.steadfast");
   const db = createAdminClient();
-  const { data: o } = await db.from("orders").select("order_no, total, guest_name, guest_phone, note, payment_status, consignment_id, shipping_address").eq("id", id).maybeSingle();
+  const { data: o } = await db.from("orders").select("order_no, total, guest_name, guest_phone, note, payment_status, advance_amount, advance_status, consignment_id, shipping_address").eq("id", id).maybeSingle();
   if (!o) throw new Error("Order not found");
   if (o.consignment_id) throw new Error("This order is already booked.");
   const a = o.shipping_address as { district?: string; address?: string };
-  const r = await bookSteadfastParcel({ invoice: String(o.order_no), name: o.guest_name as string, phone: o.guest_phone as string, address: `${a?.address ?? ""}, ${a?.district ?? ""}`, cod: o.payment_status === "paid" ? 0 : Number(o.total), note: (o.note as string) ?? "" });
+  const r = await bookSteadfastParcel({ invoice: String(o.order_no), name: o.guest_name as string, phone: o.guest_phone as string, address: `${a?.address ?? ""}, ${a?.district ?? ""}`, cod: amountDue(o), note: (o.note as string) ?? "" });
   if (!r.ok) throw new Error(r.error);
   await db.from("orders").update({ courier: "Steadfast", consignment_id: r.consignmentId, tracking_code: r.trackingCode }).eq("id", id);
   revalidatePath(`/admin/orders/${id}`);

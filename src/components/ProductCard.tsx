@@ -5,6 +5,7 @@ import { useState } from "react";
 import { Check, ShoppingBag } from "lucide-react";
 import type { Product } from "@/lib/demo-products";
 import { formatPrice } from "@/lib/config";
+import { preorderDate } from "@/lib/utils";
 import { useCart } from "@/lib/cart";
 import { HeartButton } from "./ListButtons";
 import { OfferCountdown } from "./OfferCountdown";
@@ -51,7 +52,7 @@ export function ProductCard({ p, zones }: { p: Product; zones?: Zone[] }) {
           )}
         </Link>
         <div className="pointer-events-none absolute left-2.5 top-2.5">
-          {soldOut ? <span className="rounded-full bg-ink px-2.5 py-1 text-[11px] font-medium text-paper">Sold out</span> : badges.map((t) => <TagBadge key={t} tag={t} text={t === "sale" && off > 0 ? `${off}% off` : undefined} />)}
+          {p.preorder && !soldOut ? <span className="inline-block rounded-full bg-accent px-2.5 py-1 text-[11px] font-semibold text-accent-ink">Pre-order{off > 0 ? `, ${off}% off` : ""}</span> : soldOut ? <span className="rounded-full bg-ink px-2.5 py-1 text-[11px] font-medium text-paper">Sold out</span> : badges.map((t) => <TagBadge key={t} tag={t} text={t === "sale" && off > 0 ? `${off}% off` : undefined} />)}
         </div>
         {p.offerEndsAt && !soldOut && <span className="absolute bottom-3 left-3"><OfferCountdown endsAt={p.offerEndsAt} compact /></span>}
         <button onClick={quickAdd} disabled={soldOut} aria-label={added ? `${p.name} added to cart` : `Add ${p.name} to cart`} className="absolute bottom-2.5 right-2.5 grid h-10 w-10 place-items-center rounded-full bg-surface text-ink shadow-md transition hover:bg-accent hover:text-accent-ink active:scale-95 disabled:opacity-40">{added ? <Check size={17} /> : <ShoppingBag size={17} strokeWidth={1.6} />}</button>
@@ -61,8 +62,9 @@ export function ProductCard({ p, zones }: { p: Product; zones?: Zone[] }) {
         <p className={`text-[15px] tabular-nums ${off > 0 ? "text-[var(--madder)]" : ""}`}>{formatPrice(p.basePrice)}</p>
         {off > 0 && <p className="text-[13px] tabular-nums text-muted line-through">{formatPrice(p.compareAt as number)}</p>}
       </div>
+      {p.preorder && p.preorderDate && <p className="mt-1 text-xs text-muted">Expected {preorderDate(p.preorderDate)}</p>}
       <div className="mt-auto pt-3">
-        <button onClick={() => !soldOut && setQuick(true)} disabled={soldOut} className="h-10 w-full rounded-full border border-ink/25 text-[13px] font-medium transition hover:border-accent hover:bg-accent hover:text-accent-ink active:scale-[0.98] disabled:opacity-40">Buy now</button>
+        <button onClick={() => !soldOut && setQuick(true)} disabled={soldOut} className="h-10 w-full rounded-full border border-ink/25 text-[13px] font-medium transition hover:border-accent hover:bg-accent hover:text-accent-ink active:scale-[0.98] disabled:opacity-40">{p.preorder ? "Pre-order" : "Buy now"}</button>
       </div>
       <HeartButton id={p.id} className="absolute right-2.5 top-2.5" />
       {quick && <QuickBuy product={p} zones={areas} onClose={() => setQuick(false)} />}

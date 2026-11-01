@@ -24,7 +24,8 @@ const btn = "rounded-pill bg-white px-6 py-3 text-sm font-semibold text-black tr
 
 export type BlockCtx = { products: Product[]; categories: Cat[]; banners?: Banner[]; zones?: Zone[]; slug?: string; preview?: boolean; first?: boolean };
 
-function pick(products: Product[], source: "all" | "category" | "tag", category: string, tag: Product["tags"][number]) {
+function pick(products: Product[], source: "all" | "category" | "tag" | "preorder", category: string, tag: Product["tags"][number]) {
+  if (source === "preorder") return products.filter((p) => p.preorder);
   return source === "category" ? products.filter((p) => p.category === category) : source === "tag" ? products.filter((p) => p.tags.includes(tag)) : products;
 }
 
@@ -191,7 +192,7 @@ export function BlockView({ b, ctx }: { b: Block; ctx: BlockCtx }) {
           {b.title && (
             <div className="mb-8 flex items-end justify-between gap-4">
               <Heading as={b.level} className="font-display text-2xl font-semibold md:text-3xl">{b.title}</Heading>
-              <Link href={b.source === "category" && b.category ? `/category/${b.category}` : "/shop"} className="shrink-0 pb-1 text-sm underline underline-offset-4 hover:text-accent">See all</Link>
+              <Link href={b.source === "preorder" ? "/pre-order" : b.source === "category" && b.category ? `/category/${b.category}` : "/shop"} className="shrink-0 pb-1 text-sm underline underline-offset-4 hover:text-accent">See all</Link>
             </div>
           )}
           {list.length === 0 ? <p className="text-sm text-muted">No products match yet.</p> : <div className="grid grid-cols-2 gap-x-3 gap-y-10 md:grid-cols-4 md:gap-x-6 md:gap-y-14">{list.map((p) => <ProductCard key={p.id} p={p} />)}</div>}

@@ -6,7 +6,7 @@ import { NEXT_STEPS, statusColor, statusLabel } from "@/lib/order-status";
 import { steadfastConfigured } from "@/lib/steadfast";
 import { createClient } from "@/lib/supabase/server";
 import { addOrderNote, bookSteadfast, changeStatus, refundOrder, saveShipment, setAnyStatus, verifyPayment } from "../actions";
-import { paymentLabel } from "@/lib/payments";
+import { amountDue, paymentLabel } from "@/lib/payments";
 
 type Item = { id: string; name_snapshot: string; unit_price: number | string; qty: number };
 type Ev = { id: string; status: string; note: string | null; created_at: string };
@@ -152,17 +152,19 @@ export default async function OrderDetail({ params }: { params: Promise<{ id: st
             {o.note && <p className="mt-2">Note: {o.note}</p>}
             {o.cancel_reason && <p className="mt-2 text-red-600">Cancelled: {o.cancel_reason}</p>}
             {(pays ?? []).length > 0 && <ul className="mt-3 grid gap-1 border-t border-line pt-3 text-xs text-muted">{(pays ?? []).map((x) => <li key={x.tran_id as string}>{x.tran_id}: {formatPrice(Number(x.amount))}, {x.status}{x.method ? `, ${x.method}` : ""}</li>)}</ul>}
+            {o.is_preorder && <p className="mt-3 w-fit rounded-pill bg-accent px-3 py-1 text-xs font-semibold text-accent-ink">Pre-order</p>}
             {o.payment_trx_id && (
               <div className="mt-3 rounded-xl border border-line bg-paper p-3">
-                <p className="font-medium">{paymentLabel(o.payment_method as string)} payment to check</p>
-                <p className="mt-1 text-xs text-muted">Transaction ID <span className="font-mono text-sm font-semibold text-ink">{o.payment_trx_id}</span>{o.payment_sender ? <>, sent from <span className="font-medium text-ink">{o.payment_sender}</span></> : null}, amount {formatPrice(Number(o.total))}.</p>
-                {o.payment_status === "unpaid" ? (
+                <p className="font-medium">{Number(o.advance_amount) > 0 ? `Advance by ${paymentLabel(o.advance_method as string)} to check` : `${paymentLabel(o.payment_method as string)} payment to check`}</p>
+                <p className="mt-1 text-xs text-muted">Transaction ID <span className="font-mono text-sm font-semibold text-ink">{o.payment_trx_id}</span>{o.payment_sender ? <>, sent from <span className="font-medium text-ink">{o.payment_sender}</span></> : null}, amount {formatPrice(Number(o.advance_amount) > 0 ? Number(o.advance_amount) : Number(o.total))}.</p>
+                {(Number(o.advance_amount) > 0 ? o.advance_status === "pending" : o.payment_status === "unpaid") ? (
                   <form action={verifyPayment} className="mt-2 flex flex-wrap gap-2">
                     <input type="hidden" name="id" value={o.id} />
                     <button name="result" value="received" className="rounded-pill bg-accent px-4 py-2 text-xs font-semibold text-accent-ink">Payment received</button>
                     <button name="result" value="not_found" className="rounded-pill border border-line px-4 py-2 text-xs font-medium">Could not find it</button>
                   </form>
-                ) : <p className="mt-2 text-xs font-medium">{o.payment_status === "paid" ? "Marked as paid." : o.payment_status === "failed" ? "Marked as not found." : `Status: ${o.payment_status}.`}</p>}
+                ) : <p className="mt-2 text-xs font-medium">{Number(o.advance_amount) > 0 ? (o.advance_status === "received" ? "Advance received." : "Advance not found.") : o.payment_status === "paid" ? "Marked as paid." : o.payment_status === "failed" ? "Marked as not found." : `Status: ${o.payment_status}.`}</p>}
+                {Number(o.advance_amount) > 0 && <p className="mt-2 text-xs text-muted">The rider collects <span className="font-semibold text-ink">{formatPrice(amountDue(o as { total: number; payment_status: string; advance_amount: number; advance_status: string }))}</span>.</p>}
               </div>
             )}
             <p className="mt-3 text-xs text-muted">Payment: {paymentLabel(o.payment_method as string)} ({o.payment_status}). Risk score {o.risk_score}. IP {o.ip}</p>

@@ -132,7 +132,7 @@ function Fields({ b, set, cats, products }: { b: Block; set: Setter; cats: Cat[]
   const ti = (k: string, v: string, l: string) => <ImageField key={b.id + k} value={v} label={l} onChange={(u) => set({ [k]: u })} />;
   const pair = (k1: string, v1: string, l1: string, k2: string, v2: string, l2: string) => <div className="grid grid-cols-2 gap-3">{t(k1, v1, l1, 30)}{t(k2, v2, l2, 300)}</div>;
   const source = (x: { source: string; category: string; tag: string }) => <>
-    <F l="Show"><select className={input} value={x.source} onChange={(e) => set({ source: e.target.value })}><option value="all">All products</option><option value="category">One category</option><option value="tag">A tag</option></select></F>
+    <F l="Show"><select className={input} value={x.source} onChange={(e) => set({ source: e.target.value })}><option value="all">All products</option><option value="category">One category</option><option value="tag">A tag</option>{b.type === "products" && <option value="preorder">Pre-order products</option>}</select></F>
     {x.source === "category" && <F l="Category"><select className={input} value={x.category} onChange={(e) => set({ category: e.target.value })}><option value="">Choose</option>{cats.map((c) => <option key={c.id} value={c.id}>{c.label}</option>)}</select></F>}
     {x.source === "tag" && <F l="Tag"><select className={input} value={x.tag} onChange={(e) => set({ tag: e.target.value })}>{["new", "hot", "bestseller", "featured", "sale"].map((v) => <option key={v}>{v}</option>)}</select></F>}
   </>;

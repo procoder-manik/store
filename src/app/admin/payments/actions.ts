@@ -12,7 +12,11 @@ const method = z.object({
   accountType: z.enum(["", "personal", "agent", "merchant"]),
   instructions: z.string().trim().max(200),
 });
-const schema = z.object({ methods: z.record(z.string(), method) });
+const advance = z.object({
+  deliveryFirst: z.boolean(), partialEnabled: z.boolean(), partialRequired: z.boolean(), preorderPartial: z.boolean(),
+  percent: z.number().int().min(5, "The advance percentage must be between 5 and 95.").max(95, "The advance percentage must be between 5 and 95."),
+});
+const schema = z.object({ methods: z.record(z.string(), method), advance });
 
 export async function savePayments(input: unknown): Promise<{ ok: boolean; error?: string }> {
   const p = schema.safeParse(input);
@@ -38,7 +42,7 @@ export async function savePayments(input: unknown): Promise<{ ok: boolean; error
   }
   if (!Object.values(methods).some((m) => m.enabled)) return { ok: false, error: "Keep at least one payment method turned on, or customers cannot order." };
 
-  const { error } = await ctx.supabase.from("site_settings").upsert({ key: "payments", value: { methods }, is_public: true });
+  const { error } = await ctx.supabase.from("site_settings").upsert({ key: "payments", value: { methods, advance: p.data.advance }, is_public: true });
   if (error) return { ok: false, error: error.message };
   revalidatePath("/", "layout");
   return { ok: true };

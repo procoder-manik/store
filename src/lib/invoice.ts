@@ -1,4 +1,4 @@
-import { paymentLabel } from "@/lib/payments";
+import { amountDue, paymentLabel } from "@/lib/payments";
 import { code128 } from "@/lib/barcode";
 import { formatPrice } from "@/lib/config";
 
@@ -6,7 +6,7 @@ export type InvoiceOrder = {
   id: string; order_no: number; created_at: string; guest_name: string; guest_phone: string; guest_email: string | null;
   shipping_address: { district?: string; address?: string } | null;
   subtotal: number | string; shipping_fee: number | string; discount: number | string; total: number | string;
-  payment_method: string | null; payment_status: string; status: string; note: string | null; courier: string | null; tracking_code: string | null;
+  payment_method: string | null; payment_status: string; advance_amount?: number | string | null; advance_status?: string | null; status: string; note: string | null; courier: string | null; tracking_code: string | null;
   order_items: { name_snapshot: string; unit_price: number | string; qty: number }[];
 };
 type Brand = { name: string; tagline?: string; logo?: string };
@@ -27,7 +27,7 @@ h1{font-size:26px;margin:0}h2{font-size:11px;text-transform:uppercase;letter-spa
 /** A clean invoice that customers and staff can print or save as a PDF from the browser. */
 export function invoiceHtml(o: InvoiceOrder, brand: Brand, c: Contact): string {
   const a = o.shipping_address ?? {};
-  const due = o.payment_status === "paid" ? 0 : Number(o.total);
+  const due = amountDue(o);
   const online = o.payment_method === "sslcommerz";
   return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex"><title>${esc(invoiceNo(o.order_no))}</title><style>${CSS}
 body{background:#eceef2}.page{max-width:780px;margin:24px auto;background:#fff;padding:40px;box-shadow:0 4px 30px rgba(0,0,0,.08);border-radius:8px}
@@ -58,7 +58,7 @@ ${o.note ? `<p style="margin-top:18px"><strong>Note:</strong> ${esc(o.note)}</p>
 export function labelHtml(orders: InvoiceOrder[], brand: Brand): string {
   const one = (o: InvoiceOrder) => {
     const a = o.shipping_address ?? {};
-    const due = o.payment_status === "paid" ? 0 : Number(o.total);
+    const due = amountDue(o);
     const items = o.order_items.map((i) => `${i.name_snapshot} x ${i.qty}`).join(", ");
     return `<section class="label">
 <div class="top"><div>${brand.logo && brand.logo.startsWith("https://") ? `<img src="${esc(brand.logo)}" alt="" style="max-height:30px;max-width:130px">` : `<strong>${esc(brand.name)}</strong>`}</div><div class="r"><strong>${esc(invoiceNo(o.order_no))}</strong><br><small>${esc(new Date(o.created_at).toLocaleDateString("en-GB"))}</small></div></div>

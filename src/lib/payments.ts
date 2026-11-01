@@ -44,18 +44,61 @@ export type MethodCfg = {
   /** Extra words shown to the customer, like "Use Send Money, not Payment". */
   instructions: string;
 };
-export type PaymentsSettings = { methods: Record<MethodId, MethodCfg> };
+/** Cash on delivery with money paid first. Set in Admin, Payment methods. */
+export type AdvanceCfg = {
+  /** The customer pays the delivery charge first, and the rest to the rider. */
+  deliveryFirst: boolean;
+  /** The customer can pay a percentage of the products plus the delivery charge first. */
+  partialEnabled: boolean;
+  /** The percentage plan is the only way to use cash on delivery. */
+  partialRequired: boolean;
+  percent: number;
+  /** Orders with a pre-order item always use the percentage plan. */
+  preorderPartial: boolean;
+};
+export const DEFAULT_ADVANCE: AdvanceCfg = { deliveryFirst: true, partialEnabled: true, partialRequired: false, percent: 50, preorderPartial: true };
+
+export type AdvancePlan = "none" | "delivery" | "partial";
+
+/** The choices a customer has under cash on delivery. The first one is selected by default. Without a wallet to pay into, no advance can be asked for. */
+export function advancePlans(c: AdvanceCfg, hasPreorder: boolean, hasWallet: boolean): AdvancePlan[] {
+  if (!hasWallet) return ["none"];
+  if (hasPreorder && c.preorderPartial) return ["partial"];
+  if (c.partialEnabled && c.partialRequired) return ["partial"];
+  const base: AdvancePlan = c.deliveryFirst ? "delivery" : "none";
+  return c.partialEnabled ? [base, "partial"] : [base];
+}
+
+/** How much is paid first. `total` already includes delivery and any discount. */
+export function advanceAmount(plan: AdvancePlan, c: AdvanceCfg, o: { total: number; shipping: number }) {
+  if (plan === "none") return 0;
+  const shipping = Math.min(o.shipping, o.total);
+  if (plan === "delivery") return shipping;
+  const goods = Math.max(0, o.total - shipping);
+  return Math.min(o.total, Math.round((goods * c.percent) / 100) + shipping);
+}
+
+/** What the rider still has to collect, for invoices, labels and the courier booking. */
+export function amountDue(o: { total: number | string; payment_status: string; advance_amount?: number | string | null; advance_status?: string | null }) {
+  if (o.payment_status === "paid") return 0;
+  const paid = o.advance_status === "received" ? Number(o.advance_amount ?? 0) : 0;
+  return Math.max(0, Number(o.total) - paid);
+}
+
+export type PaymentsSettings = { methods: Record<MethodId, MethodCfg>; advance: AdvanceCfg };
 
 const blank = (enabled = false): MethodCfg => ({ enabled, account: "", accountType: "", instructions: "" });
 export const DEFAULT_PAYMENTS: PaymentsSettings = {
   methods: Object.fromEntries(CATALOG.map((c) => [c.id, blank(c.id === "cod")])) as Record<MethodId, MethodCfg>,
+  advance: DEFAULT_ADVANCE,
 };
 
 export function mergePayments(v: unknown): PaymentsSettings {
-  const saved = ((v ?? {}) as { methods?: Partial<Record<MethodId, Partial<MethodCfg>>> }).methods ?? {};
+  const raw = (v ?? {}) as { methods?: Partial<Record<MethodId, Partial<MethodCfg>>>; advance?: Partial<AdvanceCfg> };
+  const saved = raw.methods ?? {};
   const methods = {} as Record<MethodId, MethodCfg>;
   for (const c of CATALOG) methods[c.id] = { ...DEFAULT_PAYMENTS.methods[c.id], ...(saved[c.id] ?? {}) };
-  return { methods };
+  return { methods, advance: { ...DEFAULT_ADVANCE, ...(raw.advance ?? {}) } };
 }
 
 export type PublicMethod = { id: MethodId; name: string; manual: boolean; account: string; accountType: AccountType; instructions: string };

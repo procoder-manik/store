@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import { Check, Minus, Plus, X } from "lucide-react";
 import type { Product } from "@/lib/demo-products";
 import { formatPrice } from "@/lib/config";
+import { preorderDate } from "@/lib/utils";
 import { useCart } from "@/lib/cart";
 import { placeOrder, quoteOrder } from "@/app/checkout/actions";
 import { readRef } from "./RefCapture";
@@ -25,7 +26,7 @@ export function QuickBuy({ product, zones, onClose }: { product: Product; zones:
   const [size, setSize] = useState(product.sizes[1] ?? product.sizes[0] ?? "");
   const [qty, setQty] = useState(1);
   const [zoneId, setZoneId] = useState(zones[0]?.id ?? "");
-  const [quote, setQuote] = useState<{ subtotal: number; shipping: number; total: number } | null>(null);
+  const [quote, setQuote] = useState<{ subtotal: number; shipping: number; total: number; hasPreorder: boolean } | null>(null);
   const [error, setError] = useState("");
   const [pending, start] = useTransition();
   const methods = usePaymentMethods();
@@ -46,7 +47,7 @@ export function QuickBuy({ product, zones, onClose }: { product: Product; zones:
     let live = true;
     quoteOrder({ items: [{ productId: product.id, variantId: variant.id, qty }], zoneId }).then((r) => {
       if (!live) return;
-      if (r.ok) { setQuote({ subtotal: r.subtotal, shipping: r.shipping, total: r.total }); setError(""); }
+      if (r.ok) { setQuote({ subtotal: r.subtotal, shipping: r.shipping, total: r.total, hasPreorder: r.hasPreorder }); setError(""); }
       else setError(r.error);
     });
     return () => { live = false; };
@@ -68,7 +69,7 @@ export function QuickBuy({ product, zones, onClose }: { product: Product; zones:
       const r = await placeOrder({
         name: String(f.get("name")), phone: String(f.get("phone")), email: String(f.get("email") ?? ""),
         zoneId, district: String(f.get("district")), address: fullAddress(f), note: "", coupon: "",
-        bump: false, useCredit: true, ref: readRef(), paymentMethod: method, payerNumber: String(f.get("payer") ?? ""), trxId: String(f.get("trxId") ?? ""), website: String(f.get("qz_hp") ?? ""),
+        bump: false, useCredit: true, ref: readRef(), paymentMethod: method, payerNumber: String(f.get("payer") ?? ""), trxId: String(f.get("trxId") ?? ""), plan: String(f.get("plan") ?? ""), advanceMethod: String(f.get("advanceMethod") ?? ""), website: String(f.get("qz_hp") ?? ""),
         items: [{ productId: product.id, variantId: variant?.id, qty }],
       });
       if (!r.ok) return setError(r.error);
@@ -100,7 +101,7 @@ export function QuickBuy({ product, zones, onClose }: { product: Product; zones:
             <div className="min-w-0 pr-8 md:pr-0">
               <h2 className="font-display text-xl font-semibold leading-snug md:text-2xl">{product.name}</h2>
               <p className="mt-1 font-display text-2xl font-semibold">{formatPrice(price)}{product.compareAt && product.compareAt > price && <span className="ml-2 text-base font-normal text-white/70 line-through">{formatPrice(product.compareAt)}</span>}</p>
-              <p className="mt-1 text-xs text-white/75">{stock > 0 ? (stock <= 5 ? `Only ${stock} left` : "In stock, ready to ship") : "Sold out in this option"}</p>
+              <p className="mt-1 text-xs text-white/75">{product.preorder ? `Pre-order${product.preorderDate ? `, expected ${preorderDate(product.preorderDate)}` : ""}` : stock > 0 ? (stock <= 5 ? `Only ${stock} left` : "In stock, ready to ship") : "Sold out in this option"}</p>
             </div>
           </div>
           <div className="grid gap-3.5">
@@ -143,16 +144,16 @@ export function QuickBuy({ product, zones, onClose }: { product: Product; zones:
           <input name="email" type="email" placeholder="Email (optional, for your invoice)" autoComplete="email" className={field} />
           <input name="qz_hp" tabIndex={-1} autoComplete="off" aria-hidden data-lpignore="true" data-1p-ignore="true" data-bwignore="true" data-form-type="other" style={{ position: "absolute", left: "-9999px", width: 1, height: 1, opacity: 0 }} />
           <p className="mt-1 text-sm font-medium">Payment</p>
-          <PaymentPicker methods={methods} value={method} onChange={setMethod} amount={quote?.total ?? price * qty} />
+          <PaymentPicker methods={methods} value={method} onChange={setMethod} amount={quote?.total ?? price * qty} shipping={quote?.shipping ?? 0} hasPreorder={quote?.hasPreorder ?? product.preorder} />
 
           <dl className="mt-1 grid gap-1.5 rounded-2xl border border-line bg-paper p-4 text-sm">
             <div className="flex justify-between"><dt className="text-muted">Items</dt><dd className="tabular-nums">{formatPrice(quote?.subtotal ?? price * qty)}</dd></div>
             <div className="flex justify-between"><dt className="text-muted">Delivery</dt><dd className="tabular-nums">{quote ? (quote.shipping === 0 ? "Free" : formatPrice(quote.shipping)) : "Calculated next"}</dd></div>
-            <div className="mt-1 flex justify-between border-t border-line pt-2.5 text-base font-semibold"><dt>{method === "cod" ? "Pay on delivery" : "Total"}</dt><dd className="tabular-nums">{formatPrice(quote?.total ?? price * qty)}</dd></div>
+            <div className="mt-1 flex justify-between border-t border-line pt-2.5 text-base font-semibold"><dt>Total</dt><dd className="tabular-nums">{formatPrice(quote?.total ?? price * qty)}</dd></div>
           </dl>
           {error && <p role="alert" className="text-sm text-[var(--madder)]">{error}</p>}
-          <button disabled={pending || stock <= 0 || !picked} className="mb-1 mt-3 flex min-h-[56px] items-center justify-center gap-2 rounded-full bg-accent px-6 py-4 text-[15px] font-semibold text-accent-ink shadow-lg transition hover:-translate-y-0.5 disabled:opacity-50">{pending ? "Placing order..." : <><Check size={16} /> {method === "cod" ? "Place order, pay on delivery" : method === "sslcommerz" ? "Continue to payment" : "Place order"}</>}</button>
-          <p className="pb-1 text-center text-xs text-muted">We will call you to confirm. {method === "cod" ? "You pay in cash when it arrives." : picked?.manual ? "We check your payment before we send the order." : ""}</p>
+          <button disabled={pending || stock <= 0 || !picked} className="mb-1 mt-3 flex min-h-[56px] items-center justify-center gap-2 rounded-full bg-accent px-6 py-4 text-[15px] font-semibold text-accent-ink shadow-lg transition hover:-translate-y-0.5 disabled:opacity-50">{pending ? "Placing order..." : <><Check size={16} /> {method === "sslcommerz" ? "Continue to payment" : "Place order"}</>}</button>
+          <p className="pb-1 text-center text-xs text-muted">We will call you to confirm. {method === "cod" ? "Any cash due is paid when it arrives." : picked?.manual ? "We check your payment before we send the order." : ""}</p>
         </form>
       </div>
     </div>

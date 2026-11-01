@@ -14,12 +14,12 @@ type V = { id?: string; sku: string; colorName: string; colorHex: string; size: 
 type Img = { path: string; alt: string };
 export type ProductInitial = {
   id?: string; name: string; slug: string; kind: string; categoryId: string; description: string;
-  basePrice: string; compareAtPrice: string; offerEndsAt: string; tags: string[]; status: string;
+  basePrice: string; compareAtPrice: string; offerEndsAt: string; preorder: boolean; preorderDate: string; tags: string[]; status: string;
   seoTitle: string; seoDescription: string; variants: V[]; images: Img[]; relatedIds: string[];
 };
 
 const EMPTY: ProductInitial = {
-  name: "", slug: "", kind: "tee", categoryId: "", description: "", basePrice: "", compareAtPrice: "", offerEndsAt: "",
+  name: "", slug: "", kind: "tee", categoryId: "", description: "", basePrice: "", compareAtPrice: "", offerEndsAt: "", preorder: false, preorderDate: "",
   tags: [], status: "draft", seoTitle: "", seoDescription: "", variants: [], images: [], relatedIds: [],
 };
 const TAGS = ["new", "hot", "bestseller", "featured", "sale"] as const;
@@ -139,6 +139,8 @@ export function ProductForm({ categories, initial = EMPTY, allProducts = [] }: {
       basePrice: Number(f.basePrice),
       compareAtPrice: f.compareAtPrice === "" ? null : Number(f.compareAtPrice),
       offerEndsAt: f.offerEndsAt,
+      preorder: f.preorder,
+      preorderDate: f.preorderDate,
       tags: f.tags,
       status: f.status,
       seoTitle: f.seoTitle,
@@ -188,6 +190,15 @@ export function ProductForm({ categories, initial = EMPTY, allProducts = [] }: {
                 {f.offerEndsAt && <button type="button" onClick={() => set("offerEndsAt", "")} className="shrink-0 rounded-xl border border-line px-4 text-sm">Clear</button>}
               </div>
               <p className="mt-1 text-xs text-muted">A live timer appears on this product and on its card until this moment passes. Leave it empty for no timer.</p>
+            </div>
+            <div className="grid gap-3 rounded-xl border border-line p-4 sm:col-span-2">
+              <label className="flex items-center gap-2 text-sm font-medium"><input type="checkbox" checked={f.preorder} onChange={(e) => set("preorder", e.target.checked)} /> Sell this as a pre-order</label>
+              {f.preorder && (
+                <>
+                  <div><label className={label}>Expected arrival date</label><input className={input} type="date" value={f.preorderDate} onChange={(e) => set("preorderDate", e.target.value)} data-no-ai /></div>
+                  <p className="text-xs text-muted">Price above is the pre-order price. Compare-at price is the price after launch.{Number(f.compareAtPrice) > Number(f.basePrice) && Number(f.basePrice) > 0 ? ` Customers save ${Math.round((1 - Number(f.basePrice) / Number(f.compareAtPrice)) * 100)}% by pre-ordering.` : " Fill in both to show the saving."} Stock is how many you will accept. The product appears on the Pre-order page, which joins the menu by itself.</p>
+                </>
+              )}
             </div>
           </div>
         </section>
