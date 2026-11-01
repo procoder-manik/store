@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
+import { ActionForm } from "@/components/admin/ActionForm";
 import { ImageField } from "@/components/admin/ImageField";
 import { BANNER_DESIGNS, BANNER_SLOTS, bannerShortcode } from "@/lib/banners";
 import { OfferSlider } from "@/components/OfferSlider";
@@ -27,7 +28,7 @@ export default async function Banners({ searchParams }: { searchParams: Promise<
       <h1 className="font-display text-2xl font-semibold">Banners</h1>
       <p className="mt-1 max-w-2xl text-sm text-muted">Show offers as a slider that changes by itself. Use your own picture, or a ready-made design with your words. Every banner can open a page when clicked.</p>
 
-      <form key={e?.id ?? "new"} action={saveBanner} className="mt-5 grid max-w-3xl gap-4 rounded-xl border border-line bg-surface p-5 sm:grid-cols-2">
+      <ActionForm key={e?.id ?? "new"} action={saveBanner} goTo="/admin/banners" className="mt-5 grid max-w-3xl gap-4 rounded-xl border border-line bg-surface p-5 sm:grid-cols-2">
         <h2 className="font-display text-base font-semibold sm:col-span-2">{e ? "Edit banner" : "Add a banner"}</h2>
         {e && <input type="hidden" name="id" value={e.id} />}
         <div>
@@ -61,7 +62,7 @@ export default async function Banners({ searchParams }: { searchParams: Promise<
           <button className="w-fit rounded-pill bg-accent px-6 py-2.5 text-sm font-semibold text-accent-ink">{e ? "Save banner" : "Add banner"}</button>
           {e && <Link href="/admin/banners" className="text-sm text-muted underline">Cancel</Link>}
         </div>
-      </form>
+      </ActionForm>
 
       {groups.length === 0 && <p className="mt-6 max-w-3xl rounded-xl border border-line bg-surface p-5 text-sm text-muted">No banners yet. Add your first one above.</p>}
       {groups.map((slot) => {

@@ -1,7 +1,6 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { redirect } from "next/navigation";
 import { z } from "zod";
 import { requireAdmin } from "@/lib/admin";
 import { isAllowedImageUrl } from "@/lib/utils";
@@ -21,7 +20,7 @@ const schema = z.object({
   ends_at: when,
 });
 
-export async function saveBanner(fd: FormData) {
+export async function saveBanner(fd: FormData): Promise<{ ok: boolean; error?: string }> {
   const picked = String(fd.get("slot") ?? "home");
   const r = schema.safeParse({
     id: fd.get("id") || undefined,
@@ -29,16 +28,19 @@ export async function saveBanner(fd: FormData) {
     design: fd.get("design"), title: fd.get("title") ?? "", subtitle: fd.get("subtitle") ?? "", image: fd.get("image") ?? "", link: fd.get("link") ?? "", button: fd.get("button") ?? "", sort: fd.get("sort") || 0,
     starts_at: fd.get("startsAt") ?? "", ends_at: fd.get("endsAt") ?? "",
   });
-  if (!r.success) throw new Error(r.error.issues[0].message);
+  if (!r.success) return { ok: false, error: r.error.issues[0].message };
   const { id, ...d } = r.data;
-  if (d.design === "image" && !d.image) throw new Error("Add a picture, or choose one of the ready-made designs.");
-  if (d.design !== "image" && !d.title) throw new Error("Ready-made designs need a title.");
-  const { supabase } = await requireAdmin(id ? "banner.update" : "banner.create");
+  // A picture with no words can only be shown as a picture, whichever design was left selected.
+  if (d.image && !d.title) d.design = "image";
+  if (d.design === "image" && !d.image) return { ok: false, error: "Add a picture, or choose a ready-made design and type a title." };
+  if (d.design !== "image" && !d.title) return { ok: false, error: "Type a title for this design, or add a picture." };
+  let supabase;
+  try { ({ supabase } = await requireAdmin(id ? "banner.update" : "banner.create")); } catch (e) { return { ok: false, error: (e as Error).message }; }
   const row = { ...d, title: d.title, subtitle: d.subtitle || null, image: d.image || null, link: d.link || null, button: d.button || null };
   const { error } = id ? await supabase.from("banners").update(row).eq("id", id) : await supabase.from("banners").insert(row);
-  if (error) throw new Error(error.message);
+  if (error) return { ok: false, error: error.message };
   revalidatePath("/", "layout");
-  redirect("/admin/banners");
+  return { ok: true };
 }
 
 export async function toggleBanner(fd: FormData) {
