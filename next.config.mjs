@@ -37,6 +37,12 @@ const nextConfig = {
   // Pin the project root so a stray package-lock.json higher up the disk is never picked as the workspace.
   outputFileTracingRoot: dirname(fileURLToPath(import.meta.url)),
   reactStrictMode: true,
+  // Sign-ins and reset links belong to one address. The Vercel address sends everyone to the real domain.
+  async redirects() {
+    const site = process.env.NEXT_PUBLIC_SITE_URL;
+    if (!site?.startsWith("https://")) return [];
+    return [{ source: "/:path*", has: [{ type: "host", value: "store-rocoder-manik.vercel.app" }], destination: `${site.replace(/\/$/, "")}/:path*`, permanent: false }];
+  },
   async headers() {
     return [
       { source: "/:path*", headers: securityHeaders },

@@ -11,6 +11,7 @@ const field = "w-full rounded-xl border border-line bg-surface px-4 py-3 text-ba
 export default function ResetPassword() {
   const router = useRouter();
   const [ready, setReady] = useState<boolean | null>(null);
+  const [needCode, setNeedCode] = useState(false);
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
 
@@ -29,11 +30,31 @@ export default function ResetPassword() {
     const password = String(f.get("password"));
     if (password !== String(f.get("again"))) return setError("The two passwords are different. Type them again.");
     setBusy(true);
-    const { error: err } = await createClient().auth.updateUser({ password });
-    setBusy(false);
-    if (err) return setError(err.message);
-    router.push("/account");
-    router.refresh();
+    try {
+      const sb = createClient();
+      // Accounts with two-step verification must confirm their code before the password can change.
+      const code = String(f.get("code") ?? "").replace(/\s/g, "");
+      if (code) {
+        const { data } = await sb.auth.mfa.listFactors();
+        const factor = data?.totp?.find((x) => x.status === "verified");
+        if (factor) {
+          const { error: mfa } = await sb.auth.mfa.challengeAndVerify({ factorId: factor.id, code });
+          if (mfa) return setError("That code is not right. Check your authenticator app and try again.");
+        }
+      }
+      const { error: err } = await sb.auth.updateUser({ password });
+      if (err) {
+        if (err.code === "insufficient_aal") {
+          setNeedCode(true);
+          return setError("Enter the code from your authenticator app, then save again.");
+        }
+        return setError(err.message);
+      }
+      router.push("/account");
+      router.refresh();
+    } finally {
+      setBusy(false);
+    }
   }
 
   return (
@@ -42,7 +63,7 @@ export default function ResetPassword() {
       {ready === null && <p className="mt-4 text-sm text-muted">Checking your link...</p>}
       {ready === false && (
         <div className="mt-4 grid gap-4 text-sm text-muted">
-          <p>This link has expired or was opened in a different browser. Ask for a new one and open it on this device.</p>
+          <p>This link has expired or was opened in a different browser. Ask for a new one, and open it in the same browser you asked from.</p>
           <Link href="/login" className="w-fit rounded-pill bg-accent px-6 py-3 font-semibold text-accent-ink">Back to sign in</Link>
         </div>
       )}
@@ -50,6 +71,7 @@ export default function ResetPassword() {
         <form onSubmit={submit} className="mt-6 grid gap-3">
           <div><label htmlFor="password" className="mb-1.5 block text-sm font-medium">New password</label><input id="password" name="password" type="password" required minLength={10} autoComplete="new-password" className={field} /><p className="mt-1.5 text-xs text-muted">Use at least 10 characters.</p></div>
           <div><label htmlFor="again" className="mb-1.5 block text-sm font-medium">Type it again</label><input id="again" name="again" type="password" required minLength={10} autoComplete="new-password" className={field} /></div>
+          {needCode && <div><label htmlFor="code" className="mb-1.5 block text-sm font-medium">Authenticator code</label><input id="code" name="code" required inputMode="numeric" autoComplete="one-time-code" maxLength={6} className={field} /></div>}
           {error && <p role="alert" className="text-sm text-[var(--madder)]">{error}</p>}
           <button disabled={busy} className="mt-1 h-12 rounded-pill bg-accent text-sm font-semibold text-accent-ink disabled:opacity-50">{busy ? "Saving..." : "Save new password"}</button>
         </form>

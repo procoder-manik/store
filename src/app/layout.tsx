@@ -19,6 +19,7 @@ import { AnnouncementBar } from "@/components/AnnouncementBar";
 import { getCatalog } from "@/lib/catalog";
 import { Suspense } from "react";
 import { RefCapture } from "@/components/RefCapture";
+import { RecoveryCatcher } from "@/components/RecoveryCatcher";
 import { ZonesProvider } from "@/components/ZonesProvider";
 import { PaymentsProvider } from "@/components/PaymentsProvider";
 import { availableMethods } from "@/lib/payments";
@@ -57,6 +58,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           <ZonesProvider zones={zones}>
           <PaymentsProvider methods={methods}>
           <Suspense fallback={null}><RefCapture /></Suspense>
+          <RecoveryCatcher />
           <StoreOnly>
             {a.enabled && a.text && <AnnouncementBar text={a.text} link={a.link} />}
             <Header brand={s.brand.name} logo={s.brand.logo} links={menuLinks} categories={categories} themePicker={s.appearance.visitorPicker} cfg={s.headerStyle} contact={{ phone: s.contact.phone, whatsapp: s.contact.whatsapp }} />
