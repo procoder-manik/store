@@ -372,7 +372,13 @@ body:has(.login-stage) .footer-gap { display: none; }
   mask-image: linear-gradient(180deg, #000 40%, rgb(0 0 0 / 0.28) 100%);
   animation: markDrift 14s ease-in-out infinite alternate;
 }
-footer.bg-ink .footer-mark { --mark: var(--paper); }
+.footer-dark {
+  --paper: var(--d-paper); --surface: var(--d-surface); --ink: var(--d-ink); --muted: var(--d-muted); --line: var(--d-line); --accent: var(--d-accent); --accent-ink: var(--d-accent-ink); --gold: var(--d-gold); --madder: #e29a8f;
+  --glass: color-mix(in srgb, var(--d-surface) 60%, transparent); --glass-strong: color-mix(in srgb, var(--d-surface) 80%, transparent); --glass-edge: rgb(255 255 255 / 0.12); --glass-line: rgb(255 255 255 / 0.1);
+  color-scheme: dark;
+  background-color: var(--d-paper);
+  color: var(--d-ink);
+}
 @keyframes markDrift { from { background-position: 0% 0; } to { background-position: 100% 0; } }
 
 /* Boxed sections keep the grid within the width of their box. */

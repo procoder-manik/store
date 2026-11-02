@@ -134,13 +134,14 @@ export function withColors(t: Theme, c?: ThemeColors): Theme {
   };
 }
 
+const darkVars = (c: Colors) => `--d-paper:${c.paper};--d-surface:${c.surface};--d-ink:${c.ink};--d-muted:${c.muted};--d-line:${c.line};--d-accent:${c.accent};--d-accent-ink:${c.accentInk};--d-gold:${c.gold};`;
 const colors = (c: Colors) => `--paper:${c.paper};--surface:${c.surface};--ink:${c.ink};--muted:${c.muted};--line:${c.line};--accent:${c.accent};--accent-ink:${c.accentInk};--gold:${c.gold};`;
 
 /** The stylesheet for the given themes. The admin panel always uses Padma, so it stays the same whichever look the store wears. */
 export function themeCss(list: Theme[]) {
   return list.map((t) => {
     const r = t.radius;
-    return `[data-theme="${t.id}"]{${colors(t.light)}--madder:#8e2a2a;--fill:${t.fill ?? "none"};--ff-display:var(${t.display}),var(--font-bn),Georgia,serif;--ff-body:var(${t.body}),var(--font-bn),system-ui,sans-serif;--r-xl:${r.box};--r-2xl:${r.box};--r-3xl:${r.box};--r-card:${r.card};--r-pill:${r.button};--display-weight:${t.type.weight};--h2-weight:${t.type.h2};--display-track:${t.type.track};}`
+    return `[data-theme="${t.id}"]{${colors(t.light)}${darkVars(t.dark)}--madder:#8e2a2a;--fill:${t.fill ?? "none"};--ff-display:var(${t.display}),var(--font-bn),Georgia,serif;--ff-body:var(${t.body}),var(--font-bn),system-ui,sans-serif;--r-xl:${r.box};--r-2xl:${r.box};--r-3xl:${r.box};--r-card:${r.card};--r-pill:${r.button};--display-weight:${t.type.weight};--h2-weight:${t.type.h2};--display-track:${t.type.track};}`
       + `.dark[data-theme="${t.id}"],.dark [data-theme="${t.id}"]{${colors(t.dark)}--madder:#e29a8f;}`;
   }).join("");
 }

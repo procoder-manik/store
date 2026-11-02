@@ -3,7 +3,7 @@
 import { useState, useTransition } from "react";
 import { subscribe } from "@/app/actions/leads";
 
-export function NewsletterForm() {
+export function NewsletterForm({ band = false }: { band?: boolean }) {
   const [msg, setMsg] = useState<{ ok: boolean; text: string } | null>(null);
   const [pending, start] = useTransition();
   function submit(e: React.FormEvent<HTMLFormElement>) {
@@ -15,9 +15,9 @@ export function NewsletterForm() {
     });
   }
   return (
-    <form onSubmit={submit} className="mt-5 max-w-xs">
-      <label htmlFor="nl-email" className="text-sm font-medium">Get new arrivals and offers</label>
-      <div className="mt-2 flex gap-2">
+    <form onSubmit={submit} className={band ? "w-full" : "mt-5 max-w-xs"}>
+      <label htmlFor="nl-email" className={band ? "sr-only" : "text-sm font-medium"}>Get new arrivals and offers</label>
+      <div className={`flex gap-2 ${band ? "" : "mt-2"}`}>
         <input id="nl-email" name="email" type="email" required placeholder="Your email" autoComplete="email" className="min-w-0 flex-1 rounded-pill border border-line bg-paper px-4 py-2 text-sm" />
         <input name="qz_hp" tabIndex={-1} autoComplete="off" aria-hidden data-lpignore="true" data-1p-ignore="true" data-bwignore="true" data-form-type="other" style={{ position: "absolute", left: "-9999px", width: 1, height: 1, opacity: 0 }} />
         <button disabled={pending} className="shrink-0 rounded-pill bg-ink px-4 py-2 text-sm font-medium text-paper disabled:opacity-50">Join</button>

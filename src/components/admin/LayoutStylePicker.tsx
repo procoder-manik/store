@@ -2,6 +2,8 @@
 
 import { useState, useTransition } from "react";
 import { saveLayoutStyle } from "@/app/admin/header-footer/actions";
+import { SocialIcon } from "@/components/SocialIcon";
+import { SOCIALS } from "@/lib/social-icons";
 import { FOOTER_STYLES, HEADER_STYLES, type FooterStyleCfg, type FooterStyleId, type HeaderStyleCfg, type HeaderStyleId } from "@/lib/layout-styles";
 import type { Cat } from "@/lib/catalog";
 import type { Settings } from "@/lib/settings";
@@ -95,8 +97,11 @@ export function LayoutStylePicker({ header, footer, brand, links, footerData, co
         <div className="grid gap-3 rounded-xl border border-line bg-surface p-4 sm:grid-cols-2">
           <Toggle on={f.showPayments} onChange={(v) => sf({ showPayments: v })}>Show the payment methods you accept<InfoTip text="Shows the payment methods you turned on, so buyers feel safe before checkout." /></Toggle>
           <Toggle on={f.showTrust} onChange={(v) => sf({ showTrust: v })}>Show the delivery promises strip (classic and dark)</Toggle>
-          {(["facebook", "instagram", "youtube", "tiktok"] as const).map((k) => (
-            <div key={k}><label className={`${label} capitalize`}>{k} link (optional)</label><input className={input} placeholder="https://" value={f.social[k]} onChange={(e) => sf({ social: { ...f.social, [k]: e.target.value } })} /></div>
+          {SOCIALS.map((n) => (
+            <div key={n.key}>
+              <label className={`${label} flex items-center gap-2`} htmlFor={`social-${n.key}`}><SocialIcon net={n} size={22} />{n.name}</label>
+              <input id={`social-${n.key}`} className={input} placeholder={n.placeholder} value={f.social[n.key]} onChange={(e) => sf({ social: { ...f.social, [n.key]: e.target.value } })} />
+            </div>
           ))}
           <p className="text-xs text-muted sm:col-span-2">The about text, link columns and copyright line are edited under Site and menu. Phone and WhatsApp come from Settings.</p>
         </div>

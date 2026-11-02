@@ -1,3 +1,5 @@
+import { SocialIcon } from "./SocialIcon";
+import { SOCIALS, type SocialLinks } from "@/lib/social-icons";
 import { walletColor } from "@/lib/payments";
 import Link from "next/link";
 import { Banknote, LifeBuoy, Truck } from "lucide-react";
@@ -20,19 +22,23 @@ export function Footer({ categories, brand, footer, contact, cfg = DEFAULT_FOOTE
   const about = footer.about || `${brand.tagline}. Order online and pay the way that suits you.`;
   const copy = footer.copyright || `\u00a9 ${new Date().getFullYear()} ${brand.name}. All rights reserved.`;
   const flat = cols.flatMap((c) => c.links);
-  const social = [["Facebook", cfg.social.facebook], ["Instagram", cfg.social.instagram], ["YouTube", cfg.social.youtube], ["TikTok", cfg.social.tiktok], ["WhatsApp", contact.whatsapp ? `https://wa.me/${contact.whatsapp}` : ""]].filter(([, u]) => u);
+  // Only the networks with a link show. WhatsApp and the map fall back to the numbers in Contact.
+  const links: SocialLinks = { ...cfg.social, whatsapp: cfg.social.whatsapp || (contact.whatsapp ? `https://wa.me/${contact.whatsapp}` : ""), map: cfg.social.map || contact.mapUrl };
+  const social = SOCIALS.filter((n) => links[n.key].startsWith("https://"));
+  // The dark footer swaps in the theme's dark colours, so everything inside reads properly in any theme, light or dark.
   const dark = cfg.style === "dark";
-  const mute = dark ? "text-paper/65" : "text-muted";
-  const hover = dark ? "hover:text-paper" : "hover:text-ink";
-  const wrapCls = dark ? "bg-ink text-paper" : "border-t border-line bg-surface";
+  const band = dark || cfg.style === "signup";
+  const mute = "text-muted";
+  const hover = "hover:text-ink";
+  const wrapCls = dark ? "footer-dark" : "border-t border-line bg-surface";
 
   const socials = social.length > 0 && (
-    <ul className="flex flex-wrap gap-2">{social.map(([n, u]) => <li key={n}><a href={u} target="_blank" rel="noopener noreferrer" className={`rounded-pill border px-3.5 py-1.5 text-xs font-medium transition ${dark ? "border-white/20 hover:bg-white/10" : "border-line hover:border-ink"}`}>{n}</a></li>)}</ul>
+    <ul className="flex flex-wrap items-center gap-2.5">{social.map((n) => <li key={n.key}><a href={links[n.key]} target="_blank" rel="noopener noreferrer" aria-label={n.name} title={n.name} className="block transition hover:-translate-y-0.5 hover:opacity-90"><SocialIcon net={n} /></a></li>)}</ul>
   );
   const pay = cfg.showPayments && payments.length > 0 && (
     <div className="flex flex-wrap items-center gap-2"><span className={`text-xs ${mute}`}>We accept</span>{payments.map((n) => {
       const c = walletColor(n);
-      return c ? <span key={n} style={{ background: c.bg, color: c.ink }} className="rounded-md px-2.5 py-1 text-xs font-bold">{n}</span> : <span key={n} className={`rounded-md border px-2.5 py-1 text-xs font-medium ${dark ? "border-white/20" : "border-line bg-paper"}`}>{n}</span>;
+      return c ? <span key={n} style={{ background: c.bg, color: c.ink }} className="rounded-md px-2.5 py-1 text-xs font-bold">{n}</span> : <span key={n} className="rounded-md border border-line bg-paper px-2.5 py-1 text-xs font-medium">{n}</span>;
     })}</div>
   );
   const colsGrid = (
@@ -59,7 +65,7 @@ export function Footer({ categories, brand, footer, contact, cfg = DEFAULT_FOOTE
   );
   const bottom = (
     <>
-      <p className={`grid gap-1 px-5 pt-6 text-center text-xs ${dark ? "text-paper/60" : "text-muted"}`}><span className="font-medium tracking-[-0.01em]">{brand.tagline}</span><span>{copy}</span></p>
+      <p className="grid gap-1 px-5 pt-6 text-center text-xs text-muted"><span className="font-medium tracking-[-0.01em]">{brand.tagline}</span><span>{copy}</span></p>
       {mark}
     </>
   );
@@ -119,7 +125,7 @@ export function Footer({ categories, brand, footer, contact, cfg = DEFAULT_FOOTE
   }
 
   const trust = cfg.showTrust && (
-    <div className={`border-b ${dark ? "border-white/10" : "border-line"}`}>
+    <div className="border-b border-line">
       <ul className="mx-auto grid max-w-6xl gap-4 px-5 py-7 text-sm sm:grid-cols-3">
         {[[Banknote, "Pay your way", "Cash on delivery, bKash, Nagad and more."], [Truck, "Delivery across Bangladesh", "Inside and outside Dhaka."], [LifeBuoy, "Help when you need it", "Call, WhatsApp or write to us."]].map(([Icon, t, d]) => {
           const I = Icon as typeof Truck;
@@ -131,11 +137,11 @@ export function Footer({ categories, brand, footer, contact, cfg = DEFAULT_FOOTE
 
   return (
     <footer className={`pb-24 md:pb-0 ${wrapCls}`}>
-      {dark && footer.newsletter && (
-        <div className="border-b border-white/10 bg-accent/15">
+      {band && footer.newsletter && (
+        <div className="border-b border-line bg-accent/10">
           <div className="mx-auto grid max-w-6xl items-center gap-5 px-5 py-9 md:grid-cols-2">
-            <div><p className="font-display text-2xl font-semibold">Get new arrivals and offers</p><p className="mt-1 text-sm text-paper/70">Join our email list. No spam.</p></div>
-            <div className="text-ink"><NewsletterForm /></div>
+            <div><p className="font-display text-2xl font-semibold">Get new arrivals and offers</p><p className="mt-1 text-sm text-muted">Join our email list. No spam.</p></div>
+            <NewsletterForm band />
           </div>
         </div>
       )}
@@ -145,7 +151,7 @@ export function Footer({ categories, brand, footer, contact, cfg = DEFAULT_FOOTE
           <p className="font-display text-xl font-semibold">{brand.name}</p>
           <p className={`mt-3 max-w-xs text-sm ${mute}`}>{about}</p>
           {phoneLines}
-          {!dark && footer.newsletter && <NewsletterForm />}
+          {!band && footer.newsletter && <NewsletterForm />}
           {social.length > 0 && <div className="mt-4">{socials}</div>}
         </div>
         {colsGrid}

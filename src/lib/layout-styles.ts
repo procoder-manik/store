@@ -1,6 +1,8 @@
+import { BLANK_SOCIAL, type SocialLinks } from "@/lib/social-icons";
+
 /** The ready-made header and footer designs, and the options you can change on each. Safe to import anywhere. */
 export type HeaderStyleId = "classic" | "centered" | "marketplace" | "split" | "bold";
-export type FooterStyleId = "classic" | "minimal" | "dark" | "contact" | "compact";
+export type FooterStyleId = "classic" | "minimal" | "dark" | "signup" | "contact" | "compact";
 
 export const HEADER_STYLES: { id: HeaderStyleId; name: string; desc: string }[] = [
   { id: "classic", name: "Classic", desc: "Logo on the left, menu beside it, icons on the right." },
@@ -13,6 +15,7 @@ export const FOOTER_STYLES: { id: FooterStyleId; name: string; desc: string }[] 
   { id: "classic", name: "Classic columns", desc: "Delivery promises on top, link columns below." },
   { id: "minimal", name: "Minimal centered", desc: "Centered name, one row of links, social links." },
   { id: "dark", name: "Dark with sign up", desc: "Dark footer with a big email sign up band and columns." },
+  { id: "signup", name: "Light with sign up", desc: "The same design as Dark with sign up, in light colours." },
   { id: "contact", name: "Contact first", desc: "A large contact card beside your link columns." },
   { id: "compact", name: "Compact bar", desc: "A slim single-row footer for a clean look." },
 ];
@@ -32,7 +35,7 @@ export type FooterStyleCfg = {
   style: FooterStyleId;
   showPayments: boolean;
   showTrust: boolean;
-  social: { facebook: string; instagram: string; youtube: string; tiktok: string };
+  social: SocialLinks;
 };
 
 export const DEFAULT_HEADER_STYLE: HeaderStyleCfg = {
@@ -40,7 +43,7 @@ export const DEFAULT_HEADER_STYLE: HeaderStyleCfg = {
   topBar: { enabled: false, text: "" }, cta: { label: "", href: "" },
 };
 export const DEFAULT_FOOTER_STYLE: FooterStyleCfg = {
-  style: "classic", showPayments: true, showTrust: true, social: { facebook: "", instagram: "", youtube: "", tiktok: "" },
+  style: "classic", showPayments: true, showTrust: true, social: BLANK_SOCIAL,
 };
 
 const HEADER_IDS = HEADER_STYLES.map((s) => s.id) as string[];

@@ -109,7 +109,7 @@ html[data-glass="on"] body:not(:has([data-admin-shell])) {
   /* Panels are white sheets on the grey page, grouped as in Settings on an iPhone. */
   & .bg-surface.border-line, & .border-line.bg-surface { border-color: transparent; background-color: var(--glass-strong); box-shadow: 0 1px 2px rgb(0 0 0 / 0.03), 0 14px 34px -24px rgb(0 0 0 / 0.25); }
   & footer { margin: 0 0.5rem 0.5rem; border: 0; border-radius: 28px; overflow: hidden; box-shadow: var(--glass-shadow); }
-  & footer:not(.bg-ink) { background: var(--glass); }
+  & footer:not(.footer-dark) { background: var(--glass); }
 
   /* Sheets and dialogs are the real frosted glass. */
   & :is(.pop-in.bg-surface, .pop-in .bg-surface, .drawer-left, .dock-sheet, aside[role="dialog"]) { background: var(--glass-strong); -webkit-backdrop-filter: var(--glass-blur); backdrop-filter: var(--glass-blur); }

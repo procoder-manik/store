@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { requireAdmin } from "@/lib/admin";
+import { SOCIALS, type SocialKey } from "@/lib/social-icons";
 import { FOOTER_STYLES, HEADER_STYLES, type FooterStyleId, type HeaderStyleId } from "@/lib/layout-styles";
 
 const url = z.string().trim().max(300).refine((v) => v === "" || v.startsWith("https://"), "Social links must start with https://");
@@ -17,7 +18,7 @@ const schema = z.object({
   footer: z.object({
     style: z.enum(FOOTER_STYLES.map((s) => s.id) as [FooterStyleId, ...FooterStyleId[]]),
     showPayments: z.boolean(), showTrust: z.boolean(),
-    social: z.object({ facebook: url, instagram: url, youtube: url, tiktok: url }),
+    social: z.object(Object.fromEntries(SOCIALS.map((n) => [n.key, url])) as Record<SocialKey, typeof url>),
   }),
 });
 
