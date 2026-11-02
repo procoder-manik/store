@@ -92,8 +92,8 @@ export default async function Settings() {
         </form>
 
         <form action={savePopup} className={`${card} grid gap-4`}>
-          <h2 className="font-display text-base font-semibold">Promo popup<InfoTip text="A popup that offers a coupon, once per visit. It turns visitors into buyers or email subscribers." /></h2>
-          <label className="flex items-center gap-2 text-sm"><input type="checkbox" name="enabled" defaultChecked={s.popup.enabled} /> Show the popup to visitors (once per visit)</label>
+          <h2 className="font-display text-base font-semibold">Promo popup<InfoTip text="A popup that offers a coupon. The rules below decide who sees it and how often, so nobody is shown it on every page load." /></h2>
+          <label className="flex items-center gap-2 text-sm"><input type="checkbox" name="enabled" defaultChecked={s.popup.enabled} /> Show the popup</label>
           <div><label className={label}>Title</label><input name="title" required maxLength={80} defaultValue={s.popup.title} className={input} /></div>
           <div><label className={label}>Text</label><input name="text" maxLength={240} defaultValue={s.popup.text} className={input} /></div>
           <div className="grid gap-4 sm:grid-cols-2">
@@ -102,6 +102,17 @@ export default async function Settings() {
             <div><label className={label}>Show when</label><select name="trigger" defaultValue={s.popup.trigger} className={input}><option value="delay">After a delay</option><option value="exit">The visitor is about to leave</option></select></div>
             <div><label className={label}>Delay in seconds</label><input name="delay" type="number" min={3} max={120} defaultValue={s.popup.delay} className={input} /></div>
           </div>
+          <fieldset className="grid gap-4 rounded-xl border border-line p-4">
+            <legend className="px-1 text-xs font-medium text-muted">Who sees it, and how often</legend>
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div><label className={label}>Times to show each visitor, in total</label><input name="maxShows" type="number" min={1} max={20} defaultValue={s.popup.maxShows} className={input} /></div>
+              <div><label className={label}>Days to wait before showing it again</label><input name="gapDays" type="number" min={0} max={365} defaultValue={s.popup.gapDays} className={input} /></div>
+            </div>
+            <label className="flex items-center gap-2 text-sm"><input type="checkbox" name="stopAfterClaim" defaultChecked={s.popup.stopAfterClaim} /> Stop showing it once the visitor copies the code or taps the button</label>
+            <label className="flex items-center gap-2 text-sm"><input type="checkbox" name="hideAfterOrder" defaultChecked={s.popup.hideAfterOrder} /> Never show it to someone who has placed an order</label>
+            <label className="flex items-center gap-2 text-sm"><input type="checkbox" name="hideSignedIn" defaultChecked={s.popup.hideSignedIn} /> Never show it to customers who are signed in</label>
+            <p className="text-xs text-muted">With the first box at 1, a new visitor sees it exactly once, however many pages they open. It never shows twice in the same visit. Change the code or the title and it counts as a new offer, so everyone can see it once more. It stays off the checkout, thank-you and login pages.</p>
+          </fieldset>
           <button className={`${save} w-fit`}>Save popup</button>
         </form>
 

@@ -5,27 +5,73 @@ import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { X } from "lucide-react";
 import type { Settings } from "@/lib/settings";
+import { createClient } from "@/lib/supabase/client";
+
+const KEY = "promo-v2";
+const DAY = 86_400_000;
+type Seen = { offer: string; shown: number; last: number; claimed: boolean };
+
+function read(offer: string): Seen | null {
+  try {
+    const raw = localStorage.getItem(KEY);
+    const v = raw ? (JSON.parse(raw) as Seen) : null;
+    // A new code or title is a new offer, so it starts again from zero.
+    return v && v.offer === offer ? v : { offer, shown: 0, last: 0, claimed: false };
+  } catch {
+    return null; // Storage is blocked. Better to stay quiet than to show it on every page.
+  }
+}
+
+function write(v: Seen) {
+  try { localStorage.setItem(KEY, JSON.stringify(v)); } catch { /* storage blocked */ }
+}
 
 export function PromoPopup({ p }: { p: Settings["popup"] }) {
   const path = usePathname();
   const [open, setOpen] = useState(false);
   const [copied, setCopied] = useState(false);
   const closeBtn = useRef<HTMLButtonElement>(null);
-  const blocked = /^\/(admin|checkout|thank-you|login)/.test(path);
+  const blocked = /^\/(admin|checkout|thank-you|login|reset-password|mfa|pay)/.test(path);
+  const offer = `${p.code}|${p.title}`;
 
   useEffect(() => {
     if (!p.enabled || blocked) return;
-    try { if (sessionStorage.getItem("promo-seen")) return; } catch { /* storage blocked */ }
-    const show = () => { setOpen(true); try { sessionStorage.setItem("promo-seen", "1"); } catch { /* storage blocked */ } };
-    if (p.trigger === "delay") {
-      const t = window.setTimeout(show, p.delay * 1000);
-      return () => window.clearTimeout(t);
-    }
-    const out = (e: MouseEvent) => { if (e.clientY <= 0 && !e.relatedTarget) show(); };
-    const fallback = window.setTimeout(show, 30000);
-    document.addEventListener("mouseout", out);
-    return () => { document.removeEventListener("mouseout", out); window.clearTimeout(fallback); };
-  }, [p.enabled, p.trigger, p.delay, blocked]);
+    let cancelled = false;
+    let cleanup = () => {};
+
+    (async () => {
+      const seen = read(offer);
+      if (!seen) return;
+      try {
+        if (sessionStorage.getItem("promo-seen")) return; // once per visit, whatever the other rules say
+        if (p.hideAfterOrder && localStorage.getItem("promo-ordered")) return;
+      } catch { return; }
+      if (p.stopAfterClaim && seen.claimed) return;
+      if (seen.shown >= p.maxShows) return;
+      if (seen.shown > 0 && Date.now() - seen.last < p.gapDays * DAY) return;
+      if (p.hideSignedIn) {
+        try { if ((await createClient().auth.getSession()).data.session) return; } catch { /* treat as signed out */ }
+      }
+      if (cancelled) return;
+
+      const show = () => {
+        try { if (sessionStorage.getItem("promo-seen")) return; sessionStorage.setItem("promo-seen", "1"); } catch { return; }
+        write({ ...seen, shown: seen.shown + 1, last: Date.now() });
+        setOpen(true);
+      };
+      if (p.trigger === "delay") {
+        const t = window.setTimeout(show, p.delay * 1000);
+        cleanup = () => window.clearTimeout(t);
+        return;
+      }
+      const out = (e: MouseEvent) => { if (e.clientY <= 0 && !e.relatedTarget) show(); };
+      const fallback = window.setTimeout(show, 30000);
+      document.addEventListener("mouseout", out);
+      cleanup = () => { document.removeEventListener("mouseout", out); window.clearTimeout(fallback); };
+    })();
+
+    return () => { cancelled = true; cleanup(); };
+  }, [p.enabled, p.trigger, p.delay, p.maxShows, p.gapDays, p.hideAfterOrder, p.hideSignedIn, p.stopAfterClaim, offer, blocked]);
 
   useEffect(() => {
     if (!open) return;
@@ -36,8 +82,11 @@ export function PromoPopup({ p }: { p: Settings["popup"] }) {
   }, [open]);
 
   if (!open || blocked) return null;
+
+  const claim = () => { const seen = read(offer); if (seen) write({ ...seen, claimed: true }); };
   const copy = async () => {
     try { await navigator.clipboard.writeText(p.code); setCopied(true); } catch { /* clipboard blocked */ }
+    claim();
   };
 
   return (
@@ -52,7 +101,7 @@ export function PromoPopup({ p }: { p: Settings["popup"] }) {
             <span className="text-sm text-accent">{copied ? "Copied" : "Copy code"}</span>
           </button>
         )}
-        <Link href="/shop" onClick={() => setOpen(false)} className="mt-4 block rounded-pill bg-accent py-3 text-center text-sm font-semibold text-accent-ink">{p.button || "Shop now"}</Link>
+        <Link href="/shop" onClick={() => { claim(); setOpen(false); }} className="mt-4 block rounded-pill bg-accent py-3 text-center text-sm font-semibold text-accent-ink">{p.button || "Shop now"}</Link>
       </div>
     </div>
   );

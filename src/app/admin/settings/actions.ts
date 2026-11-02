@@ -49,8 +49,10 @@ export async function savePopup(fd: FormData) {
     button: z.string().trim().max(30),
     trigger: z.enum(["delay", "exit"]),
     delay: z.coerce.number().int().min(3).max(120),
-  }), { title: fd.get("title"), text: fd.get("text"), code: fd.get("code"), button: fd.get("button"), trigger: fd.get("trigger"), delay: fd.get("delay") });
-  await save("popup", { enabled: on(fd.get("enabled")), ...d });
+    maxShows: z.coerce.number().int().min(1).max(20),
+    gapDays: z.coerce.number().int().min(0).max(365),
+  }), { title: fd.get("title"), text: fd.get("text"), code: fd.get("code"), button: fd.get("button"), trigger: fd.get("trigger"), delay: fd.get("delay"), maxShows: fd.get("maxShows"), gapDays: fd.get("gapDays") });
+  await save("popup", { enabled: on(fd.get("enabled")), hideAfterOrder: on(fd.get("hideAfterOrder")), hideSignedIn: on(fd.get("hideSignedIn")), stopAfterClaim: on(fd.get("stopAfterClaim")), ...d });
 }
 
 export async function saveProof(fd: FormData) {

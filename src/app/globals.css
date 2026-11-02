@@ -238,3 +238,8 @@ select option { background: var(--surface); color: var(--ink); }
 @media (prefers-reduced-transparency: reduce) { .search-veil { background: var(--paper); } .chat-glass { background: var(--surface); } }
 @supports not (background: color-mix(in srgb, red, blue)) { .search-veil { background: var(--paper); } .chat-glass { background: var(--surface); } }
 @media (prefers-reduced-motion: reduce) { .search-veil, .search-rise, .search-line.is-busy, .chat-launcher .chat-dot, .typing-dot { animation: none !important; } }
+
+/* Sign in page: one entrance, then still. */
+.login-in { animation: loginIn 0.7s cubic-bezier(0.2, 0.8, 0.2, 1) both; animation-delay: var(--d, 0s); }
+@keyframes loginIn { from { opacity: 0; translate: 0 18px; } }
+@media (prefers-reduced-motion: reduce) { .login-in { animation: none; } }
