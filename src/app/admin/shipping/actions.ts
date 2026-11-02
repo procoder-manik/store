@@ -35,3 +35,24 @@ export async function deleteZone(formData: FormData) {
   revalidatePath("/admin/shipping");
   revalidatePath("/checkout");
 }
+
+const rule = z.object({
+  enabled: z.boolean(),
+  amount: z.coerce.number().min(0).max(10_000_000),
+  zones: z.array(z.string().uuid()).max(200),
+  endsAt: z.string().regex(/^(\d{4}-\d{2}-\d{2})?$/, "Choose a valid last day"),
+});
+
+export async function saveFreeDelivery(formData: FormData) {
+  const d = rule.parse({
+    enabled: formData.get("enabled") === "on",
+    amount: formData.get("amount") || 0,
+    zones: formData.get("scope") === "some" ? formData.getAll("zones").map(String) : [],
+    endsAt: formData.get("endsAt") ?? "",
+  });
+  if (d.enabled && d.amount <= 0) throw new Error("Enter the order amount that earns free delivery.");
+  const { supabase } = await requireAdmin("shipping.free-delivery");
+  const { error } = await supabase.from("site_settings").upsert({ key: "free_delivery", value: d, is_public: true });
+  if (error) throw new Error(error.message);
+  revalidatePath("/", "layout");
+}

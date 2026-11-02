@@ -14,13 +14,13 @@ const local = (v: string | null) => (v ? new Date(v).toISOString().slice(0, 16) 
 
 type Row = { id: string; title: string | null; subtitle: string | null; image: string | null; link: string | null; button: string | null; sort: number; active: boolean; slot: string | null; design: string | null; starts_at: string | null; ends_at: string | null };
 
-export default async function Banners({ searchParams }: { searchParams: Promise<{ edit?: string }> }) {
-  const { edit } = await searchParams;
+export default async function Banners({ searchParams }: { searchParams: Promise<{ edit?: string; slot?: string; title?: string; text?: string; link?: string; button?: string; design?: string }> }) {
+  const { edit, ...pre } = await searchParams;
   const supabase = await createClient();
   const { data } = await supabase.from("banners").select("*").order("sort");
   const rows = (data ?? []) as Row[];
   const e = rows.find((r) => r.id === edit);
-  const reserved = BANNER_SLOTS.some((s) => s.id === (e?.slot ?? "home"));
+  const reserved = BANNER_SLOTS.some((s) => s.id === (e?.slot ?? pre.slot ?? "home"));
   const groups = [...new Set(rows.map((r) => r.slot ?? "home"))];
 
   return (
@@ -33,7 +33,7 @@ export default async function Banners({ searchParams }: { searchParams: Promise<
         {e && <input type="hidden" name="id" value={e.id} />}
         <div>
           <label className={label} htmlFor="slot">Where it shows</label>
-          <select id="slot" name="slot" defaultValue={reserved ? e?.slot ?? "home" : "custom"} className={input}>
+          <select id="slot" name="slot" defaultValue={reserved ? e?.slot ?? pre.slot ?? "home" : "custom"} className={input}>
             {BANNER_SLOTS.map((s) => <option key={s.id} value={s.id}>{s.name} ({s.size})</option>)}
             <option value="custom">My own group, placed with a shortcode</option>
           </select>
@@ -44,7 +44,7 @@ export default async function Banners({ searchParams }: { searchParams: Promise<
         </div>
         <div>
           <label className={label} htmlFor="design">Design</label>
-          <select id="design" name="design" defaultValue={e?.design ?? "image"} className={input}>{BANNER_DESIGNS.map((d) => <option key={d.id} value={d.id}>{d.name}</option>)}</select>
+          <select id="design" name="design" defaultValue={e?.design ?? pre.design ?? "image"} className={input}>{BANNER_DESIGNS.map((d) => <option key={d.id} value={d.id}>{d.name}</option>)}</select>
         </div>
         <div>
           <label className={label} htmlFor="sort">Order (0 shows first)</label>
@@ -52,10 +52,10 @@ export default async function Banners({ searchParams }: { searchParams: Promise<
         </div>
         <div className="sm:col-span-2"><ImageField name="image" value={e?.image ?? ""} label="Picture (upload, choose from your library, or paste a link)" /></div>
         <div className="sm:col-span-2 -mt-2"><p className="text-xs text-muted">If your picture already has the words in it, leave the title and text empty.</p></div>
-        <div><label className={label} htmlFor="title">Title</label><input id="title" name="title" defaultValue={e?.title ?? ""} maxLength={80} className={input} /></div>
-        <div><label className={label} htmlFor="subtitle">Text (optional)</label><input id="subtitle" name="subtitle" defaultValue={e?.subtitle ?? ""} maxLength={160} className={input} /></div>
-        <div><label className={label} htmlFor="link">Opens this page when clicked</label><input id="link" name="link" defaultValue={e?.link ?? ""} maxLength={200} placeholder="/category/pillows" className={input} /></div>
-        <div><label className={label} htmlFor="button">Button words (optional)</label><input id="button" name="button" defaultValue={e?.button ?? ""} maxLength={30} className={input} /></div>
+        <div><label className={label} htmlFor="title">Title</label><input id="title" name="title" defaultValue={e?.title ?? pre.title ?? ""} maxLength={80} className={input} /></div>
+        <div><label className={label} htmlFor="subtitle">Text (optional)</label><input id="subtitle" name="subtitle" defaultValue={e?.subtitle ?? pre.text ?? ""} maxLength={160} className={input} /></div>
+        <div><label className={label} htmlFor="link">Opens this page when clicked</label><input id="link" name="link" defaultValue={e?.link ?? pre.link ?? ""} maxLength={200} placeholder="/category/pillows" className={input} /></div>
+        <div><label className={label} htmlFor="button">Button words (optional)</label><input id="button" name="button" defaultValue={e?.button ?? pre.button ?? ""} maxLength={30} className={input} /></div>
         <div><label className={label} htmlFor="startsAt">Start showing (optional)</label><input id="startsAt" name="startsAt" type="datetime-local" defaultValue={local(e?.starts_at ?? null)} className={input} /></div>
         <div><label className={label} htmlFor="endsAt">Stop showing (optional)</label><input id="endsAt" name="endsAt" type="datetime-local" defaultValue={local(e?.ends_at ?? null)} className={input} /></div>
         <div className="flex items-center gap-3 sm:col-span-2">

@@ -5,6 +5,8 @@ import { z } from "zod";
 import { blocksSchema } from "@/lib/blocks";
 import { checkFraud } from "@/lib/fraud";
 import { clientIp, rateLimit } from "@/lib/ratelimit";
+import { deliveryFee } from "@/lib/free-delivery";
+import { getPublicSettings } from "@/lib/settings";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 import { normalizePhone } from "@/lib/utils";
@@ -83,7 +85,7 @@ export async function placeLandingOrderV2(input: unknown): Promise<Placed> {
 
     const { data: zone } = await db.from("shipping_zones").select("name, fee, free_over").eq("id", d.zoneId).eq("active", true).maybeSingle();
     if (!zone) return { ok: false, error: "Choose a delivery area." };
-    const shipping = zone.free_over != null && subtotal >= Number(zone.free_over) ? 0 : Number(zone.fee);
+    const shipping = deliveryFee(d.zoneId, zone, subtotal, (await getPublicSettings()).freeDelivery);
     const total = subtotal + shipping;
 
     const h = await headers();

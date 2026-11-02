@@ -40,3 +40,16 @@ export async function deleteCoupon(formData: FormData) {
   await supabase.from("coupons").delete().eq("id", id);
   revalidatePath("/admin/coupons");
 }
+
+/** Puts a coupon on the public Offers page, or takes it off. All other coupons stay private. */
+export async function toggleOfferCoupon(formData: FormData) {
+  const code = z.string().regex(/^[A-Z0-9_-]{3,30}$/).parse(formData.get("code"));
+  const { supabase } = await requireAdmin("coupon.offers-page");
+  const { data } = await supabase.from("site_settings").select("value").eq("key", "offers").maybeSingle();
+  const cur = ((data?.value ?? {}) as { coupons?: string[] }).coupons ?? [];
+  const coupons = cur.includes(code) ? cur.filter((c) => c !== code) : [...cur, code];
+  const { error } = await supabase.from("site_settings").upsert({ key: "offers", value: { coupons }, is_public: true });
+  if (error) throw new Error(error.message);
+  revalidatePath("/", "layout");
+  revalidatePath("/admin/coupons");
+}

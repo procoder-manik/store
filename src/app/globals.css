@@ -386,3 +386,9 @@ footer.bg-ink .footer-mark { --mark: var(--paper); }
 [data-admin-shell] :is(a, button).bg-accent { transition: opacity 0.2s, scale 0.25s; }
 [data-admin-shell] :is(a, button).bg-accent:hover { opacity: 0.9; }
 [data-admin-shell] :is(a, button).bg-accent:active { scale: 0.97; }
+
+/* Pre-order always wears the highlight colour, so it can never be mistaken for Buy now. Change it with Highlight in the theme colours. */
+.btn-preorder, .btn-preorder:hover { border-color: transparent !important; background: var(--gold) !important; background-image: none !important; color: #1a1408 !important; font-weight: 700; animation: none !important; }
+.btn-preorder:hover:not(:disabled) { filter: brightness(1.07); }
+:is(.pcard--minimal, .pcard--editorial) .btn-preorder { height: 2.5rem; border-radius: 9999px; text-align: center; text-decoration: none; }
+

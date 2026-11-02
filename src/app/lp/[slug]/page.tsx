@@ -1,3 +1,5 @@
+import { getPublicSettings } from "@/lib/settings";
+import { withRule } from "@/lib/free-delivery";
 import type { Metadata } from "next";
 import { notFound, permanentRedirect } from "next/navigation";
 import { cache } from "react";
@@ -25,7 +27,7 @@ const loadBuilt = cache(async (slug: string) => {
   if (!parsed.success) return null;
   const { products, categories } = await getCatalog();
   const { data: z } = await sb.from("shipping_zones").select("id, name, fee, free_over").eq("active", true).order("sort").order("fee");
-  return { title: data.title as string, description: (data.description as string) ?? "", blocks: parsed.data as Block[], products, categories, zones: zonesOf(z) };
+  return { title: data.title as string, description: (data.description as string) ?? "", blocks: parsed.data as Block[], products, categories, zones: withRule(zonesOf(z), (await getPublicSettings()).freeDelivery) };
 });
 
 const load = cache(async (slug: string) => {
@@ -41,7 +43,7 @@ const load = cache(async (slug: string) => {
     slug: l.slug as string, headline: l.headline as string, subheadline: (l.subheadline as string) ?? "", bullets: (l.bullets as string[]) ?? [],
     heroImage: (l.hero_image as string) ?? "", cta: l.cta_text as string, offers: l.offers as LandingData["offers"],
   };
-  const zones = (z ?? []).map((x) => ({ id: x.id as string, name: x.name as string, fee: Number(x.fee), freeOver: x.free_over == null ? null : Number(x.free_over) }));
+  const zones = withRule(zonesOf(z), (await getPublicSettings()).freeDelivery);
   return { landing, product, zones };
 });
 

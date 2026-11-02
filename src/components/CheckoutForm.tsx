@@ -1,5 +1,7 @@
 "use client";
 
+import { clearClaim, readClaim } from "./ClaimCoupon";
+import { FreeDeliveryNote } from "./FreeDeliveryNote";
 import Link from "next/link";
 import { DistrictFields } from "./DistrictFields";
 import { fullAddress } from "@/lib/districts";
@@ -29,6 +31,7 @@ export function CheckoutForm({ zones, bump = null, prefill = null, methods = [] 
   const [zoneId, setZoneId] = useState(zones[0]?.id ?? "");
   const [couponInput, setCouponInput] = useState("");
   const [coupon, setCoupon] = useState("");
+  useEffect(() => { const c = readClaim(); if (c) { setCouponInput(c); setCoupon(c); } }, []);
   const [bumpOn, setBumpOn] = useState(false);
   const [method, setMethod] = useState<string>(methods[0]?.id ?? "");
   const picked = methods.find((m) => m.id === method);
@@ -80,6 +83,7 @@ export function CheckoutForm({ zones, bump = null, prefill = null, methods = [] 
     start(async () => {
       const r = await placeOrder(payload);
       if (!r.ok) return setError(r.error);
+      clearClaim();
       clear();
       if (r.payUrl) window.location.assign(r.payUrl);
       else router.push(online ? `/pay/${r.id}` : `/thank-you/${r.id}`);
@@ -150,6 +154,7 @@ export function CheckoutForm({ zones, bump = null, prefill = null, methods = [] 
             <button type="button" onClick={() => setCoupon(couponInput.trim())} className="shrink-0 rounded-pill border border-line px-4 text-sm font-medium hover:bg-paper">Apply</button>
           </div>
           {quote?.couponError && <p className="mt-2 text-xs text-red-600">{quote.couponError}</p>}
+          <FreeDeliveryNote subtotal={quote?.subtotal ?? 0} zoneId={zoneId} className="mt-3" />
 
           {quote && (
             <dl className="mt-4 grid gap-2 text-sm">

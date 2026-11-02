@@ -1,12 +1,12 @@
 "use client";
 
+import { FreeDeliveryNote } from "./FreeDeliveryNote";
 import Link from "next/link";
 import { Minus, Plus, ShoppingBag, X } from "lucide-react";
 import { useCart } from "@/lib/cart";
 import { formatPrice } from "@/lib/config";
 import { ProductArt } from "./ProductArt";
 import { useOverlay } from "./Portal";
-import { useZones } from "./ZonesProvider";
 import { useCallback } from "react";
 
 export function CartDrawer() {
@@ -14,8 +14,6 @@ export function CartDrawer() {
   const total = items.reduce((n, i) => n + i.price * i.qty, 0);
   const count = items.reduce((n, i) => n + i.qty, 0);
   const close = useCallback(() => setOpen(false), [setOpen]);
-  const zones = useZones();
-  const freeAt = Math.min(...zones.map((z) => z.freeOver ?? Infinity));
   useOverlay(open, close);
 
   return (
@@ -26,12 +24,7 @@ export function CartDrawer() {
           <h2 className="font-display text-lg font-semibold">Your cart{count > 0 && <span className="ml-2 text-sm font-normal text-muted">{count} {count === 1 ? "item" : "items"}</span>}</h2>
           <button aria-label="Close cart" onClick={() => setOpen(false)} className="grid h-9 w-9 place-items-center rounded-full hover:bg-paper"><X size={18} /></button>
         </div>
-        {items.length > 0 && Number.isFinite(freeAt) && (
-          <div className="border-b border-line px-5 py-3 text-xs">
-            <p className="font-medium">{total >= freeAt ? "You get free delivery on this order." : `Add ${formatPrice(freeAt - total)} more for free delivery.`}</p>
-            <div className="mt-2 h-1.5 overflow-hidden rounded-pill bg-paper"><div style={{ width: `${Math.min(100, (total / freeAt) * 100)}%` }} className="h-full rounded-pill bg-[var(--gold)] transition-[width] duration-500" /></div>
-          </div>
-        )}
+        {items.length > 0 && <FreeDeliveryNote subtotal={total} className="border-b border-line px-5 py-3 empty:hidden" />}
         <div className="no-scrollbar flex-1 overflow-y-auto px-5">
           {items.length === 0 ? (
             <div className="grid place-items-center gap-3 py-20 text-center">

@@ -1,5 +1,7 @@
 import "server-only";
 import { getBanners } from "@/lib/banners";
+import { getPublicCoupons } from "@/lib/offers";
+import { getZones } from "@/lib/zones";
 import { getBundles } from "@/lib/bundles";
 import { getCatalog } from "@/lib/catalog";
 import { formatPrice, SITE_URL } from "@/lib/config";
@@ -95,18 +97,17 @@ function pageText(blocks: unknown) {
 }
 
 export async function buildChatContext(question: string, path = ""): Promise<ChatContext> {
-  const [{ products, categories }, settings, banners, bundles] = await Promise.all([getCatalog(), getPublicSettings(), getBanners(), getBundles()]);
+  const [{ products, categories }, settings, banners, bundles, zoneRows, coupons] = await Promise.all([getCatalog(), getPublicSettings(), getBanners(), getBundles(), getZones(), getPublicCoupons()]);
   const sb = createPublicClient();
-  const [zones, pages, reviews] = sb
+  const [pages, reviews] = sb
     ? await Promise.all([
-        sb.from("shipping_zones").select("name, fee, free_over").eq("active", true).order("sort"),
         sb.from("pages").select("slug, kind, title, description, blocks").eq("status", "active").limit(40),
         sb.from("reviews").select("product_id, rating").eq("status", "approved").limit(2000),
       ])
-    : [null, null, null];
+    : [null, null];
 
   const catName = new Map(categories.map((c) => [c.id, c.label]));
-  const links = new Map<string, string>([["/shop", "See all products"], ["/track", "Track your order"], ["/pre-order", "Pre-order"], ["/contact", "Contact us"]]);
+  const links = new Map<string, string>([["/shop", "See all products"], ["/track", "Track your order"], ["/pre-order", "Pre-order"], ["/offers", "See all offers"], ["/contact", "Contact us"]]);
   for (const c of categories) links.set(`/category/${c.id}`, c.label);
   for (const s of INFO_SLUGS) links.set(`/${s}`, INFO_TITLES[s]);
 
@@ -139,9 +140,8 @@ export async function buildChatContext(question: string, path = ""): Promise<Cha
   const menu = [...settings.header.links, ...settings.footer.columns.flatMap((c) => c.links)];
   for (const l of menu) if (l.href.startsWith("/") && l.href.length > 1 && !links.has(l.href)) links.set(l.href, l.label);
 
-  const zoneRows = (zones?.data ?? []) as { name: string; fee: number | string; free_over: number | string | null }[];
   const delivery = zoneRows.length
-    ? `${zoneRows.map((z) => `${z.name}: ${formatPrice(Number(z.fee))}${z.free_over != null ? `, free on orders of ${formatPrice(Number(z.free_over))} or more` : ", no free delivery offer"}`).join("; ")}. These are the only delivery areas. The customer picks one at checkout.`
+    ? `${zoneRows.map((z) => `${z.name}: ${formatPrice(z.fee)}${z.freeOver != null ? `, free on orders of ${formatPrice(z.freeOver)} or more` : ", no free delivery offer"}`).join("; ")}. These are the only delivery areas. The customer picks one at checkout.`
     : "The fee is shown at checkout.";
 
   const adv = settings.payments.advance;
@@ -158,6 +158,7 @@ export async function buildChatContext(question: string, path = ""): Promise<Cha
     settings.announcement.enabled && settings.announcement.text && `Store notice: ${settings.announcement.text}`,
     ...banners.filter((b) => b.title).map((b) => `${b.title}${b.subtitle ? `: ${b.subtitle}` : ""}${b.link.startsWith("/") ? ` (${b.link})` : ""}`),
     settings.popup.enabled && settings.popup.code && `${settings.popup.title}. ${settings.popup.text} Code: ${settings.popup.code}`,
+    ...coupons.map((c) => `Coupon ${c.code}: ${c.type === "percent" ? `${c.value}%` : formatPrice(c.value)} off${c.minSubtotal > 0 ? ` on orders of ${formatPrice(c.minSubtotal)} or more` : ""}. All offers are on /offers`),
     ...bundles.map((b) => `Bundle "${b.name}": ${b.percent}% off when bought together (${products.filter((p) => b.productIds.includes(p.id)).map((p) => p.name).join(", ")})`),
     onSale.length ? `Products on sale now: ${onSale.slice(0, 30).map((p) => `${p.name} ${price(p)}${p.offerEndsAt ? `, ends ${dhakaDate(p.offerEndsAt)}` : ""}`).join("; ")}` : "",
   ].filter(Boolean);

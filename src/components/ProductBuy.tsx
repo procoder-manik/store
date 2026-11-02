@@ -9,6 +9,7 @@ import { preorderDate } from "@/lib/utils";
 import { useCart } from "@/lib/cart";
 import { trackAddToCart } from "@/lib/track";
 import { ListButtons } from "./ListButtons";
+import { FreeDeliveryNote } from "./FreeDeliveryNote";
 import { Portal } from "./Portal";
 
 type Props = { product: Product; colorIdx: number; onColor: (i: number) => void; compact?: boolean };
@@ -106,7 +107,7 @@ export function ProductBuy({ product, colorIdx, onColor, compact = false }: Prop
           <div className="mt-4 flex items-center gap-2">
             {stepper}
             <button disabled={!available} onClick={onAdd} className="flex flex-1 items-center justify-center gap-1.5 rounded-pill bg-accent py-3 text-sm font-semibold text-accent-ink transition active:scale-[0.99] disabled:opacity-40">{added ? <><Check size={15} /> Added</> : available ? "Add to cart" : "Sold out"}</button>
-            <button disabled={!available} onClick={buyNow} className="flex-1 rounded-pill bg-ink py-3 text-sm font-semibold text-paper transition active:scale-[0.99] disabled:opacity-40">Buy now</button>
+            <button disabled={!available} onClick={buyNow} className={`flex-1 rounded-pill bg-ink py-3 text-sm font-semibold text-paper transition active:scale-[0.99] disabled:opacity-40 ${product.preorder ? "btn-preorder" : ""}`}>{product.preorder ? "Pre-order now" : "Buy now"}</button>
           </div>
           {stockNote && <p className={`mt-2 text-xs ${available ? "text-muted" : "text-red-600"}`}>{stockNote}</p>}
         </>
@@ -115,9 +116,9 @@ export function ProductBuy({ product, colorIdx, onColor, compact = false }: Prop
           <div className="mt-5 flex items-center gap-4">{stepper}{stockNote && <p className={`text-sm ${available ? "text-muted" : "text-red-600"}`}>{stockNote}</p>}</div>
           <div ref={buttons} className="mt-5 grid gap-2.5">
             <button disabled={!available} onClick={onAdd} className="flex items-center justify-center gap-2 rounded-pill bg-accent py-3.5 text-sm font-semibold text-accent-ink transition active:scale-[0.99] disabled:opacity-40">
-              {added ? <><Check size={16} /> Added to cart</> : available ? (product.preorder ? "Pre-order now" : "Add to cart") : "Sold out"}
+              {added ? <><Check size={16} /> Added to cart</> : available ? "Add to cart" : "Sold out"}
             </button>
-            <button disabled={!available} onClick={buyNow} className="rounded-pill bg-ink py-3.5 text-sm font-semibold text-paper transition active:scale-[0.99] disabled:opacity-40">Buy now</button>
+            <button disabled={!available} onClick={buyNow} className={`rounded-pill bg-ink py-3.5 text-sm font-semibold text-paper transition active:scale-[0.99] disabled:opacity-40 ${product.preorder ? "btn-preorder" : ""}`}>{product.preorder ? "Pre-order now" : "Buy now"}</button>
           </div>
         </>
       )}
@@ -130,12 +131,13 @@ export function ProductBuy({ product, colorIdx, onColor, compact = false }: Prop
                 <p className="font-display text-lg font-semibold leading-tight tabular-nums">{formatPrice(price)}</p>
               </div>
               <button disabled={!available} onClick={onAdd} className="rounded-pill bg-accent px-4 py-3 text-sm font-semibold text-accent-ink transition active:scale-[0.98] disabled:opacity-40">{added ? <Check size={16} /> : available ? "Add" : "Sold out"}</button>
-              <button disabled={!available} onClick={buyNow} className="rounded-pill bg-ink px-4 py-3 text-sm font-semibold text-paper transition active:scale-[0.98] disabled:opacity-40">Buy now</button>
+              <button disabled={!available} onClick={buyNow} className={`rounded-pill bg-ink px-4 py-3 text-sm font-semibold text-paper transition active:scale-[0.98] disabled:opacity-40 ${product.preorder ? "btn-preorder" : ""}`}>{product.preorder ? "Pre-order" : "Buy now"}</button>
             </div>
           </div>
         </Portal>
       )}
       <p className="mt-3 flex items-center gap-2 text-xs text-muted"><Truck size={14} /> {product.preorder ? "Delivered when it arrives." : "Pay the rest in cash when it arrives."}</p>
+      <FreeDeliveryNote className="mt-2" />
       <ListButtons id={product.id} />
     </div>
   );

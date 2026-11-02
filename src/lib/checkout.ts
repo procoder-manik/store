@@ -1,4 +1,6 @@
 import "server-only";
+import { deliveryFee } from "@/lib/free-delivery";
+import { getPublicSettings } from "@/lib/settings";
 import { createAdminClient } from "@/lib/supabase/admin";
 
 export type CartInput = { productId: string; variantId?: string; qty: number }[];
@@ -76,7 +78,7 @@ export async function priceCart(items: CartInput, zoneId: string, couponRaw?: st
 
   const { data: zone } = await db.from("shipping_zones").select("name, fee, free_over").eq("id", zoneId).eq("active", true).maybeSingle();
   if (!zone) return { ok: false, error: "Choose a delivery area." };
-  const shipping = zone.free_over != null && subtotal >= Number(zone.free_over) ? 0 : Number(zone.fee);
+  const shipping = deliveryFee(zoneId, zone, subtotal, (await getPublicSettings()).freeDelivery);
 
   let bundleDiscount = 0;
   const { data: bundles, error: bundleErr } = await db.from("bundles").select("product_ids, discount_percent").eq("active", true);

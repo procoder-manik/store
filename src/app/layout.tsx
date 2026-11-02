@@ -29,6 +29,7 @@ import { ZonesProvider } from "@/components/ZonesProvider";
 import { PaymentsProvider } from "@/components/PaymentsProvider";
 import { availableMethods } from "@/lib/payments";
 import { sslConfigured } from "@/lib/sslcommerz";
+import { ruleLive } from "@/lib/free-delivery";
 import { getZones } from "@/lib/zones";
 import { getPublicSettings } from "@/lib/settings";
 import { SITE_URL } from "@/lib/config";
@@ -53,7 +54,8 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   // The menu always lists the live categories first, then any extra links added in Admin, Site and menu.
   const categoryLinks = categories.map((c) => ({ label: c.label, href: `/category/${c.id}` }));
   const preorderLink = products.some((p) => p.preorder) ? [{ label: "Pre-order", href: "/pre-order" }] : [];
-  const autoLinks = [...categoryLinks, ...preorderLink];
+  const hasOffers = ruleLive(s.freeDelivery) || s.offers.coupons.length > 0 || banners.some((b) => b.title || b.image) || products.some((p) => (p.compareAt ?? 0) > p.basePrice);
+  const autoLinks = [...categoryLinks, ...preorderLink, ...(hasOffers ? [{ label: "Offers", href: "/offers" }] : [])];
   const menuLinks = [...autoLinks, ...s.header.links.filter((l) => !autoLinks.some((c) => c.href === l.href))];
   const methods = availableMethods(s.payments, { sslReady: await sslConfigured() });
   const theme = themeOf(s.appearance.theme);

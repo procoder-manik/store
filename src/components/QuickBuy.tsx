@@ -14,6 +14,8 @@ import { readRef } from "./RefCapture";
 import { ProductArt } from "./ProductArt";
 import { PaymentPicker } from "./PaymentPicker";
 import { Portal } from "./Portal";
+import { clearClaim, readClaim } from "./ClaimCoupon";
+import { FreeDeliveryNote } from "./FreeDeliveryNote";
 import { usePaymentMethods } from "./PaymentsProvider";
 
 export type Zone = { id: string; name: string; fee: number; freeOver: number | null };
@@ -30,6 +32,7 @@ export function QuickBuy({ product, zones, onClose }: { product: Product; zones:
   const [quote, setQuote] = useState<{ subtotal: number; shipping: number; discount: number; total: number; hasPreorder: boolean; mustPartial?: boolean; couponError?: string } | null>(null);
   const [couponInput, setCouponInput] = useState("");
   const [coupon, setCoupon] = useState("");
+  useEffect(() => { const c = readClaim(); if (c) { setCouponInput(c); setCoupon(c); } }, []);
   const [error, setError] = useState("");
   const [pending, start] = useTransition();
   const methods = usePaymentMethods();
@@ -76,6 +79,7 @@ export function QuickBuy({ product, zones, onClose }: { product: Product; zones:
         items: [{ productId: product.id, variantId: variant?.id, qty }],
       });
       if (!r.ok) return setError(r.error);
+      clearClaim();
       onClose();
       if (r.payUrl) window.location.assign(r.payUrl);
       else router.push(method === "sslcommerz" ? `/pay/${r.id}` : `/thank-you/${r.id}`);
@@ -161,6 +165,7 @@ export function QuickBuy({ product, zones, onClose }: { product: Product; zones:
             )}
           </div>
 
+          <FreeDeliveryNote subtotal={quote?.subtotal ?? price * qty} zoneId={zoneId} />
           <dl className="mt-1 grid gap-1.5 rounded-2xl border border-line bg-paper p-4 text-sm">
             <div className="flex justify-between"><dt className="text-muted">Items</dt><dd className="tabular-nums">{formatPrice(quote?.subtotal ?? price * qty)}</dd></div>
             {!!quote && quote.discount > 0 && <div className="flex justify-between"><dt className="text-muted">Discount</dt><dd className="tabular-nums">-{formatPrice(quote.discount)}</dd></div>}
@@ -168,7 +173,7 @@ export function QuickBuy({ product, zones, onClose }: { product: Product; zones:
             <div className="mt-1 flex justify-between border-t border-line pt-2.5 text-base font-semibold"><dt>Total</dt><dd className="tabular-nums">{formatPrice(quote?.total ?? price * qty)}</dd></div>
           </dl>
           {error && <p role="alert" className="text-sm text-[var(--madder)]">{error}</p>}
-          <button disabled={pending || stock <= 0 || !picked || (!quote && !demo)} className="mb-1 mt-3 flex min-h-[56px] items-center justify-center gap-2 rounded-full bg-accent px-6 py-4 text-[15px] font-semibold text-accent-ink shadow-lg transition hover:-translate-y-0.5 disabled:opacity-50">{pending ? "Placing order..." : <><Check size={16} /> {method === "sslcommerz" ? "Continue to payment" : "Place order"}</>}</button>
+          <button disabled={pending || stock <= 0 || !picked || (!quote && !demo)} className={`mb-1 mt-3 flex min-h-[56px] items-center justify-center gap-2 rounded-full bg-accent px-6 py-4 text-[15px] font-semibold text-accent-ink shadow-lg transition hover:-translate-y-0.5 disabled:opacity-50 ${product.preorder ? "btn-preorder" : ""}`}>{pending ? "Placing order..." : <><Check size={16} /> {method === "sslcommerz" ? "Continue to payment" : product.preorder ? "Place pre-order" : "Place order"}</>}</button>
           <p className="pb-1 text-center text-xs text-muted">We will call you to confirm. {method === "cod" ? "Any cash due is paid when it arrives." : picked?.manual ? "We check your payment before we send the order." : ""}</p>
         </form>
       </div>

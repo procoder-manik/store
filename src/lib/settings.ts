@@ -1,6 +1,7 @@
 import { cache } from "react";
 import { createPublicClient } from "@/lib/supabase/public";
 import { BRAND } from "@/lib/config";
+import { DEFAULT_FREE_DELIVERY, type FreeDeliveryRule } from "@/lib/free-delivery";
 import type { ThemeColors } from "@/lib/themes";
 import { DEFAULT_PAYMENTS, mergePayments, type PaymentsSettings } from "@/lib/payments";
 import { DEFAULT_FOOTER_STYLE, DEFAULT_HEADER_STYLE, mergeFooterStyle, mergeHeaderStyle, type FooterStyleCfg, type HeaderStyleCfg } from "@/lib/layout-styles";
@@ -19,6 +20,9 @@ export type Settings = {
   footer: { about: string; columns: { title: string; links: { label: string; href: string }[] }[]; copyright: string; newsletter: boolean };
   extras: { backToTop: boolean; backToTopText: boolean; catalog: boolean; quickBar: boolean; cartChip: boolean };
   payments: PaymentsSettings;
+  freeDelivery: FreeDeliveryRule;
+  /** Coupon codes shown on the Offers page. All others stay private. */
+  offers: { coupons: string[] };
   headerStyle: HeaderStyleCfg;
   footerStyle: FooterStyleCfg;
 };
@@ -37,12 +41,14 @@ export const DEFAULTS: Settings = {
   footer: { about: "", columns: [], copyright: "", newsletter: true },
   extras: { backToTop: true, backToTopText: false, catalog: true, quickBar: true, cartChip: true },
   payments: DEFAULT_PAYMENTS,
+  freeDelivery: DEFAULT_FREE_DELIVERY,
+  offers: { coupons: [] },
   headerStyle: DEFAULT_HEADER_STYLE,
   footerStyle: DEFAULT_FOOTER_STYLE,
 };
 
 export function mergeSettings(rows: { key: string; value: unknown }[]): Settings {
-  const out: Settings = { announcement: { ...DEFAULTS.announcement }, tracking: { ...DEFAULTS.tracking }, popup: { ...DEFAULTS.popup }, proof: { ...DEFAULTS.proof }, bump: { ...DEFAULTS.bump }, chat: { ...DEFAULTS.chat }, contact: { ...DEFAULTS.contact }, appearance: { ...DEFAULTS.appearance }, brand: { ...DEFAULTS.brand }, header: { ...DEFAULTS.header }, footer: { ...DEFAULTS.footer }, extras: { ...DEFAULTS.extras }, payments: DEFAULTS.payments, headerStyle: DEFAULTS.headerStyle, footerStyle: DEFAULTS.footerStyle };
+  const out: Settings = { announcement: { ...DEFAULTS.announcement }, tracking: { ...DEFAULTS.tracking }, popup: { ...DEFAULTS.popup }, proof: { ...DEFAULTS.proof }, bump: { ...DEFAULTS.bump }, chat: { ...DEFAULTS.chat }, contact: { ...DEFAULTS.contact }, appearance: { ...DEFAULTS.appearance }, brand: { ...DEFAULTS.brand }, header: { ...DEFAULTS.header }, footer: { ...DEFAULTS.footer }, extras: { ...DEFAULTS.extras }, payments: DEFAULTS.payments, freeDelivery: DEFAULTS.freeDelivery, offers: DEFAULTS.offers, headerStyle: DEFAULTS.headerStyle, footerStyle: DEFAULTS.footerStyle };
   for (const r of rows) {
     const v = (r.value ?? {}) as object;
     if (r.key === "announcement") out.announcement = { ...out.announcement, ...v };
@@ -63,6 +69,8 @@ export function mergeSettings(rows: { key: string; value: unknown }[]): Settings
     if (r.key === "footer") out.footer = { ...out.footer, ...v };
     if (r.key === "extras") out.extras = { ...out.extras, ...v };
     if (r.key === "payments") out.payments = mergePayments(v);
+    if (r.key === "free_delivery") out.freeDelivery = { ...out.freeDelivery, ...v };
+    if (r.key === "offers") out.offers = { ...out.offers, ...v };
     if (r.key === "header_style") out.headerStyle = mergeHeaderStyle(v);
     if (r.key === "footer_style") out.footerStyle = mergeFooterStyle(v);
   }

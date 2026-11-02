@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { createPublicClient } from "@/lib/supabase/public";
+import { withRule } from "@/lib/free-delivery";
 import { createClient } from "@/lib/supabase/server";
 import { getPublicSettings } from "@/lib/settings";
 import { sslConfigured } from "@/lib/sslcommerz";
@@ -18,7 +19,7 @@ export default async function Checkout() {
     getPublicSettings(),
     supabase ? supabase.auth.getUser() : Promise.resolve({ data: { user: null } }),
   ]);
-  const zones: Zone[] = (zr.data ?? []).map((z) => ({ id: z.id as string, name: z.name as string, fee: Number(z.fee), freeOver: z.free_over == null ? null : Number(z.free_over) }));
+  const zones: Zone[] = withRule((zr.data ?? []).map((z) => ({ id: z.id as string, name: z.name as string, fee: Number(z.fee), freeOver: z.free_over == null ? null : Number(z.free_over) })), settings.freeDelivery);
 
   let prefill: Prefill | null = null;
   const user = auth.data.user;
