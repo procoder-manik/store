@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useState, useTransition } from "react";
 import { InfoTip } from "./InfoTip";
+import { SslKeys, type SslView } from "./SslKeys";
 import { savePayments } from "@/app/admin/payments/actions";
 import { CATALOG, type CatalogItem, type MethodCfg, type MethodGroup, type AdvanceCfg, type MethodId, type PaymentsSettings } from "@/lib/payments";
 
@@ -12,7 +13,7 @@ const GROUPS: { id: MethodGroup; title: string; note: string }[] = [
   { id: "cash", title: "Cash", note: "" },
   { id: "mobile", title: "Mobile wallets (customer sends money, you check it)", note: "Customers see your number, send the money, then type their number and the transaction ID. You check it in your wallet app and mark the order paid." },
   { id: "bank", title: "Bank", note: "" },
-  { id: "gateway", title: "Payment gateways (pay on a secure page)", note: "Gateways take payment automatically. SSLCommerz works today once your store ID and password are set in the server settings. The others are listed so you can see what is coming." },
+  { id: "gateway", title: "Payment gateways (pay on a secure page)", note: "Gateways take payment automatically. SSLCommerz works today: add your store ID and password below, and it takes bKash, Nagad, Rocket and cards on one secure page. The others are listed so you can see what is coming." },
 ];
 
 function Switch({ on, onChange, disabled, name }: { on: boolean; onChange: (v: boolean) => void; disabled?: boolean; name: string }) {
@@ -24,7 +25,8 @@ function Switch({ on, onChange, disabled, name }: { on: boolean; onChange: (v: b
   );
 }
 
-export function PaymentsEditor({ initial, sslReady }: { initial: PaymentsSettings; sslReady: boolean }) {
+export function PaymentsEditor({ initial, sslReady, ssl, products }: { initial: PaymentsSettings; sslReady: boolean; ssl: SslView; products: { id: string; name: string; image: string; preorder: boolean }[] }) {
+  const [find, setFind] = useState("");
   const [m, setM] = useState(initial.methods);
   const [adv, setAdv] = useState<AdvanceCfg>(initial.advance);
   const setA = (p: Partial<AdvanceCfg>) => { setMsg(null); setAdv((x) => ({ ...x, ...p })); };
@@ -41,7 +43,7 @@ export function PaymentsEditor({ initial, sslReady }: { initial: PaymentsSetting
           <div className="min-w-0">
             <p className="flex flex-wrap items-center gap-2 font-medium">{c.name}
               {listedOnly && <span className="rounded-pill bg-paper px-2 py-0.5 text-[11px] font-normal text-muted">Not connected yet</span>}
-              {c.id === "sslcommerz" && <span className={`rounded-pill px-2 py-0.5 text-[11px] font-normal ${sslReady ? "bg-emerald-500/10 text-emerald-700" : "bg-amber-500/10 text-amber-800"}`}>{sslReady ? "Keys found on the server" : "Keys missing on the server"}</span>}
+              {c.id === "sslcommerz" && <span className={`rounded-pill px-2 py-0.5 text-[11px] font-normal ${sslReady ? "bg-emerald-500/10 text-emerald-700" : "bg-amber-500/10 text-amber-800"}`}>{sslReady ? (ssl.live ? "Connected, live" : "Connected, sandbox") : "Keys needed"}</span>}
             </p>
             <p className="mt-0.5 text-xs text-muted">{c.blurb}</p>
           </div>
@@ -58,7 +60,7 @@ export function PaymentsEditor({ initial, sslReady }: { initial: PaymentsSetting
           <div><label className={label}>Bank details customers see (bank, account name, account number, branch)</label><textarea className={input} rows={4} maxLength={400} placeholder={"Bank: \nAccount name: \nAccount number: \nBranch: "} value={cfg.account} onChange={(e) => set(c.id, { account: e.target.value })} /></div>
         )}
         {c.manual && <div><label className={label}>Extra words for the customer (optional)<InfoTip text="A short instruction shown at checkout, like Use Send Money, not Payment. It prevents wrong payments." /></label><input className={input} maxLength={200} placeholder={c.group === "mobile" ? "Use Send Money, not Payment." : "Use your order number as the reference."} value={cfg.instructions} onChange={(e) => set(c.id, { instructions: e.target.value })} /></div>}
-        {c.id === "sslcommerz" && !sslReady && <p className="text-xs text-muted">Customers will not see SSLCommerz until SSLCOMMERZ_STORE_ID and SSLCOMMERZ_STORE_PASSWORD are set where the site is hosted. Those stay on the server on purpose, so they are never stored in these settings.</p>}
+        {c.id === "sslcommerz" && <SslKeys ssl={ssl} />}
       </div>
     );
   }
@@ -75,15 +77,33 @@ export function PaymentsEditor({ initial, sslReady }: { initial: PaymentsSetting
       <section className="grid gap-3">
         <div><h2 className="font-display text-base font-semibold">Money before delivery<InfoTip text="For cash on delivery orders. The customer sends the advance by a mobile wallet or bank, then enters the transaction ID. You check it on the order page." /></h2><p className="mt-1 text-xs text-muted">Needs at least one wallet or bank turned on below. The delivery charges are set on the <Link href="/admin/shipping" className="underline">Shipping</Link> page. Landing page order forms stay plain cash on delivery.</p></div>
         <div className="grid gap-3 rounded-xl border border-line bg-surface p-4">
-          {rule("Delivery charge first", "The customer pays the delivery charge now, and the rest to the rider.", adv.deliveryFirst, (v) => setA({ deliveryFirst: v }))}
-          {rule("Partial payment", "The customer can pay a percentage of the products plus the delivery charge now.", adv.partialEnabled, (v) => setA({ partialEnabled: v }))}
+          {rule("Delivery charge first", "The customer pays only the delivery charge now, and the rest to the rider.", adv.deliveryFirst, (v) => setA({ deliveryFirst: v }))}
+          {rule("Offer partial payment", "A tick box at checkout. If the customer ticks it, they also pay this percentage of the products now. It is their choice.", adv.partialEnabled, (v) => setA({ partialEnabled: v }))}
           {adv.partialEnabled && (
             <div className="grid gap-3 border-t border-line pt-3">
               <div><label className={label} htmlFor="advance-percent">Percentage paid first</label><input id="advance-percent" className={`${input} max-w-32`} type="number" min={5} max={95} value={adv.percent} onChange={(e) => setA({ percent: Number(e.target.value) })} /></div>
-              {rule("Make partial payment required", "Off: the customer chooses. On: every cash on delivery order must pay this percentage first.", adv.partialRequired, (v) => setA({ partialRequired: v }))}
             </div>
           )}
-          {rule("Partial payment for pre-orders", "Orders with a pre-order item must pay the percentage first, even when the other rules are off.", adv.preorderPartial, (v) => setA({ preorderPartial: v }))}
+          {rule("Required for all pre-orders", "An order with a pre-order item must pay the delivery charge and the percentage together.", adv.preorderPartial, (v) => setA({ preorderPartial: v }))}
+          <div className="grid gap-2 rounded-xl border border-line p-3">
+            <div>
+              <p className="text-sm font-medium">Products that must pay the percentage first</p>
+              <p className="text-xs text-muted">An order with any product you tick must pay the delivery charge and the percentage together. All other products keep it optional. {adv.requiredProducts.length} selected.</p>
+            </div>
+            <input value={find} onChange={(e) => setFind(e.target.value)} placeholder="Search products" aria-label="Search products" className={input} />
+            <ul className="grid max-h-64 gap-1 overflow-y-auto pr-1">
+              {[...products].sort((a, b) => Number(adv.requiredProducts.includes(b.id)) - Number(adv.requiredProducts.includes(a.id))).filter((p) => p.name.toLowerCase().includes(find.trim().toLowerCase())).map((p) => (
+                <li key={p.id}>
+                  <label className="flex cursor-pointer items-center gap-3 rounded-lg p-1.5 text-sm hover:bg-paper">
+                    <input type="checkbox" checked={adv.requiredProducts.includes(p.id)} onChange={(e) => setA({ requiredProducts: e.target.checked ? [...adv.requiredProducts, p.id] : adv.requiredProducts.filter((x) => x !== p.id) })} />
+                    {p.image ? <img src={p.image} alt="" className="h-8 w-8 shrink-0 rounded object-contain" /> : <span className="h-8 w-8 shrink-0 rounded bg-paper" />}
+                    <span className="min-w-0 flex-1 truncate">{p.name}</span>
+                    {p.preorder && <span className="shrink-0 text-[11px] text-muted">Pre-order</span>}
+                  </label>
+                </li>
+              ))}
+            </ul>
+          </div>
         </div>
       </section>
       {GROUPS.map((g) => (

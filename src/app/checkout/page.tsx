@@ -44,5 +44,5 @@ export default async function Checkout() {
     }
   }
 
-  return <CheckoutForm zones={zones} bump={bump} prefill={prefill} methods={availableMethods(settings.payments, { sslReady: sslConfigured() })} />;
+  return <CheckoutForm zones={zones} bump={bump} prefill={prefill} methods={availableMethods(settings.payments, { sslReady: await sslConfigured() })} />;
 }

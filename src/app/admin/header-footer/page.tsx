@@ -14,7 +14,7 @@ export default async function HeaderFooter() {
       <h1 className="font-display text-2xl font-semibold">Header and footer</h1>
       <p className="mt-1 max-w-2xl text-sm text-muted">Click a design to use it. The preview below shows your own store name, menu and contact details. Change the menu links under Site and menu.</p>
       <div className="mt-6">
-        <LayoutStylePicker header={s.headerStyle} footer={s.footerStyle} brand={s.brand} links={s.header.links} footerData={s.footer} contact={s.contact} categories={categories} payments={availableMethods(s.payments, { sslReady: sslConfigured() }).map((m) => m.name)} />
+        <LayoutStylePicker header={s.headerStyle} footer={s.footerStyle} brand={s.brand} links={s.header.links} footerData={s.footer} contact={s.contact} categories={categories} payments={availableMethods(s.payments, { sslReady: await sslConfigured() }).map((m) => m.name)} />
       </div>
     </>
   );

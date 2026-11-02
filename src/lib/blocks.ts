@@ -89,6 +89,9 @@ export type BlockType = Block["type"];
 
 const GRID_FIRST = new Set<string>(["hero", "herofull", "showcase", "showcasefull", "rail3d", "rail3dfull", "slider", "sliderfull", "pagehead", "spotlight", "cta"]);
 export const showsGrid = (b: Pick<Block, "type" | "gridLines">) => b.gridLines ?? GRID_FIRST.has(b.type);
+/** Sections that are a card on the page draw the grid inside the card. Boxed sections keep it to the page's width. */
+export const GRID_IN_CARD = new Set<string>(["spotlight", "cta"]);
+export const GRID_BOXED = new Set<string>(["hero", "showcase", "rail3d", "slider"]);
 
 export const BLOCK_LABELS: Record<BlockType, string> = {
   hero: "Hero banner", herofull: "Hero banner, full width", sliderfull: "Image slider, full width", rail3dfull: "3D product slider, full width", bannerfull: "Banner, full width", split: "Picture and text side by side", trust: "Trust badges (delivery, returns, support)", html: "Custom HTML code", showcase: "Product showcase hero", showcasefull: "Product showcase hero, full width", rail3d: "3D product slider", slider: "Image slider", spotlight: "Product spotlight", pagehead: "Page title",

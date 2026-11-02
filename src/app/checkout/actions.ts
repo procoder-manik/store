@@ -12,7 +12,7 @@ import { sslConfigured, startPayment } from "@/lib/sslcommerz";
 import { clientIp, rateLimit } from "@/lib/ratelimit";
 import { creditBalance, referrerFromCode, usableCredit } from "@/lib/credit";
 import { getPublicSettings } from "@/lib/settings";
-import { advanceAmount, advancePlans, availableMethods, type AdvancePlan } from "@/lib/payments";
+import { advanceAmount, advancePlans, availableMethods, mustPayPartial, type AdvancePlan } from "@/lib/payments";
 
 /** How much store credit this signed-in person may spend on an order of this size. */
 async function creditFor(wanted: boolean, totalBeforeCredit: number) {
@@ -35,7 +35,9 @@ export async function quoteOrder(input: unknown): Promise<Priced> {
     const priced = await priceCart(p.data.items, p.data.zoneId, p.data.coupon, p.data.bump);
     if (!priced.ok) return priced;
     const { credit, balance } = await creditFor(p.data.useCredit ?? false, priced.total);
-    return { ...priced, total: priced.total - credit, creditUsed: credit, creditBalance: balance };
+    const { payments } = await getPublicSettings();
+    const mustPartial = mustPayPartial(payments.advance, { hasPreorder: priced.hasPreorder, productIds: priced.lines.map((l) => l.productId) });
+    return { ...priced, mustPartial, total: priced.total - credit, creditUsed: credit, creditBalance: balance };
   } catch {
     return { ok: false, error: "Checkout is not available right now." };
   }
@@ -77,7 +79,7 @@ export async function placeOrder(input: unknown): Promise<Placed> {
 
   // The customer's choice is checked against what the store really offers. Nothing from the browser is trusted.
   const settings = await getPublicSettings();
-  const open = availableMethods(settings.payments, { sslReady: sslConfigured() });
+  const open = availableMethods(settings.payments, { sslReady: await sslConfigured() });
   const method = open.find((m) => m.id === d.paymentMethod);
   if (!method) return { ok: false, error: "That payment method is not available right now. Please choose another one." };
   const online = method.id === "sslcommerz";
@@ -97,17 +99,21 @@ export async function placeOrder(input: unknown): Promise<Placed> {
     const referrerId = d.ref ? await referrerFromCode(d.ref) : null;
 
     // The advance is worked out here from the store's rules. The amount from the browser is never used.
-    const wallets = open.filter((m) => m.manual);
+    const ways = open.filter((m) => m.manual || m.id === "sslcommerz");
     let plan: AdvancePlan = "none";
     let advance = 0;
+    let advanceOnline = false;
     let payVia = method.manual ? method : undefined;
     if (method.id === "cod") {
-      const plans = advancePlans(settings.payments.advance, priced.hasPreorder, wallets.length > 0);
+      const must = mustPayPartial(settings.payments.advance, { hasPreorder: priced.hasPreorder, productIds: priced.lines.map((l) => l.productId) });
+      const plans = advancePlans(settings.payments.advance, must, ways.length > 0);
       plan = d.plan && plans.includes(d.plan as AdvancePlan) ? (d.plan as AdvancePlan) : plans[0];
       advance = advanceAmount(plan, settings.payments.advance, { total, shipping: priced.shipping });
       if (advance > 0) {
-        payVia = wallets.find((w) => w.id === d.advanceMethod);
-        if (!payVia) return { ok: false, error: "Choose how you will send the advance." };
+        const way = ways.find((w) => w.id === d.advanceMethod);
+        if (!way) return { ok: false, error: "Choose how you will send the advance." };
+        advanceOnline = way.id === "sslcommerz";
+        payVia = advanceOnline ? undefined : way;
       }
     }
 
@@ -162,7 +168,7 @@ export async function placeOrder(input: unknown): Promise<Placed> {
         zone: priced.zoneName,
         ip,
         // The payment details are also kept in the note, so they are never lost even if the order columns are missing.
-        note: [d.note, payVia ? `${advance > 0 ? `Advance ${advance}` : "Full"} by ${payVia.name}: TrxID ${trxId}${payer ? `, sent from ${payer}` : ""}` : ""].filter(Boolean).join(" | ").slice(0, 400),
+        note: [d.note, advanceOnline ? `Advance ${advance} by SSLCommerz` : payVia ? `${advance > 0 ? `Advance ${advance}` : "Full"} by ${payVia.name}: TrxID ${trxId}${payer ? `, sent from ${payer}` : ""}` : ""].filter(Boolean).join(" | ").slice(0, 400),
       },
       items: priced.lines.map((l) => ({ product_id: l.productId, variant_id: l.variantId ?? "", name: l.name, unit_price: l.unitPrice, qty: l.qty })),
     });
@@ -173,10 +179,10 @@ export async function placeOrder(input: unknown): Promise<Placed> {
       return { ok: false, error: "Something went wrong placing your order. Please try again." };
     }
     const created = data as { id: string; order_no: number };
-    if (payVia || priced.hasPreorder) {
+    if (payVia || advanceOnline || priced.hasPreorder) {
       const { error: extraErr } = await db.from("orders").update({
         ...(payVia ? { payment_trx_id: trxId, payment_sender: payer } : {}),
-        ...(advance > 0 ? { advance_amount: advance, advance_status: "pending", advance_method: payVia?.id } : {}),
+        ...(advance > 0 ? { advance_amount: advance, advance_status: "pending", advance_method: advanceOnline ? "sslcommerz" : payVia?.id } : {}),
         is_preorder: priced.hasPreorder,
       }).eq("id", created.id);
       if (extraErr) console.error("[order] could not save the payment details on the order.", extraErr.message);
@@ -185,7 +191,7 @@ export async function placeOrder(input: unknown): Promise<Placed> {
       await db.from("abandoned_carts").update({ recovered: true }).eq("recovered", false).eq("phone", phone);
       if (d.email) await db.from("abandoned_carts").update({ recovered: true }).eq("recovered", false).eq("email", d.email.toLowerCase());
     } catch { /* best effort */ }
-    if (online) {
+    if (online || advanceOnline) {
       const pay = await startPayment(created.id);
       return pay.ok ? { ok: true, id: created.id, payUrl: pay.url } : { ok: true, id: created.id };
     }

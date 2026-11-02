@@ -3,6 +3,8 @@
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { requireAdmin } from "@/lib/admin";
+import { removeSsl, saveSsl } from "@/lib/gateway-config";
+import { testSsl } from "@/lib/sslcommerz";
 import { normalizePhone } from "@/lib/utils";
 import { CATALOG, type MethodId, type PaymentsSettings } from "@/lib/payments";
 
@@ -13,7 +15,8 @@ const method = z.object({
   instructions: z.string().trim().max(200),
 });
 const advance = z.object({
-  deliveryFirst: z.boolean(), partialEnabled: z.boolean(), partialRequired: z.boolean(), preorderPartial: z.boolean(),
+  deliveryFirst: z.boolean(), partialEnabled: z.boolean(), preorderPartial: z.boolean(),
+  requiredProducts: z.array(z.string().uuid()).max(1000),
   percent: z.number().int().min(5, "The advance percentage must be between 5 and 95.").max(95, "The advance percentage must be between 5 and 95."),
 });
 const schema = z.object({ methods: z.record(z.string(), method), advance });
@@ -46,4 +49,35 @@ export async function savePayments(input: unknown): Promise<{ ok: boolean; error
   if (error) return { ok: false, error: error.message };
   revalidatePath("/", "layout");
   return { ok: true };
+}
+
+const sslSchema = z.object({
+  storeId: z.string().trim().min(3, "Enter the Store ID.").max(80).regex(/^\S+$/, "The Store ID has a space in it."),
+  password: z.string().trim().max(200).regex(/^\S*$/, "The password has a space in it."),
+  live: z.boolean(),
+});
+
+export async function saveSslKeys(input: unknown): Promise<{ ok: boolean; error?: string }> {
+  const p = sslSchema.safeParse(input);
+  if (!p.success) return { ok: false, error: p.error.issues[0].message };
+  try {
+    await requireAdmin("payments.ssl-keys");
+    await saveSsl(p.data);
+  } catch (e) { return { ok: false, error: (e as Error).message }; }
+  revalidatePath("/", "layout");
+  return { ok: true };
+}
+
+export async function removeSslKeys(): Promise<{ ok: boolean; error?: string }> {
+  try {
+    await requireAdmin("payments.ssl-remove");
+    await removeSsl();
+  } catch (e) { return { ok: false, error: (e as Error).message }; }
+  revalidatePath("/", "layout");
+  return { ok: true };
+}
+
+export async function testSslKeys(): Promise<{ ok: boolean; live?: boolean; error?: string }> {
+  try { await requireAdmin("payments.ssl-test"); } catch (e) { return { ok: false, error: (e as Error).message }; }
+  return testSsl();
 }

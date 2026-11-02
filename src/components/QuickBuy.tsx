@@ -27,7 +27,7 @@ export function QuickBuy({ product, zones, onClose }: { product: Product; zones:
   const [size, setSize] = useState(product.sizes[1] ?? product.sizes[0] ?? "");
   const [qty, setQty] = useState(1);
   const [zoneId, setZoneId] = useState(zones[0]?.id ?? "");
-  const [quote, setQuote] = useState<{ subtotal: number; shipping: number; discount: number; total: number; hasPreorder: boolean; couponError?: string } | null>(null);
+  const [quote, setQuote] = useState<{ subtotal: number; shipping: number; discount: number; total: number; hasPreorder: boolean; mustPartial?: boolean; couponError?: string } | null>(null);
   const [couponInput, setCouponInput] = useState("");
   const [coupon, setCoupon] = useState("");
   const [error, setError] = useState("");
@@ -50,7 +50,7 @@ export function QuickBuy({ product, zones, onClose }: { product: Product; zones:
     let live = true;
     quoteOrder({ items: [{ productId: product.id, variantId: variant.id, qty }], zoneId, coupon }).then((r) => {
       if (!live) return;
-      if (r.ok) { setQuote({ subtotal: r.subtotal, shipping: r.shipping, discount: r.discount, total: r.total, hasPreorder: r.hasPreorder, couponError: r.couponError }); setError(""); }
+      if (r.ok) { setQuote({ subtotal: r.subtotal, shipping: r.shipping, discount: r.discount, total: r.total, hasPreorder: r.hasPreorder, mustPartial: r.mustPartial, couponError: r.couponError }); setError(""); }
       else setError(r.error);
     });
     return () => { live = false; };
@@ -148,7 +148,7 @@ export function QuickBuy({ product, zones, onClose }: { product: Product; zones:
           <input name="email" type="email" placeholder="Email (optional, for your invoice)" autoComplete="email" className={field} />
           <input name="qz_hp" tabIndex={-1} autoComplete="off" aria-hidden data-lpignore="true" data-1p-ignore="true" data-bwignore="true" data-form-type="other" style={{ position: "absolute", left: "-9999px", width: 1, height: 1, opacity: 0 }} />
           <p className="mt-1 text-sm font-medium">Payment</p>
-          <PaymentPicker methods={methods} value={method} onChange={setMethod} amount={quote?.total} shipping={quote?.shipping} hasPreorder={quote?.hasPreorder ?? product.preorder} />
+          <PaymentPicker methods={methods} value={method} onChange={setMethod} amount={quote?.total} shipping={quote?.shipping} hasPreorder={quote?.hasPreorder ?? product.preorder} mustPartial={quote?.mustPartial} />
 
           <div>
             <div className="flex gap-2">

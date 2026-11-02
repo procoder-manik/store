@@ -53,14 +53,14 @@ export function Footer({ categories, brand, footer, contact, cfg = DEFAULT_FOOTE
   );
   // The brand name, as large as the footer allows, sinking softly into the page. It sizes itself to the name, whatever the name is.
   const mark = (
-    <div aria-hidden className="select-none overflow-hidden px-3 pt-6">
+    <div aria-hidden className="select-none overflow-hidden px-3 pb-5 pt-3">
       <p style={{ fontSize: `min(13rem, calc(92vw / ${Math.max(brand.name.length, 4) * 0.56}))` }} className="footer-mark text-center font-display">{brand.name}</p>
     </div>
   );
   const bottom = (
     <>
+      <p className={`grid gap-1 px-5 pt-6 text-center text-xs ${dark ? "text-paper/60" : "text-muted"}`}><span className="font-medium tracking-[-0.01em]">{brand.tagline}</span><span>{copy}</span></p>
       {mark}
-      <p className={`grid gap-1 px-5 pb-6 pt-3 text-center text-xs ${dark ? "text-paper/60" : "text-muted"}`}><span className="font-medium tracking-[-0.01em]">{brand.tagline}</span><span>{copy}</span></p>
     </>
   );
 
@@ -152,7 +152,6 @@ export function Footer({ categories, brand, footer, contact, cfg = DEFAULT_FOOTE
       </div>
       {pay && <div className="mx-auto max-w-6xl px-5 pb-8">{pay}</div>}
       {bottom}
-      <p aria-hidden className="select-none overflow-hidden whitespace-nowrap text-center font-display text-[clamp(3.5rem,15vw,15rem)] font-normal leading-[0.9] text-ink/[0.07]">{brand.name}</p>
     </footer>
   );
 }

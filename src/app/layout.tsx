@@ -55,7 +55,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   const preorderLink = products.some((p) => p.preorder) ? [{ label: "Pre-order", href: "/pre-order" }] : [];
   const autoLinks = [...categoryLinks, ...preorderLink];
   const menuLinks = [...autoLinks, ...s.header.links.filter((l) => !autoLinks.some((c) => c.href === l.href))];
-  const methods = availableMethods(s.payments, { sslReady: sslConfigured() });
+  const methods = availableMethods(s.payments, { sslReady: await sslConfigured() });
   const theme = themeOf(s.appearance.theme);
   // Only the store's own theme and the one the admin panel uses go into the page, unless visitors may switch.
   const dressed = (t: typeof theme) => withColors(t, s.appearance.colors[t.id]);

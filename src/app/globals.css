@@ -356,20 +356,33 @@ body:has(.login-stage) .footer-gap { display: none; }
 /* An input that sits inside its own capsule or on a line has no box, no ring and no fill of its own, active or not. */
 .bare-input, .bare-input:hover, .bare-input:focus, .bare-input:focus-visible { outline: 0 !important; border: 0 !important; border-radius: 0 !important; background: transparent !important; box-shadow: none !important; }
 
-/* The large brand name at the foot of every page: it fades down into the page, and a slow band of gold passes through it. */
+/* The large brand name at the foot of every page: its colours keep drifting, and it fades softly toward the bottom. */
 .footer-mark {
   --mark: var(--ink);
   font-weight: 600;
-  line-height: 0.92;
+  line-height: 0.98;
   letter-spacing: -0.045em;
   white-space: nowrap;
   color: transparent;
-  background-image: linear-gradient(105deg, transparent 40%, color-mix(in srgb, var(--gold) 85%, transparent) 50%, transparent 60%), linear-gradient(180deg, color-mix(in srgb, var(--mark) 88%, transparent) 15%, color-mix(in srgb, var(--mark) 14%, transparent) 100%);
-  background-size: 300% 100%, 100% 100%;
-  background-repeat: no-repeat;
+  background-image: linear-gradient(100deg, var(--mark) 0%, var(--accent) 25%, var(--gold) 50%, var(--accent) 75%, var(--mark) 100%);
+  background-size: 300% 100%;
   -webkit-background-clip: text;
   background-clip: text;
-  animation: markLight 11s ease-in-out infinite;
+  -webkit-mask-image: linear-gradient(180deg, #000 40%, rgb(0 0 0 / 0.28) 100%);
+  mask-image: linear-gradient(180deg, #000 40%, rgb(0 0 0 / 0.28) 100%);
+  animation: markDrift 14s ease-in-out infinite alternate;
 }
 footer.bg-ink .footer-mark { --mark: var(--paper); }
-@keyframes markLight { 0% { background-position: 130% 0, 0 0; } 45%, 100% { background-position: -60% 0, 0 0; } }
+@keyframes markDrift { from { background-position: 0% 0; } to { background-position: 100% 0; } }
+
+/* Boxed sections keep the grid within the width of their box. */
+.section-grid--box { left: 50%; right: auto; width: min(100%, 80rem); translate: -50% 0; }
+/* Inside a card, the grid fills the card and stops at its edge. */
+.section-grid--in { -webkit-mask-image: none; mask-image: none; }
+
+/* The admin panel: softer corners, the system font and quiet shadows. */
+[data-admin-shell] { font-family: var(--ff-body); -webkit-font-smoothing: antialiased; }
+[data-admin-shell] .bg-surface.border-line, [data-admin-shell] .border-line.bg-surface { box-shadow: 0 1px 2px rgb(0 0 0 / 0.03), 0 10px 26px -20px rgb(0 0 0 / 0.22); }
+[data-admin-shell] :is(a, button).bg-accent { transition: opacity 0.2s, scale 0.25s; }
+[data-admin-shell] :is(a, button).bg-accent:hover { opacity: 0.9; }
+[data-admin-shell] :is(a, button).bg-accent:active { scale: 0.97; }

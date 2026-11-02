@@ -57,23 +57,27 @@ export type MethodCfg = {
 export type AdvanceCfg = {
   /** The customer pays the delivery charge first, and the rest to the rider. */
   deliveryFirst: boolean;
-  /** The customer can pay a percentage of the products plus the delivery charge first. */
+  /** The customer may tick a box to also pay a percentage of the products first. */
   partialEnabled: boolean;
-  /** The percentage plan is the only way to use cash on delivery. */
-  partialRequired: boolean;
   percent: number;
-  /** Orders with a pre-order item always use the percentage plan. */
+  /** Orders with a pre-order item must pay the percentage first. */
   preorderPartial: boolean;
+  /** Orders with any of these products must pay the percentage first. */
+  requiredProducts: string[];
 };
-export const DEFAULT_ADVANCE: AdvanceCfg = { deliveryFirst: true, partialEnabled: true, partialRequired: false, percent: 50, preorderPartial: true };
+export const DEFAULT_ADVANCE: AdvanceCfg = { deliveryFirst: true, partialEnabled: true, percent: 50, preorderPartial: true, requiredProducts: [] };
 
 export type AdvancePlan = "none" | "delivery" | "partial";
 
-/** The choices a customer has under cash on delivery. The first one is selected by default. Without a wallet to pay into, no advance can be asked for. */
-export function advancePlans(c: AdvanceCfg, hasPreorder: boolean, hasWallet: boolean): AdvancePlan[] {
-  if (!hasWallet) return ["none"];
-  if (hasPreorder && c.preorderPartial) return ["partial"];
-  if (c.partialEnabled && c.partialRequired) return ["partial"];
+/** True when this order cannot skip the percentage: a pre-order, or a product the owner has marked. */
+export function mustPayPartial(c: AdvanceCfg, o: { hasPreorder: boolean; productIds: string[] }) {
+  return (o.hasPreorder && c.preorderPartial) || o.productIds.some((id) => c.requiredProducts.includes(id));
+}
+
+/** The choices under cash on delivery. The first is the default; the partial choice is opt-in, unless the order must pay it. Without a way to pay first, no advance can be asked for. */
+export function advancePlans(c: AdvanceCfg, mustPartial: boolean, canPayFirst: boolean): AdvancePlan[] {
+  if (!canPayFirst) return ["none"];
+  if (mustPartial) return ["partial"];
   const base: AdvancePlan = c.deliveryFirst ? "delivery" : "none";
   return c.partialEnabled ? [base, "partial"] : [base];
 }

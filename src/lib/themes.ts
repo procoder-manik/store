@@ -146,4 +146,5 @@ export function themeCss(list: Theme[]) {
 }
 
 /** The admin panel keeps the original Padma, even when the owner recolours Padma for the shop. */
-export const adminThemeCss = () => themeCss([THEMES[0]]).split('[data-theme="padma"]').join('[data-admin-shell][data-theme="padma"]');
+export const adminThemeCss = () => themeCss([THEMES[0]]).split('[data-theme="padma"]').join('[data-admin-shell][data-theme="padma"]')
+  + '[data-admin-shell][data-theme="padma"]{--ff-display:var(--font-apple),var(--font-bn),sans-serif;--ff-body:var(--font-apple),var(--font-bn),sans-serif;--r-xl:12px;--r-2xl:16px;--r-3xl:20px;--r-card:16px;--r-pill:9999px;}';

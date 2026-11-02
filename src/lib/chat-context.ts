@@ -145,11 +145,11 @@ export async function buildChatContext(question: string, path = ""): Promise<Cha
     : "The fee is shown at checkout.";
 
   const adv = settings.payments.advance;
-  const methods = availableMethods(settings.payments, { sslReady: sslConfigured() });
+  const methods = availableMethods(settings.payments, { sslReady: await sslConfigured() });
   const pay = methods.map((m) => (m.manual && m.id !== "bank" ? `${m.name} (send to ${m.account})` : m.name)).join(", ");
   const advance = [
     adv.deliveryFirst && "With cash on delivery the delivery charge is paid in advance and the rest to the rider.",
-    adv.partialEnabled && `Customers can also pay ${adv.percent}% of the products plus delivery first${adv.partialRequired ? " (this is required for cash on delivery)" : ""}.`,
+    adv.partialEnabled && `Customers can choose to also pay ${adv.percent}% of the products in advance. It is optional, except on some products.`,
     adv.preorderPartial && `Pre-orders need ${adv.percent}% of the products plus delivery in advance.`,
   ].filter(Boolean).join(" ");
 

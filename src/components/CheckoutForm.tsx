@@ -17,7 +17,7 @@ import type { PublicMethod } from "@/lib/payments";
 export type Zone = { id: string; name: string; fee: number; freeOver: number | null };
 export type BumpInfo = { headline: string; text: string; name: string; price: number; normalPrice: number };
 export type Prefill = { name: string; phone: string; email: string; district: string; address: string };
-type Quote = { hasPreorder?: boolean; subtotal: number; shipping: number; discount: number; bundleDiscount: number; total: number; couponError?: string; creditUsed?: number; creditBalance?: number };
+type Quote = { hasPreorder?: boolean; mustPartial?: boolean; subtotal: number; shipping: number; discount: number; bundleDiscount: number; total: number; couponError?: string; creditUsed?: number; creditBalance?: number };
 
 const input = "w-full rounded-xl border border-line bg-surface px-3 py-2.5 text-sm";
 const label = "mb-1 block text-xs font-medium text-muted";
@@ -51,7 +51,7 @@ export function CheckoutForm({ zones, bump = null, prefill = null, methods = [] 
       if (!live) return;
       if (!r.ok) { setQuote(null); setError(r.error); return; }
       setError("");
-      setQuote({ hasPreorder: r.hasPreorder, subtotal: r.subtotal, shipping: r.shipping, discount: r.discount, bundleDiscount: r.bundleDiscount, total: r.total, couponError: r.couponError, creditUsed: r.creditUsed, creditBalance: r.creditBalance });
+      setQuote({ hasPreorder: r.hasPreorder, mustPartial: r.mustPartial, subtotal: r.subtotal, shipping: r.shipping, discount: r.discount, bundleDiscount: r.bundleDiscount, total: r.total, couponError: r.couponError, creditUsed: r.creditUsed, creditBalance: r.creditBalance });
     });
     return () => { live = false; };
   }, [mounted, cartKey, zoneId, coupon, items.length, bumpOn, useCredit]);
@@ -129,7 +129,7 @@ export function CheckoutForm({ zones, bump = null, prefill = null, methods = [] 
           )}
 
           <h2 className="mt-2 font-display text-lg font-semibold">Payment</h2>
-          <PaymentPicker methods={methods} value={method} onChange={setMethod} amount={quote?.total} shipping={quote?.shipping} hasPreorder={quote?.hasPreorder} />
+          <PaymentPicker methods={methods} value={method} onChange={setMethod} amount={quote?.total} shipping={quote?.shipping} hasPreorder={quote?.hasPreorder} mustPartial={quote?.mustPartial} />
         </div>
 
         <aside className="h-fit rounded-xl border border-line bg-surface p-5 lg:sticky lg:top-20">

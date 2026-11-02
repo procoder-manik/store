@@ -3,7 +3,7 @@ import type { Product } from "@/lib/demo-products";
 import type { Cat } from "@/lib/catalog";
 import type { Banner } from "@/lib/banners";
 import type { Block } from "@/lib/blocks";
-import { showsGrid } from "@/lib/blocks";
+import { GRID_BOXED, GRID_IN_CARD, showsGrid } from "@/lib/blocks";
 import { formatPrice } from "@/lib/config";
 import { Clock, CreditCard, Gift, Headset, RefreshCcw, ShieldCheck, Star, Truck } from "lucide-react";
 import { HtmlBlock } from "./HtmlBlock";
@@ -45,7 +45,7 @@ export function BlockView({ b: raw, ctx }: { b: Block; ctx: BlockCtx }) {
   const titled = (asTitle && "heading" in raw ? { ...raw, heading: page.title, sub: page.description || ("sub" in raw ? raw.sub : "") } : raw) as Block;
   const crumb = raw.crumbs && page ? page.title : "";
   const view = <BlockBody b={titled} ctx={ctx} asTitle={asTitle} crumb={crumb} />;
-  const body = showsGrid(raw) ? <div className="relative">{view}<span aria-hidden className="section-grid" /></div> : view;
+  const body = showsGrid(raw) && !GRID_IN_CARD.has(raw.type) ? <div className="relative">{view}<span aria-hidden className={`section-grid ${GRID_BOXED.has(raw.type) ? "section-grid--box" : ""}`} /></div> : view;
   if (crumb && CRUMB_BAR.has(raw.type)) return <><div className="mx-auto max-w-7xl px-5 py-3 md:px-8"><Crumbs title={crumb} /></div>{body}</>;
   return body;
 }
@@ -153,7 +153,8 @@ function BlockBody({ b, ctx, asTitle, crumb }: { b: Block; ctx: BlockCtx; asTitl
       if (!p) return null;
       return (
         <section className={wrap}>
-          <div className="grid items-center gap-8 rounded-3xl border border-line bg-surface p-6 md:grid-cols-2 md:p-10">
+          <div className="relative grid items-center gap-8 overflow-hidden rounded-3xl border border-line bg-surface p-6 md:grid-cols-2 md:p-10">
+            {showsGrid(b) && <span aria-hidden className="section-grid section-grid--in" />}
             <div className="overflow-hidden rounded-2xl border border-line">{p.image ? <img src={p.image} alt={p.name} className="aspect-[4/5] w-full object-cover" /> : <ProductArt kind={p.kind} color={p.colors[0].hex} className="aspect-[4/5] w-full" />}</div>
             <div>
               {b.heading && <p className="text-sm font-medium text-accent">{b.heading}</p>}
@@ -317,6 +318,7 @@ function BlockBody({ b, ctx, asTitle, crumb }: { b: Block; ctx: BlockCtx; asTitl
       return (
         <section className={wrap}>
           <div className="relative isolate overflow-hidden rounded-3xl bg-ink px-6 py-12 text-center text-white md:px-14 md:py-16">
+            {showsGrid(b) && <span aria-hidden className="section-grid section-grid--in" />}
             <div aria-hidden className="animate-aurora-a absolute -left-16 -top-20 -z-10 h-72 w-72 rounded-full bg-accent opacity-60 blur-3xl" />
             <div aria-hidden className="animate-aurora-b absolute -bottom-24 -right-10 -z-10 h-80 w-80 rounded-full bg-accent opacity-40 blur-3xl" />
             <Heading as={b.level} className="font-display text-3xl font-semibold md:text-5xl">{b.heading}</Heading>
