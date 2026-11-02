@@ -1,7 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { mergeSettings } from "@/lib/settings";
 import { PALETTES } from "@/lib/palettes";
-import { THEMES } from "@/lib/themes";
+import { CARD_STYLES, THEMES, themeOf } from "@/lib/themes";
 import { InfoTip } from "@/components/admin/InfoTip";
 import { ImageField } from "@/components/admin/ImageField";
 import { saveAnnouncement, saveBump, saveAppearance, saveChat, saveContact, saveExtras, savePopup, saveProof, saveTracking } from "./actions";
@@ -30,19 +30,42 @@ export default async function Settings() {
             {THEMES.map((t) => (
               <label key={t.id} className="group relative cursor-pointer overflow-hidden rounded-xl border border-line has-[:checked]:border-ink has-[:checked]:ring-2 has-[:checked]:ring-ink/20">
                 <input type="radio" name="theme" value={t.id} defaultChecked={s.appearance.theme === t.id} className="sr-only" />
-                <span className="flex items-stretch">
+                <span className="flex h-full items-stretch">
                   <span style={{ background: t.light.paper, color: t.light.ink }} className="flex-1 p-4">
-                    <span style={{ fontFamily: `var(${t.display}), system-ui` }} className="block text-lg font-semibold">{t.name}</span>
-                    <span style={{ fontFamily: `var(${t.body}), system-ui`, opacity: 0.7 }} className="mt-1 block text-xs">{t.about}</span>
-                    <span className="mt-3 flex items-center gap-1.5"><span style={{ background: t.light.accent }} className="h-5 w-12 rounded" /><span style={{ background: t.light.surface, borderColor: t.light.ink + "22" }} className="h-5 w-5 rounded border" /></span>
+                    <span className="flex items-center justify-between gap-2">
+                      <span style={{ fontFamily: `var(${t.display}), system-ui`, fontWeight: t.type.weight }} className="block text-lg">{t.name}</span>
+                      <span style={{ borderColor: t.light.ink + "33" }} className="rounded-full border px-2 py-0.5 text-[10px]">{t.kind === "gradient" ? "Gradient" : "Solid"}</span>
+                    </span>
+                    <span style={{ fontFamily: `var(${t.body}), system-ui`, opacity: 0.72 }} className="mt-1 block text-xs">{t.about}</span>
+                    <span className="mt-3 flex items-center gap-1.5">
+                      <span style={{ background: t.fill ?? t.light.accent, color: t.light.accentInk, borderRadius: t.radius.button, fontFamily: `var(${t.body}), system-ui` }} className="px-3 py-1 text-[11px] font-semibold">Buy now</span>
+                      <span style={{ background: t.light.surface, borderColor: t.light.ink + "22", borderRadius: t.radius.card }} className="h-6 w-6 border" />
+                    </span>
                   </span>
-                  <span style={{ background: t.dark.paper, color: t.dark.ink }} className="grid w-16 content-center justify-items-center gap-2 p-2">
-                    <span style={{ background: t.dark.accent }} className="h-5 w-10 rounded" /><span className="text-[10px] opacity-70">Dark</span>
+                  <span style={{ background: t.dark.paper, color: t.dark.ink }} className="grid w-14 content-center justify-items-center gap-2 p-2">
+                    <span style={{ background: t.fill ?? t.dark.accent }} className="h-5 w-9 rounded" /><span className="text-[10px] opacity-70">Dark</span>
                   </span>
                 </span>
               </label>
             ))}
           </div>
+          <label className="flex items-start gap-2 text-sm"><input type="checkbox" name="applyLayout" className="mt-1" /> <span>Also use this theme&apos;s header and footer layout, and its favourite light or dark mode<span className="block text-xs text-muted">Tick this to change the whole look at once. You can still change the header and footer afterwards.</span></span></label>
+          <div>
+            <label className={label}>Product card style</label>
+            <div className="grid gap-2 sm:grid-cols-2">
+              <label className="cursor-pointer">
+                <input type="radio" name="card" value="theme" defaultChecked={!CARD_STYLES.some((c) => c.id === s.appearance.card)} className="peer sr-only" />
+                <span className="block h-full rounded-xl border border-line p-3 text-sm peer-checked:border-ink peer-checked:ring-2 peer-checked:ring-ink/20"><span className="block font-medium">Follow the theme</span><span className="mt-0.5 block text-xs text-muted">Right now: {CARD_STYLES.find((c) => c.id === themeOf(s.appearance.theme).card)?.name}.</span></span>
+              </label>
+              {CARD_STYLES.map((c) => (
+                <label key={c.id} className="cursor-pointer">
+                  <input type="radio" name="card" value={c.id} defaultChecked={s.appearance.card === c.id} className="peer sr-only" />
+                  <span className="block h-full rounded-xl border border-line p-3 text-sm peer-checked:border-ink peer-checked:ring-2 peer-checked:ring-ink/20"><span className="block font-medium">{c.name}</span><span className="mt-0.5 block text-xs text-muted">{c.about}</span></span>
+                </label>
+              ))}
+            </div>
+          </div>
+          <label className="flex items-center gap-2 text-sm"><input type="checkbox" name="shine" defaultChecked={s.appearance.shine} /> Filled buttons catch the light every few seconds, by themselves</label>
           <div className="grid gap-4 sm:grid-cols-2">
             
             <div>
@@ -153,9 +176,11 @@ export default async function Settings() {
         </form>
 
         <form action={saveExtras} className={`${card} grid gap-4`}>
-          <h2 className="font-display text-base font-semibold">Back to Top button and catalog<InfoTip text="Two small extras for visitors: a jump-to-top button and a price-free product catalog page." /></h2>
+          <h2 className="font-display text-base font-semibold">Quick buttons, Back to Top and catalog<InfoTip text="Small helpers for visitors: quick buttons on phones, a jump-to-top button and a price-free product catalog page." /></h2>
           <label className="flex items-center gap-2 text-sm"><input type="checkbox" name="backToTop" defaultChecked={s.extras.backToTop} /> Show a Back to Top button when visitors scroll down<InfoTip text="A small button that jumps back to the top of a long page. It helps on phones, where scrolling back up takes a while." /></label>
           <label className="grid gap-1 text-sm"><span className="text-xs font-medium text-muted">Back to Top button shows</span><select name="backToTopStyle" defaultValue={s.extras.backToTopText ? "text" : "icon"} className={input}><option value="icon">Only the arrow</option><option value="text">The arrow and the words Back to Top</option></select></label>
+          <label className="flex items-center gap-2 text-sm"><input type="checkbox" name="quickBar" defaultChecked={s.extras.quickBar} /> Phone quick bar at the bottom: Home, Menu, Cart, Search, Account</label>
+          <label className="flex items-center gap-2 text-sm"><input type="checkbox" name="cartChip" defaultChecked={s.extras.cartChip} /> Phone cart tab on the side of the screen, with items and total</label>
           <label className="flex items-center gap-2 text-sm"><input type="checkbox" name="catalog" defaultChecked={s.extras.catalog} /> Turn on the public Catalog page at /catalog<InfoTip text="A product book with pictures and names only, no prices. Useful when prices change often, when you send it to wholesale buyers, or when you want customers to message you for a price. Add /catalog to your menu under Site and menu." /></label>
           <button className={`${save} w-fit`}>Save</button>
         </form>

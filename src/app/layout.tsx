@@ -9,7 +9,8 @@ import { Tracking } from "@/components/Tracking";
 import { ConsentGate } from "@/components/ConsentGate";
 import { StoreOnly } from "@/components/StoreOnly";
 import { isPalette } from "@/lib/palettes";
-import { isTheme } from "@/lib/themes";
+import { isCardStyle, isTheme, themeCss, themeOf, THEMES } from "@/lib/themes";
+import { CartChip, MobileDock } from "@/components/MobileDock";
 import { PromoPopup } from "@/components/PromoPopup";
 import { SocialProof } from "@/components/SocialProof";
 import { CompareBar } from "@/components/CompareBar";
@@ -53,9 +54,13 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   const autoLinks = [...categoryLinks, ...preorderLink];
   const menuLinks = [...autoLinks, ...s.header.links.filter((l) => !autoLinks.some((c) => c.href === l.href))];
   const methods = availableMethods(s.payments, { sslReady: sslConfigured() });
+  const theme = themeOf(s.appearance.theme);
+  // Only the store's own theme and the one the admin panel uses go into the page, unless visitors may switch.
+  const css = themeCss(s.appearance.visitorPicker ? THEMES : theme.id === "padma" ? [theme] : [THEMES[0], theme]);
   return (
-    <html lang="en" suppressHydrationWarning data-theme={isTheme(s.appearance.theme) ? s.appearance.theme : "padma"} data-buttons={s.appearance.buttons ?? "round"} {...(isPalette(s.appearance.accent) ? { "data-palette": s.appearance.accent } : {})} className={fontClasses}>
+    <html lang="en" suppressHydrationWarning data-theme={isTheme(s.appearance.theme) ? s.appearance.theme : "padma"} data-buttons={s.appearance.buttons ?? "theme"} data-card={isCardStyle(s.appearance.card) ? s.appearance.card : theme.card} data-shine={s.appearance.shine ? "on" : "off"} {...(isPalette(s.appearance.accent) ? { "data-palette": s.appearance.accent } : {})} className={fontClasses}>
       <head>
+        <style dangerouslySetInnerHTML={{ __html: css }} />
         {s.appearance.visitorPicker && <script dangerouslySetInnerHTML={{ __html: "try{var t=localStorage.getItem('theme-pick');if(t&&/^[a-z]{3,12}$/.test(t)){var e=document.documentElement;e.setAttribute('data-theme',t);e.removeAttribute('data-palette')}}catch(e){}" }} />}
       </head>
       <body>
@@ -69,10 +74,12 @@ export default async function RootLayout({ children }: { children: React.ReactNo
             <Header brand={s.brand.name} logo={s.brand.logo} links={menuLinks} categories={categories} themePicker={s.appearance.visitorPicker} cfg={s.headerStyle} contact={{ phone: s.contact.phone, whatsapp: s.contact.whatsapp }} />
           </StoreOnly>
           {children}
-          <StoreOnly><div className="mt-16"><OfferSlider banners={inSlot("pre-footer")} size="band" /></div></StoreOnly>
+          <StoreOnly><div className="footer-gap mt-16"><OfferSlider banners={inSlot("pre-footer")} size="band" /></div></StoreOnly>
           <StoreOnly><BannerPopup banners={inSlot("popup")} /></StoreOnly>
           <StoreOnly><Footer categories={categories} brand={s.brand} footer={s.footer} contact={s.contact} cfg={s.footerStyle} payments={methods.map((m) => m.name)} /></StoreOnly>
           <CartDrawer />
+          {s.extras.quickBar && <StoreOnly><MobileDock links={menuLinks} /></StoreOnly>}
+          {s.extras.cartChip && <StoreOnly><CartChip /></StoreOnly>}
           <PromoPopup p={s.popup} />
           <CompareBar />
           {s.extras.backToTop && <StoreOnly><BackToTop withText={s.extras.backToTopText} /></StoreOnly>}

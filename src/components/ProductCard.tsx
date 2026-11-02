@@ -42,8 +42,8 @@ export function ProductCard({ p, zones }: { p: Product; zones?: Zone[] }) {
 
   const tint = p.colors[0]?.hex ?? "#d9dbe0";
   return (
-    <div className="group relative flex flex-col">
-      <div style={{ background: `color-mix(in srgb, ${tint} 17%, var(--surface))` }} className="relative overflow-hidden rounded-[14px] transition duration-500 md:group-hover:shadow-[0_22px_44px_-26px_rgba(15,31,28,0.55)]">
+    <div className="pcard group relative flex flex-col">
+      <div style={{ background: `color-mix(in srgb, ${tint} 17%, var(--surface))` }} className="pcard-media relative overflow-hidden transition duration-500 md:group-hover:shadow-[0_22px_44px_-26px_rgba(15,31,28,0.55)]">
         <Link href={`/product/${p.slug}`} className="block" aria-label={p.name}>
           {p.image ? (
             <img src={p.image} alt={p.name} loading="lazy" className="aspect-[4/5] w-full object-contain p-[10%] drop-shadow-[0_16px_18px_rgba(15,31,28,0.2)] transition duration-700 ease-out md:group-hover:-translate-y-1.5 md:group-hover:scale-[1.06]" />
@@ -57,14 +57,16 @@ export function ProductCard({ p, zones }: { p: Product; zones?: Zone[] }) {
         {p.offerEndsAt && !soldOut && <span className="absolute bottom-3 left-3"><OfferCountdown endsAt={p.offerEndsAt} compact /></span>}
         <button onClick={quickAdd} disabled={soldOut} aria-label={added ? `${p.name} added to cart` : `Add ${p.name} to cart`} className="absolute bottom-2.5 right-2.5 grid h-10 w-10 place-items-center rounded-full bg-surface text-ink shadow-md transition hover:bg-accent hover:text-accent-ink active:scale-95 disabled:opacity-40">{added ? <Check size={17} /> : <ShoppingBag size={17} strokeWidth={1.6} />}</button>
       </div>
-      <Link href={`/product/${p.slug}`} className="mt-3 block text-[14px] font-medium leading-snug md:text-[15px]">{p.name}</Link>
-      <div className="mt-1 flex flex-wrap items-baseline gap-x-2">
-        <p className={`text-[15px] tabular-nums ${off > 0 ? "text-[var(--madder)]" : ""}`}>{formatPrice(p.basePrice)}</p>
+      <div className="pcard-body">
+      <Link href={`/product/${p.slug}`} className="pcard-name mt-3 block text-[14px] font-medium leading-snug md:text-[15px]">{p.name}</Link>
+      <div className="pcard-price-row mt-1 flex flex-wrap items-baseline gap-x-2">
+        <p className={`pcard-price text-[15px] tabular-nums ${off > 0 ? "text-[var(--madder)]" : ""}`}>{formatPrice(p.basePrice)}</p>
         {off > 0 && <p className="text-[13px] tabular-nums text-muted line-through">{formatPrice(p.compareAt as number)}</p>}
       </div>
       {p.preorder && p.preorderDate && <p className="mt-1 text-xs text-muted">Expected {preorderDate(p.preorderDate)}</p>}
       <div className="mt-auto pt-3">
-        <button onClick={() => !soldOut && setQuick(true)} disabled={soldOut} className="h-10 w-full rounded-full border border-ink/25 text-[13px] font-medium transition hover:border-accent hover:bg-accent hover:text-accent-ink active:scale-[0.98] disabled:opacity-40">{p.preorder ? "Pre-order" : "Buy now"}</button>
+        <button onClick={() => !soldOut && setQuick(true)} disabled={soldOut} className="pcard-cta h-10 w-full rounded-pill border border-ink/25 text-[13px] font-medium transition hover:border-accent hover:bg-accent hover:text-accent-ink active:scale-[0.98] disabled:opacity-40">{p.preorder ? "Pre-order" : "Buy now"}</button>
+      </div>
       </div>
       <HeartButton id={p.id} className="absolute right-2.5 top-2.5" />
       {quick && <QuickBuy product={p} zones={areas} onClose={() => setQuick(false)} />}

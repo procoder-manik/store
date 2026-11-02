@@ -25,7 +25,7 @@ function Row({ h, id, active, onPick, onHover }: { h: Hit; id: string; active: b
   );
 }
 
-export function SearchOverlay({ bar = false }: { bar?: boolean }) {
+export function SearchOverlay({ bar = false, dock = false }: { bar?: boolean; dock?: boolean }) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [q, setQ] = useState("");
@@ -80,7 +80,9 @@ export function SearchOverlay({ bar = false }: { bar?: boolean }) {
 
   return (
     <>
-      {bar ? (
+      {dock ? (
+        <button type="button" onClick={() => setOpen(true)} className="dock-item"><Search size={21} /><span>Search</span></button>
+      ) : bar ? (
         <button type="button" aria-label="Search products" onClick={() => setOpen(true)} className="flex h-11 w-full items-center gap-2 border-b border-ink/25 bg-transparent px-1 text-left text-sm text-muted transition hover:border-ink"><Search size={16} /> Search products</button>
       ) : (
         <button aria-label="Search products" onClick={() => setOpen(true)} className="grid h-10 w-10 place-items-center rounded-full transition hover:bg-ink/10"><Search size={18} /></button>

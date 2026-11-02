@@ -2,10 +2,11 @@
 
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
+import { getPublicSettings } from "@/lib/settings";
 import { requireAdmin } from "@/lib/admin";
 import { isLogoUrl, normalizePhone } from "@/lib/utils";
 import { isPalette } from "@/lib/palettes";
-import { isTheme } from "@/lib/themes";
+import { isCardStyle, isTheme, themeOf } from "@/lib/themes";
 
 function parse<T extends z.ZodType>(schema: T, data: unknown): z.infer<T> {
   const r = schema.safeParse(data);
@@ -111,9 +112,18 @@ export async function saveAppearance(fd: FormData) {
   if (!isTheme(theme)) throw new Error("Choose one of the themes");
   if (accent && !isPalette(accent)) throw new Error("Choose one of the accent colors");
   if (!["light", "dark", "system"].includes(mode)) throw new Error("Choose a mode");
-  await save("appearance", { theme, accent, mode, buttons, visitorPicker: on(fd.get("visitorPicker")) });
+  const card = String(fd.get("card") ?? "theme");
+  if (card !== "theme" && !isCardStyle(card)) throw new Error("Choose a product card style");
+  // A theme can bring its whole layout along: header, footer and the light or dark it was designed for.
+  const look = on(fd.get("applyLayout")) ? themeOf(theme) : null;
+  if (look) {
+    const s = await getPublicSettings();
+    await save("header_style", { ...s.headerStyle, style: look.header });
+    await save("footer_style", { ...s.footerStyle, style: look.footer });
+  }
+  await save("appearance", { theme, accent, mode: look?.prefers ?? mode, buttons, card, shine: on(fd.get("shine")), visitorPicker: on(fd.get("visitorPicker")) });
 }
 
 export async function saveExtras(fd: FormData) {
-  await save("extras", { backToTop: on(fd.get("backToTop")), backToTopText: fd.get("backToTopStyle") === "text", catalog: on(fd.get("catalog")) });
+  await save("extras", { backToTop: on(fd.get("backToTop")), backToTopText: fd.get("backToTopStyle") === "text", catalog: on(fd.get("catalog")), quickBar: on(fd.get("quickBar")), cartChip: on(fd.get("cartChip")) });
 }

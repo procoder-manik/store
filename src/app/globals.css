@@ -46,24 +46,24 @@ body { @apply bg-paper font-body text-ink antialiased; }
 @media (max-width: 767px) { .panel-in { animation-name: popIn; } }
 
 /* Color sets. Light values first, then dark. Chosen in Admin, Settings, or by visitors when allowed. */
-[data-palette="tide"] { --accent: #1f6f78; --accent-ink: #ffffff; }
-[data-palette="indigo"] { --accent: #3d4fc4; --accent-ink: #ffffff; }
-[data-palette="forest"] { --accent: #2f6b3f; --accent-ink: #ffffff; }
-[data-palette="plum"] { --accent: #7b3f8c; --accent-ink: #ffffff; }
-[data-palette="ember"] { --accent: #c2410c; --accent-ink: #ffffff; }
-[data-palette="rose"] { --accent: #be3a5f; --accent-ink: #ffffff; }
-[data-palette="gold"] { --accent: #8a5d12; --accent-ink: #ffffff; }
-[data-palette="ocean"] { --accent: #0369a1; --accent-ink: #ffffff; }
-[data-palette="graphite"] { --accent: #1f2937; --accent-ink: #ffffff; }
-.dark[data-palette="tide"] { --accent: #4fb3bf; --accent-ink: #0f1114; }
-.dark[data-palette="indigo"] { --accent: #8b9bff; --accent-ink: #0f1114; }
-.dark[data-palette="forest"] { --accent: #6fbf86; --accent-ink: #0f1114; }
-.dark[data-palette="plum"] { --accent: #c89bd6; --accent-ink: #0f1114; }
-.dark[data-palette="ember"] { --accent: #fb8b5b; --accent-ink: #0f1114; }
-.dark[data-palette="rose"] { --accent: #f08aa6; --accent-ink: #0f1114; }
-.dark[data-palette="gold"] { --accent: #e3b25a; --accent-ink: #0f1114; }
-.dark[data-palette="ocean"] { --accent: #38bdf8; --accent-ink: #0f1114; }
-.dark[data-palette="graphite"] { --accent: #e5e7eb; --accent-ink: #0f1114; }
+html[data-palette="tide"] { --fill: none; --accent: #1f6f78; --accent-ink: #ffffff; }
+html[data-palette="indigo"] { --fill: none; --accent: #3d4fc4; --accent-ink: #ffffff; }
+html[data-palette="forest"] { --fill: none; --accent: #2f6b3f; --accent-ink: #ffffff; }
+html[data-palette="plum"] { --fill: none; --accent: #7b3f8c; --accent-ink: #ffffff; }
+html[data-palette="ember"] { --fill: none; --accent: #c2410c; --accent-ink: #ffffff; }
+html[data-palette="rose"] { --fill: none; --accent: #be3a5f; --accent-ink: #ffffff; }
+html[data-palette="gold"] { --fill: none; --accent: #8a5d12; --accent-ink: #ffffff; }
+html[data-palette="ocean"] { --fill: none; --accent: #0369a1; --accent-ink: #ffffff; }
+html[data-palette="graphite"] { --fill: none; --accent: #1f2937; --accent-ink: #ffffff; }
+html.dark[data-palette="tide"] { --accent: #4fb3bf; --accent-ink: #0f1114; }
+html.dark[data-palette="indigo"] { --accent: #8b9bff; --accent-ink: #0f1114; }
+html.dark[data-palette="forest"] { --accent: #6fbf86; --accent-ink: #0f1114; }
+html.dark[data-palette="plum"] { --accent: #c89bd6; --accent-ink: #0f1114; }
+html.dark[data-palette="ember"] { --accent: #fb8b5b; --accent-ink: #0f1114; }
+html.dark[data-palette="rose"] { --accent: #f08aa6; --accent-ink: #0f1114; }
+html.dark[data-palette="gold"] { --accent: #e3b25a; --accent-ink: #0f1114; }
+html.dark[data-palette="ocean"] { --accent: #38bdf8; --accent-ink: #0f1114; }
+html.dark[data-palette="graphite"] { --accent: #e5e7eb; --accent-ink: #0f1114; }
 
 /* One reveal per section as it enters the screen. The style comes from the section's animation setting. */
 .reveal { opacity: 0; transform: translateY(24px); transition: opacity 0.8s ease, transform 0.8s cubic-bezier(0.2, 0.8, 0.2, 1); }
@@ -115,9 +115,9 @@ body { @apply bg-paper font-body text-ink antialiased; }
 @media (prefers-reduced-motion: reduce) { .hero-float, .hero-fade { animation: none; } }
 
 /* Button shape chosen in Admin, Settings. "Follow the theme" leaves each theme's own corners. */
-[data-buttons="round"] { --r-pill: 9999px; }
-[data-buttons="soft"] { --r-pill: 0.75rem; }
-[data-buttons="square"] { --r-pill: 0; }
+html[data-buttons="round"] { --r-pill: 9999px; }
+html[data-buttons="soft"] { --r-pill: 0.75rem; }
+html[data-buttons="square"] { --r-pill: 0; }
 
 /* Scroll bars: slim and quiet everywhere. Tab rows and panels hide them completely with .no-scrollbar. */
 * { scrollbar-width: thin; scrollbar-color: color-mix(in srgb, var(--muted) 35%, transparent) transparent; }
@@ -166,18 +166,12 @@ body { @apply bg-paper font-body text-ink antialiased; }
 .float-lift { transition: translate 0.25s ease; }
 @media (max-width: 767px) { body:has(.buy-bar) .float-lift { translate: 0 -64px; } }
 
-/* Sonar Tori. Three looks only, all built on the same type and the same quiet corners. */
-:root { --ff-display: var(--font-bodoni), var(--font-bn), Georgia, serif; --ff-body: var(--font-hanken), var(--font-bn), system-ui, sans-serif; --r-xl: 0.125rem; --r-2xl: 0.125rem; --r-3xl: 0.125rem; --r-pill: 0.125rem; --gold: #a8843f; --madder: #8e2a2a; }
-[data-theme="padma"] { --paper: #f5f5f1; --surface: #ffffff; --ink: #0f1f1c; --muted: #5d6b66; --line: #dedfd8; --accent: #12332d; --accent-ink: #f5f5f1; }
-.dark[data-theme="padma"], .dark [data-theme="padma"] { --paper: #0b1513; --surface: #12201d; --ink: #ecebe3; --muted: #a2ada7; --line: #24332f; --accent: #c9a45c; --accent-ink: #0b1513; --gold: #c9a45c; --madder: #e29a8f; }
-[data-theme="sondha"] { --paper: #f6f3f0; --surface: #ffffff; --ink: #241014; --muted: #6f5c5f; --line: #e6dedc; --accent: #4e1119; --accent-ink: #f6f3f0; }
-.dark[data-theme="sondha"], .dark [data-theme="sondha"] { --paper: #150a0c; --surface: #1f1013; --ink: #f1e8e4; --muted: #b5a3a2; --line: #38201f; --accent: #d4a373; --accent-ink: #150a0c; --gold: #d4a373; --madder: #e29a8f; }
-[data-theme="kalo"] { --paper: #f4f4f2; --surface: #ffffff; --ink: #111111; --muted: #666662; --line: #deded9; --accent: #111111; --accent-ink: #ffffff; }
-.dark[data-theme="kalo"], .dark [data-theme="kalo"] { --paper: #0c0c0c; --surface: #161616; --ink: #f2f2ee; --muted: #a3a3a0; --line: #2a2a2a; --accent: #f2f2ee; --accent-ink: #0c0c0c; --gold: #c9a45c; --madder: #e29a8f; }
+/* The defaults under every theme. Each theme in src/lib/themes.ts sets its own colours, fonts, corners and heading weight. */
+:root { --ff-display: var(--font-bodoni), var(--font-bn), Georgia, serif; --ff-body: var(--font-hanken), var(--font-bn), system-ui, sans-serif; --r-xl: 0.125rem; --r-2xl: 0.125rem; --r-3xl: 0.125rem; --r-card: 0.875rem; --r-pill: 0.125rem; --gold: #a8843f; --madder: #8e2a2a; --fill: none; }
 
 /* Display type stays light and large. The admin panel keeps the plain sans for reading numbers and tables. */
-.font-display { font-weight: 500; letter-spacing: -0.012em; }
-section h2.font-display:not(.text-lg):not(.text-base) { font-size: clamp(2rem, 1.3rem + 3vw, 3.75rem); font-weight: 400; line-height: 1.04; }
+.font-display { font-weight: var(--display-weight, 500); letter-spacing: var(--display-track, -0.012em); }
+section h2.font-display:not(.text-lg):not(.text-base) { font-size: clamp(2rem, 1.3rem + 3vw, 3.75rem); font-weight: var(--h2-weight, 400); line-height: 1.04; }
 [data-admin-shell] .font-display { font-family: var(--ff-body); font-weight: 600; letter-spacing: -0.01em; }
 [data-admin-shell] section h2.font-display:not(.text-lg):not(.text-base) { font-size: 1.125rem; }
 body { font-feature-settings: "ss01"; }
@@ -243,3 +237,76 @@ select option { background: var(--surface); color: var(--ink); }
 .login-in { animation: loginIn 0.7s cubic-bezier(0.2, 0.8, 0.2, 1) both; animation-delay: var(--d, 0s); }
 @keyframes loginIn { from { opacity: 0; translate: 0 18px; } }
 @media (prefers-reduced-motion: reduce) { .login-in { animation: none; } }
+
+/* Gradient themes: every filled button, badge and band takes the gradient. Solid themes set --fill to none. */
+.bg-accent, .hover\:bg-accent:hover { background-image: var(--fill, none); }
+
+/* Filled buttons catch the light by themselves every few seconds. Switched on or off in Admin, Settings. */
+html[data-shine="on"] :is(a, button).bg-accent:not(:disabled):not([data-admin-shell] *),
+html[data-shine="on"][data-card="bold"] .pcard-cta:not(:disabled),
+html[data-shine="on"][data-card="elevated"] .pcard-cta:not(:disabled) {
+  background-image: linear-gradient(110deg, transparent 38%, rgb(255 255 255 / 0.38) 50%, transparent 62%), var(--fill, none);
+  background-size: 260% 100%, 100% 100%;
+  background-repeat: no-repeat;
+  animation: glint 5.5s ease-in-out infinite;
+}
+@keyframes glint { 0% { background-position: 130% 0, 0 0; } 26%, 100% { background-position: -60% 0, 0 0; } }
+
+/* Product card styles. The tint and layout below "soft" are the card's own. */
+.pcard { --pcard-pad: 0px; }
+.pcard-media { border-radius: var(--r-card); }
+.pcard-body { display: flex; flex: 1; flex-direction: column; padding: 0 var(--pcard-pad) var(--pcard-pad); }
+html:is([data-card="framed"], [data-card="elevated"], [data-card="glass"]) .pcard { --pcard-pad: 0.75rem; border-radius: var(--r-card); }
+html[data-card="framed"] .pcard { background: var(--surface); border: 1px solid var(--line); transition: border-color 0.2s, box-shadow 0.2s; }
+html[data-card="framed"] .pcard:hover { border-color: color-mix(in srgb, var(--accent) 45%, var(--line)); box-shadow: 0 16px 34px -24px rgb(0 0 0 / 0.45); }
+html[data-card="framed"] .pcard-media { background: transparent !important; border-radius: 0; }
+html[data-card="framed"] .pcard-price { color: var(--accent); font-size: 1.0625rem; font-weight: 700; }
+html[data-card="framed"] .pcard-cta { border-color: var(--accent); color: var(--accent); font-weight: 600; }
+html[data-card="framed"] .pcard-cta:hover { color: var(--accent-ink); }
+html[data-card="elevated"] .pcard { background: var(--surface); box-shadow: 0 14px 34px -20px rgb(0 0 0 / 0.38); overflow: hidden; transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.3s; }
+html[data-card="elevated"] .pcard:hover { box-shadow: 0 26px 46px -22px rgb(0 0 0 / 0.5); }
+@media (hover: hover) { html[data-card="elevated"] .pcard:hover { transform: translateY(-5px); } }
+html[data-card="elevated"] .pcard-media { border-radius: 0; }
+html[data-card="elevated"] .pcard-name { margin-top: 0.75rem; }
+html:is([data-card="elevated"], [data-card="bold"]) .pcard-cta { background-color: var(--accent); background-image: var(--fill, none); color: var(--accent-ink); border-color: transparent; font-weight: 600; }
+html[data-card="glass"] body { background-image: radial-gradient(45% 40% at 90% 10%, color-mix(in srgb, var(--accent) 16%, transparent), transparent 70%), radial-gradient(45% 40% at 5% 75%, color-mix(in srgb, var(--gold) 15%, transparent), transparent 70%); background-attachment: fixed; }
+html[data-card="glass"] .pcard { background: color-mix(in srgb, var(--surface) 58%, transparent); border: 1px solid color-mix(in srgb, var(--ink) 11%, transparent); -webkit-backdrop-filter: blur(16px) saturate(1.4); backdrop-filter: blur(16px) saturate(1.4); box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.25), 0 18px 38px -28px rgb(0 0 0 / 0.5); }
+html[data-card="glass"] .pcard-media { background: transparent !important; }
+html[data-card="minimal"] .pcard-media { background: transparent !important; }
+html[data-card="minimal"] :is(.pcard-name, .pcard-price-row) { justify-content: center; text-align: center; }
+html[data-card="minimal"] .pcard-cta { border-color: transparent; text-decoration: underline; text-underline-offset: 4px; }
+html[data-card="minimal"] .pcard-cta:hover { background: none; color: var(--accent); }
+html[data-card="bold"] .pcard-name { font-weight: 700; }
+html[data-card="bold"] .pcard-price { color: var(--accent); font-size: 1.25rem; font-weight: 800; }
+
+/* Phone quick bar and cart tab. They hide when a product page's own buy bar is up. */
+.dock-item { display: flex; min-width: 0; flex-direction: column; align-items: center; justify-content: center; gap: 3px; font-size: 10.5px; font-weight: 600; letter-spacing: 0.01em; transition: opacity 0.2s, transform 0.15s; }
+.dock-item:active { transform: scale(0.92); }
+.dock-item[aria-current="page"] { position: relative; }
+.dock-item[aria-current="page"]::before { content: ""; position: absolute; top: 0; width: 26px; height: 3px; border-radius: 0 0 4px 4px; background: currentColor; }
+.mobile-dock { box-shadow: 0 -12px 28px -16px rgb(0 0 0 / 0.45); }
+.dock-sheet { animation: dockSheet 0.3s cubic-bezier(0.2, 0.8, 0.2, 1); }
+@keyframes dockSheet { from { transform: translateY(100%); } }
+body:has(.buy-bar) :is(.mobile-dock, .cart-chip) { display: none; }
+@media (max-width: 767px) {
+  body:has(.mobile-dock) { padding-bottom: calc(4rem + env(safe-area-inset-bottom)); }
+  body:has(.mobile-dock) .float-lift { translate: 0 calc(-4rem - env(safe-area-inset-bottom)); }
+  body:has(.buy-bar) { padding-bottom: 0; }
+  body:has(.buy-bar) .float-lift { translate: 0 -64px; }
+}
+
+/* Sign in: one scene of slow light behind a glass card. */
+.login-stage { --stage: var(--accent); --stage-ink: var(--accent-ink); --blob-a: var(--gold); --blob-b: var(--accent-ink); --login-spark: var(--gold); color: var(--stage-ink); background-color: var(--stage); background-image: var(--fill, none); }
+.dark .login-stage { --stage: var(--paper); --stage-ink: var(--ink); --blob-a: var(--accent); --blob-b: var(--gold); background-image: none; }
+.login-blob { position: absolute; width: 58vmax; height: 58vmax; border-radius: 50%; filter: blur(90px); opacity: 0.32; }
+.login-blob-a { top: -28vmax; right: -14vmax; background: var(--blob-a); }
+.login-blob-b { bottom: -34vmax; left: -18vmax; background: var(--blob-b); opacity: 0.16; }
+.login-grid { position: absolute; inset: 0; background-image: linear-gradient(color-mix(in srgb, var(--stage-ink) 9%, transparent) 1px, transparent 1px), linear-gradient(90deg, color-mix(in srgb, var(--stage-ink) 9%, transparent) 1px, transparent 1px); background-size: 56px 56px; -webkit-mask-image: radial-gradient(70% 70% at 30% 40%, black, transparent); mask-image: radial-gradient(70% 70% at 30% 40%, black, transparent); }
+.login-glass { background: color-mix(in srgb, var(--surface) 80%, transparent); -webkit-backdrop-filter: blur(26px) saturate(1.6); backdrop-filter: blur(26px) saturate(1.6); border: 1px solid rgb(255 255 255 / 0.28); box-shadow: 0 40px 90px -36px rgb(0 0 0 / 0.75), inset 0 1px 0 rgb(255 255 255 / 0.4); }
+.dark .login-glass { border-color: rgb(255 255 255 / 0.12); box-shadow: 0 40px 90px -36px rgb(0 0 0 / 0.9), inset 0 1px 0 rgb(255 255 255 / 0.08); }
+.login-chip { background: color-mix(in srgb, var(--stage-ink) 10%, transparent); border: 1px solid color-mix(in srgb, var(--stage-ink) 18%, transparent); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); }
+.login-drift { animation: loginDrift 7s ease-in-out infinite; }
+@keyframes loginDrift { 50% { translate: 0 -12px; } }
+body:has(.login-stage) .footer-gap { display: none; }
+@media (prefers-reduced-motion: reduce) { .login-drift, .dock-sheet { animation: none; } html[data-shine="on"] :is(a, button).bg-accent, html[data-shine="on"] .pcard-cta { animation: none !important; } }
+@media (prefers-reduced-transparency: reduce) { .login-glass { background: var(--surface); } html[data-card="glass"] .pcard { background: var(--surface); } }
