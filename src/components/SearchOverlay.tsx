@@ -113,7 +113,7 @@ export function SearchOverlay({ bar = false, dock = false }: { bar?: boolean; do
                   aria-controls="search-results"
                   aria-activedescendant={active >= 0 ? `search-row-${active}` : undefined}
                   autoComplete="off"
-                  className="h-16 min-w-0 flex-1 bg-transparent font-display text-2xl outline-none placeholder:text-ink/50 sm:h-20 sm:text-4xl [&::-webkit-search-cancel-button]:hidden"
+                  className="bare-input h-16 min-w-0 flex-1 bg-transparent font-display text-2xl outline-none placeholder:text-ink/50 sm:h-20 sm:text-4xl [&::-webkit-search-cancel-button]:hidden"
                 />
                 <button type="button" aria-label="Close search" onClick={close} className="grid h-11 w-11 shrink-0 place-items-center rounded-full transition hover:bg-ink/10"><X size={20} /></button>
                 <span aria-hidden className={`search-line absolute -bottom-px left-0 h-px w-full bg-accent ${busy ? "is-busy" : ""}`} />

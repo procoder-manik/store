@@ -352,3 +352,24 @@ body:has(.buy-bar) :is(.mobile-dock, .cart-chip) { display: none; }
 body:has(.login-stage) .footer-gap { display: none; }
 @media (prefers-reduced-motion: reduce) { .login-drift, .dock-sheet { animation: none; } html[data-shine="on"] :is(a, button).bg-accent, html[data-shine="on"] .pcard-cta { animation: none !important; } }
 @media (prefers-reduced-transparency: reduce) { .login-glass { background: var(--surface); } html[data-card="glass"] .pcard { background: var(--surface); } }
+
+/* An input that sits inside its own capsule or on a line has no box, no ring and no fill of its own, active or not. */
+.bare-input, .bare-input:hover, .bare-input:focus, .bare-input:focus-visible { outline: 0 !important; border: 0 !important; border-radius: 0 !important; background: transparent !important; box-shadow: none !important; }
+
+/* The large brand name at the foot of every page: it fades down into the page, and a slow band of gold passes through it. */
+.footer-mark {
+  --mark: var(--ink);
+  font-weight: 600;
+  line-height: 0.92;
+  letter-spacing: -0.045em;
+  white-space: nowrap;
+  color: transparent;
+  background-image: linear-gradient(105deg, transparent 40%, color-mix(in srgb, var(--gold) 85%, transparent) 50%, transparent 60%), linear-gradient(180deg, color-mix(in srgb, var(--mark) 88%, transparent) 15%, color-mix(in srgb, var(--mark) 14%, transparent) 100%);
+  background-size: 300% 100%, 100% 100%;
+  background-repeat: no-repeat;
+  -webkit-background-clip: text;
+  background-clip: text;
+  animation: markLight 11s ease-in-out infinite;
+}
+footer.bg-ink .footer-mark { --mark: var(--paper); }
+@keyframes markLight { 0% { background-position: 130% 0, 0 0; } 45%, 100% { background-position: -60% 0, 0 0; } }

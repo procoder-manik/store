@@ -171,7 +171,7 @@ export function ChatWidget({ name, greeting, avatar = "", whatsapp = "", waNote 
 
           <form onSubmit={(e) => { e.preventDefault(); ask(text.trim()); }} className="p-3 pt-1">
             <div className="flex items-center gap-1 rounded-full border border-ink/15 bg-surface/70 py-1 pl-4 pr-1 transition focus-within:border-ink/30">
-              <input value={text} onChange={(e) => setText(e.target.value)} maxLength={500} placeholder="Message" aria-label="Your message" className="chat-input min-w-0 flex-1 bg-transparent py-1.5 text-base outline-none placeholder:text-ink/50 md:text-sm" />
+              <input value={text} onChange={(e) => setText(e.target.value)} maxLength={500} placeholder="Message" aria-label="Your message" className="bare-input min-w-0 flex-1 bg-transparent py-1.5 text-base outline-none placeholder:text-ink/50 md:text-sm" />
               <button aria-label="Send" disabled={busy || !text.trim()} className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-accent text-accent-ink transition disabled:opacity-30"><ArrowUp size={17} strokeWidth={2.5} /></button>
             </div>
           </form>

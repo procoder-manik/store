@@ -37,8 +37,9 @@ export async function sendEmails(msgs: Outgoing[], kind = "other"): Promise<{ se
   let sent = 0, failed = 0, error: string | undefined;
   const from = await senderLine();
   const { getPublicSettings } = await import("@/lib/settings");
-  const { themeOf } = await import("@/lib/themes");
-  const theme = themeOf((await getPublicSettings()).appearance.theme);
+  const { themeOf, withColors } = await import("@/lib/themes");
+  const { appearance } = await getPublicSettings();
+  const theme = withColors(themeOf(appearance.theme), appearance.colors[appearance.theme]);
   for (let i = 0; i < msgs.length; i += 100) {
     const chunk = msgs.slice(i, i + 100);
     try {

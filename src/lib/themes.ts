@@ -3,7 +3,7 @@ import type { FooterStyleId, HeaderStyleId } from "@/lib/layout-styles";
 export type ThemeId = "kach" | "padma" | "sondha" | "kalo" | "komola" | "nodi" | "beli" | "shobuj" | "surjasto" | "akash" | "rani";
 export type CardStyleId = "ios" | "soft" | "framed" | "elevated" | "glass" | "minimal" | "bold" | "overlay" | "editorial" | "boutique";
 
-type Colors = { paper: string; surface: string; ink: string; muted: string; line: string; accent: string; accentInk: string; gold: string };
+export type Colors = { paper: string; surface: string; ink: string; muted: string; line: string; accent: string; accentInk: string; gold: string };
 
 export type Theme = {
   id: ThemeId;
@@ -114,6 +114,26 @@ export const CARD_STYLES: { id: CardStyleId; name: string; about: string }[] = [
 ];
 export const isCardStyle = (v: string): v is CardStyleId => CARD_STYLES.some((c) => c.id === v);
 
+/** The colours the owner has changed on a theme. Everything left out keeps the theme's own value. */
+export type ThemeColors = { light?: Partial<Colors>; dark?: Partial<Colors>; from?: string; to?: string };
+
+export const isHex = (v: unknown): v is string => typeof v === "string" && /^#[0-9a-fA-F]{6}$/.test(v);
+export const gradientStops = (t: Theme) => (t.fill?.match(/#[0-9a-fA-F]{6}/g) ?? ["", ""]) as string[];
+
+const onlyHex = (c?: Partial<Colors>) => Object.fromEntries(Object.entries(c ?? {}).filter(([, v]) => isHex(v))) as Partial<Colors>;
+
+/** A theme dressed in the owner's colours. Values are checked here too, because they end up inside the page's CSS. */
+export function withColors(t: Theme, c?: ThemeColors): Theme {
+  if (!c) return t;
+  const [from, to] = gradientStops(t);
+  return {
+    ...t,
+    fill: t.fill ? `linear-gradient(135deg, ${isHex(c.from) ? c.from : from} 0%, ${isHex(c.to) ? c.to : to} 100%)` : undefined,
+    light: { ...t.light, ...onlyHex(c.light) },
+    dark: { ...t.dark, ...onlyHex(c.dark) },
+  };
+}
+
 const colors = (c: Colors) => `--paper:${c.paper};--surface:${c.surface};--ink:${c.ink};--muted:${c.muted};--line:${c.line};--accent:${c.accent};--accent-ink:${c.accentInk};--gold:${c.gold};`;
 
 /** The stylesheet for the given themes. The admin panel always uses Padma, so it stays the same whichever look the store wears. */
@@ -124,3 +144,6 @@ export function themeCss(list: Theme[]) {
       + `.dark[data-theme="${t.id}"],.dark [data-theme="${t.id}"]{${colors(t.dark)}--madder:#e29a8f;}`;
   }).join("");
 }
+
+/** The admin panel keeps the original Padma, even when the owner recolours Padma for the shop. */
+export const adminThemeCss = () => themeCss([THEMES[0]]).split('[data-theme="padma"]').join('[data-admin-shell][data-theme="padma"]');

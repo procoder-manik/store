@@ -1,3 +1,4 @@
+import { walletColor } from "@/lib/payments";
 import Link from "next/link";
 import { Banknote, LifeBuoy, Truck } from "lucide-react";
 import type { Cat } from "@/lib/catalog";
@@ -29,7 +30,10 @@ export function Footer({ categories, brand, footer, contact, cfg = DEFAULT_FOOTE
     <ul className="flex flex-wrap gap-2">{social.map(([n, u]) => <li key={n}><a href={u} target="_blank" rel="noopener noreferrer" className={`rounded-pill border px-3.5 py-1.5 text-xs font-medium transition ${dark ? "border-white/20 hover:bg-white/10" : "border-line hover:border-ink"}`}>{n}</a></li>)}</ul>
   );
   const pay = cfg.showPayments && payments.length > 0 && (
-    <div className="flex flex-wrap items-center gap-2"><span className={`text-xs ${mute}`}>We accept</span>{payments.map((n) => <span key={n} className={`rounded-md border px-2.5 py-1 text-xs font-medium ${dark ? "border-white/20" : "border-line bg-paper"}`}>{n}</span>)}</div>
+    <div className="flex flex-wrap items-center gap-2"><span className={`text-xs ${mute}`}>We accept</span>{payments.map((n) => {
+      const c = walletColor(n);
+      return c ? <span key={n} style={{ background: c.bg, color: c.ink }} className="rounded-md px-2.5 py-1 text-xs font-bold">{n}</span> : <span key={n} className={`rounded-md border px-2.5 py-1 text-xs font-medium ${dark ? "border-white/20" : "border-line bg-paper"}`}>{n}</span>;
+    })}</div>
   );
   const colsGrid = (
     <>
@@ -47,7 +51,18 @@ export function Footer({ categories, brand, footer, contact, cfg = DEFAULT_FOOTE
       {contact.whatsapp && <a href={`https://wa.me/${contact.whatsapp}`} target="_blank" rel="noopener noreferrer" className="hover:underline">Chat on WhatsApp</a>}
     </p>
   );
-  const bottom = <p className={`border-t px-5 py-5 text-center text-xs ${dark ? "border-white/10 text-paper/60" : "border-line text-muted"}`}>{copy}</p>;
+  // The brand name, as large as the footer allows, sinking softly into the page. It sizes itself to the name, whatever the name is.
+  const mark = (
+    <div aria-hidden className="select-none overflow-hidden px-3 pt-6">
+      <p style={{ fontSize: `min(13rem, calc(92vw / ${Math.max(brand.name.length, 4) * 0.56}))` }} className="footer-mark text-center font-display">{brand.name}</p>
+    </div>
+  );
+  const bottom = (
+    <>
+      {mark}
+      <p className={`grid gap-1 px-5 pb-6 pt-3 text-center text-xs ${dark ? "text-paper/60" : "text-muted"}`}><span className="font-medium tracking-[-0.01em]">{brand.tagline}</span><span>{copy}</span></p>
+    </>
+  );
 
   if (cfg.style === "minimal") {
     return (
@@ -73,7 +88,8 @@ export function Footer({ categories, brand, footer, contact, cfg = DEFAULT_FOOTE
           <ul className={`flex flex-wrap justify-center gap-x-5 gap-y-1.5 text-sm ${mute}`}>{flat.slice(0, 8).map((l) => <li key={l.label + l.href}><Link href={l.href} className={hover}>{l.label}</Link></li>)}</ul>
           {socials}
         </div>
-        {<div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-2 border-t border-line px-5 py-4 text-xs text-muted md:flex-row"><span>{copy}</span>{pay}</div>}
+        {pay && <div className="mx-auto flex max-w-6xl justify-center px-5 pb-2 text-xs text-muted">{pay}</div>}
+        {bottom}
       </footer>
     );
   }

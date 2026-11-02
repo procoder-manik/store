@@ -11,7 +11,7 @@ import { ConsentGate } from "@/components/ConsentGate";
 import { StoreOnly } from "@/components/StoreOnly";
 import { isPalette } from "@/lib/palettes";
 import { CardStyle } from "@/components/CardStyle";
-import { isCardStyle, isTheme, themeCss, themeOf, THEMES } from "@/lib/themes";
+import { adminThemeCss, isCardStyle, isTheme, themeCss, themeOf, THEMES, withColors } from "@/lib/themes";
 import { CartChip, MobileDock } from "@/components/MobileDock";
 import { PromoPopup } from "@/components/PromoPopup";
 import { SocialProof } from "@/components/SocialProof";
@@ -58,7 +58,8 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   const methods = availableMethods(s.payments, { sslReady: sslConfigured() });
   const theme = themeOf(s.appearance.theme);
   // Only the store's own theme and the one the admin panel uses go into the page, unless visitors may switch.
-  const css = themeCss(s.appearance.visitorPicker ? THEMES : theme.id === "padma" ? [theme] : [THEMES[0], theme]);
+  const dressed = (t: typeof theme) => withColors(t, s.appearance.colors[t.id]);
+  const css = themeCss(s.appearance.visitorPicker ? THEMES.map(dressed) : theme.id === "padma" ? [dressed(theme)] : [THEMES[0], dressed(theme)]) + adminThemeCss();
   return (
     <html lang="en" suppressHydrationWarning data-theme={isTheme(s.appearance.theme) ? s.appearance.theme : "padma"} data-buttons={s.appearance.buttons ?? "theme"} data-grid={s.appearance.sectionGrid ? "on" : "off"} data-shine={s.appearance.shine ? "on" : "off"} data-glass={s.appearance.glass ? "on" : "off"} {...(isPalette(s.appearance.accent) ? { "data-palette": s.appearance.accent } : {})} className={fontClasses}>
       <head>

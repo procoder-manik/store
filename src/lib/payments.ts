@@ -30,6 +30,15 @@ export const CATALOG: CatalogItem[] = [
   { id: "payoneer", name: "Payoneer", group: "gateway", manual: false, ready: false, blurb: "For customers abroad. Not connected yet." },
 ];
 
+/** The colours each mobile wallet uses for its own brand, so customers know them at a glance. */
+const WALLET_COLORS: Record<string, { bg: string; ink: string }> = {
+  bkash: { bg: "#e2136e", ink: "#ffffff" },
+  nagad: { bg: "#ec1c24", ink: "#ffffff" },
+  rocket: { bg: "#8c3494", ink: "#ffffff" },
+  upay: { bg: "#ffd200", ink: "#10255e" },
+};
+export const walletColor = (idOrName: string) => WALLET_COLORS[idOrName.toLowerCase()];
+
 export const METHOD_IDS = CATALOG.map((c) => c.id) as MethodId[];
 export const isMethodId = (v: string): v is MethodId => (METHOD_IDS as string[]).includes(v);
 export const catalogItem = (id: string) => CATALOG.find((c) => c.id === id);

@@ -85,15 +85,15 @@ export function QuickBuy({ product, zones, onClose }: { product: Product; zones:
   const sizeOk = (s: string) => !product.variants?.length || product.variants.some((v) => (!hasColors || v.colorName === color?.name) && v.size === s && v.stock > 0);
   const base = color?.hex ?? "#3a3f48";
   const n = parseInt(base.replace("#", "").padEnd(6, "0").slice(0, 6), 16);
-  const mix = (k: number) => `rgb(${Math.round((n >> 16) * (1 - k))}, ${Math.round(((n >> 8) & 255) * (1 - k))}, ${Math.round((n & 255) * (1 - k))})`;
+  const mix = (k: number) => `rgba(${Math.round((n >> 16) * (1 - k))}, ${Math.round(((n >> 8) & 255) * (1 - k))}, ${Math.round((n & 255) * (1 - k))}, 0.78)`;
   const field = "w-full rounded-xl border border-line bg-paper px-3.5 py-2.5 text-sm text-ink";
   const chip = (on: boolean) => `grid h-9 min-w-10 place-items-center rounded-full border px-3 text-sm transition ${on ? "border-white bg-white font-semibold text-black" : "border-white/25 bg-white/10 text-white hover:bg-white/20"}`;
 
   return (
     <Portal>
     <div className="fixed inset-0 z-50 grid place-items-end sm:place-items-center">
-      <div className="absolute inset-0 bg-black/55 backdrop-blur-md" onClick={onClose} />
-      <div role="dialog" aria-modal="true" aria-label={`Order ${product.name}`} className="panel-in relative grid max-h-[94dvh] w-full overflow-y-auto overscroll-contain rounded-t-[28px] border border-line shadow-[0_30px_80px_-20px_rgba(0,0,0,0.6)] sm:max-w-3xl sm:rounded-[28px] md:grid-cols-[0.92fr_1.08fr] md:overflow-hidden">
+      <div className="qb-veil absolute inset-0 bg-black/55 backdrop-blur-md" onClick={onClose} />
+      <div role="dialog" aria-modal="true" aria-label={`Order ${product.name}`} className="qb-panel panel-in relative grid max-h-[94dvh] w-full overflow-y-auto overscroll-contain rounded-t-[28px] border border-line shadow-[0_30px_80px_-20px_rgba(0,0,0,0.6)] sm:max-w-3xl sm:rounded-[28px] md:grid-cols-[0.92fr_1.08fr] md:overflow-hidden">
         <button aria-label="Close" onClick={onClose} className="absolute right-3.5 top-3.5 z-20 grid h-9 w-9 place-items-center rounded-full border border-white/30 bg-black/25 text-white backdrop-blur transition hover:bg-black/40"><X size={16} /></button>
 
         {/* The product side: its own colour, with white text */}
@@ -134,7 +134,7 @@ export function QuickBuy({ product, zones, onClose }: { product: Product; zones:
         </div>
 
         {/* The form side uses the theme colours, so every word stays easy to read in light and dark mode. */}
-        <form onSubmit={submit} className="no-scrollbar flex flex-col gap-2.5 overflow-y-auto bg-surface p-5 pb-8 text-ink md:max-h-[94dvh] md:p-7 md:pb-9 [&>*]:shrink-0">
+        <form onSubmit={submit} className="qb-form no-scrollbar flex flex-col gap-2.5 overflow-y-auto bg-surface p-5 pb-8 text-ink md:max-h-[94dvh] md:p-7 md:pb-9 [&>*]:shrink-0">
           <p className="font-display text-lg font-semibold">Where should we deliver it?</p>
           <div className="grid gap-2.5 sm:grid-cols-2">
             <input name="name" required minLength={2} placeholder="Full name" autoComplete="name" className={field} />

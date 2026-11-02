@@ -75,7 +75,9 @@ html[data-glass="on"] body:not(:has([data-admin-shell])) {
   }
   & .site-header.scrolled.bg-ink { background: transparent; }
   & .site-header.scrolled.bg-ink::before { background: color-mix(in srgb, var(--ink) 80%, transparent); }
-  & .site-header nav a { border-radius: 9999px; font-size: 0.875rem; font-weight: 500; letter-spacing: -0.01em; text-transform: none; transition: background-color 0.2s; }
+  & .site-header a.font-display { flex-shrink: 0; white-space: nowrap; }
+  & .site-header nav { min-width: 0; overflow-x: auto; scrollbar-width: none; }
+  & .site-header nav a { flex-shrink: 0; white-space: nowrap; border-radius: 9999px; font-size: 0.875rem; font-weight: 500; letter-spacing: -0.01em; text-transform: none; transition: background-color 0.2s; }
   & .site-header nav a:hover, & .site-header nav a[aria-current="page"] { background: color-mix(in srgb, currentColor 9%, transparent); }
   & .thread::after { display: none; }
   & .site-header button.rounded-full:hover, & .site-header a.rounded-full:hover { background: color-mix(in srgb, currentColor 9%, transparent); }
@@ -96,7 +98,6 @@ html[data-glass="on"] body:not(:has([data-admin-shell])) {
   & :is(input:not([type="checkbox"], [type="radio"], [type="file"], [type="range"]), select, textarea):not(.peer) { border-color: transparent; background-color: color-mix(in srgb, var(--ink) 6%, transparent); }
   & :is(input, select, textarea):not(.peer):focus-visible { background-color: var(--surface); }
 
-  & .chat-input.chat-input { background: transparent; }
   & .chat-glass :is(button, a).bg-accent { min-height: 0; }
 
   /* Tick boxes become iPhone switches. */
@@ -154,3 +155,11 @@ html[data-glass="on"] body:not(:has([data-admin-shell])) {
 .msg-in { animation: msgIn 0.42s cubic-bezier(0.32, 0.72, 0, 1) both; }
 @keyframes msgIn { from { opacity: 0; translate: 0 10px; scale: 0.96; } }
 @media (prefers-reduced-motion: reduce) { .msg-in { animation: none; } }
+
+/* Buy Now: frosted glass on both sides, with the page soft behind it. */
+html[data-glass="on"] .qb-veil { background: rgb(0 0 0 / 0.28); }
+html[data-glass="on"] .qb-panel { border-color: rgb(255 255 255 / 0.28); -webkit-backdrop-filter: blur(34px) saturate(180%); backdrop-filter: blur(34px) saturate(180%); box-shadow: 0 40px 90px -30px rgb(0 0 0 / 0.65), inset 0 1px 0 rgb(255 255 255 / 0.3); }
+html.dark[data-glass="on"] .qb-panel { border-color: rgb(255 255 255 / 0.13); box-shadow: 0 40px 90px -30px rgb(0 0 0 / 0.9), inset 0 1px 0 rgb(255 255 255 / 0.1); }
+html[data-glass="on"] .qb-form { background: color-mix(in srgb, var(--surface) 66%, transparent); }
+html[data-glass="on"] .qb-form :is(input:not([type="radio"], [type="checkbox"]), select, textarea, .bg-paper) { border-color: transparent; background-color: color-mix(in srgb, var(--ink) 6.5%, transparent); }
+html[data-glass="on"] .qb-form .bg-surface { background-color: color-mix(in srgb, var(--surface) 55%, transparent); }

@@ -6,7 +6,9 @@ import { getPublicSettings } from "@/lib/settings";
 import { requireAdmin } from "@/lib/admin";
 import { isLogoUrl, normalizePhone } from "@/lib/utils";
 import { isPalette } from "@/lib/palettes";
-import { isCardStyle, isTheme, themeOf } from "@/lib/themes";
+import { isCardStyle, isHex, isTheme, themeOf, type Colors, type ThemeColors } from "@/lib/themes";
+
+const COLOR_KEYS: (keyof Colors)[] = ["paper", "surface", "ink", "muted", "line", "accent", "accentInk", "gold"];
 
 function parse<T extends z.ZodType>(schema: T, data: unknown): z.infer<T> {
   const r = schema.safeParse(data);
@@ -120,7 +122,14 @@ export async function saveAppearance(fd: FormData) {
     await save("header_style", { ...s.headerStyle, style: look.header });
     await save("footer_style", { ...s.footerStyle, style: look.footer });
   }
-  await save("appearance", { theme, accent, mode, buttons, card, shine: on(fd.get("shine")), glass: on(fd.get("glass")), sectionGrid: on(fd.get("sectionGrid")), visitorPicker: on(fd.get("visitorPicker")) });
+  // Your own theme colours, kept for every theme, so switching back and forth loses nothing.
+  let colors: Record<string, ThemeColors> = {};
+  try {
+    const raw = JSON.parse(String(fd.get("colors") ?? "{}")) as Record<string, ThemeColors>;
+    const hexes = (c?: Partial<Colors>) => Object.fromEntries(Object.entries(c ?? {}).filter(([k, v]) => COLOR_KEYS.includes(k as keyof Colors) && isHex(v)));
+    colors = Object.fromEntries(Object.entries(raw).filter(([id]) => isTheme(id)).map(([id, c]) => [id, { light: hexes(c.light), dark: hexes(c.dark), ...(isHex(c.from) ? { from: c.from } : {}), ...(isHex(c.to) ? { to: c.to } : {}) }]));
+  } catch { throw new Error("The theme colours could not be read. Please try again."); }
+  await save("appearance", { colors, theme, accent, mode, buttons, card, shine: on(fd.get("shine")), glass: on(fd.get("glass")), sectionGrid: on(fd.get("sectionGrid")), visitorPicker: on(fd.get("visitorPicker")) });
 }
 
 export async function saveExtras(fd: FormData) {

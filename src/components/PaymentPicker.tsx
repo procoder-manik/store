@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Check, Copy } from "lucide-react";
-import { ACCOUNT_TYPE_LABEL, advanceAmount, advancePlans, type AdvancePlan, type PublicMethod } from "@/lib/payments";
+import { ACCOUNT_TYPE_LABEL, advanceAmount, advancePlans, walletColor, type AdvancePlan, type PublicMethod } from "@/lib/payments";
 import { formatPrice } from "@/lib/config";
 import { useAdvance } from "./PaymentsProvider";
 
@@ -54,9 +54,9 @@ export function PaymentPicker({ methods, value, onChange, amount, shipping, hasP
   return (
     <div className="grid gap-2">
       {methods.map((m) => (
-        <label key={m.id} className={row(m.id === value)}>
-          <input type="radio" name="pay" checked={m.id === value} onChange={() => onChange(m.id)} />
-          <span>{m.name}{m.id === "cod" && <span className={`block text-xs ${muted}`}>{plans[0] === "none" ? "Check it, then pay the rider in cash." : "Pay an advance now, the rest to the rider in cash."}</span>}{m.id === "sslcommerz" && <span className={`block text-xs ${muted}`}>Cards, bKash, Nagad, Rocket and banks on a secure page.</span>}</span>
+        <label key={m.id} className={row(m.id === value)} style={m.id === value && walletColor(m.id) ? { background: walletColor(m.id).bg, borderColor: walletColor(m.id).bg, color: walletColor(m.id).ink } : undefined}>
+          <input type="radio" name="pay" checked={m.id === value} onChange={() => onChange(m.id)} style={m.id === value && walletColor(m.id) ? { accentColor: walletColor(m.id).ink } : undefined} />
+          <span>{walletColor(m.id) ? <span style={{ background: walletColor(m.id).bg, color: walletColor(m.id).ink }} className="inline-block rounded-md px-2.5 py-1 text-[13px] font-bold tracking-[-0.01em]">{m.name}</span> : m.name}{m.id === "cod" && <span className={`block text-xs ${muted}`}>{plans[0] === "none" ? "Check it, then pay the rider in cash." : "Pay an advance now, the rest to the rider in cash."}</span>}{m.id === "sslcommerz" && <span className={`block text-xs ${muted}`}>Cards, bKash, Nagad, Rocket and banks on a secure page.</span>}</span>
         </label>
       ))}
 
