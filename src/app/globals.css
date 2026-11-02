@@ -244,41 +244,82 @@ select option { background: var(--surface); color: var(--ink); }
 
 /* Filled buttons catch the light by themselves every few seconds. Switched on or off in Admin, Settings. */
 html[data-shine="on"] :is(a, button).bg-accent:not(:disabled):not([data-admin-shell] *),
-html[data-shine="on"][data-card="bold"] .pcard-cta:not(:disabled),
-html[data-shine="on"][data-card="elevated"] .pcard-cta:not(:disabled) {
-  background-image: linear-gradient(110deg, transparent 38%, rgb(255 255 255 / 0.38) 50%, transparent 62%), var(--fill, none);
+html[data-shine="on"] :is(.pcard--bold, .pcard--elevated) .pcard-cta:not(:disabled) {
+  background-image: linear-gradient(110deg, transparent 40%, rgb(255 255 255 / 0.22) 50%, transparent 60%), var(--fill, none);
   background-size: 260% 100%, 100% 100%;
   background-repeat: no-repeat;
-  animation: glint 5.5s ease-in-out infinite;
+  animation: glint 7s ease-in-out infinite;
 }
-@keyframes glint { 0% { background-position: 130% 0, 0 0; } 26%, 100% { background-position: -60% 0, 0 0; } }
+@keyframes glint { 0% { background-position: 130% 0, 0 0; } 22%, 100% { background-position: -60% 0, 0 0; } }
 
-/* Product card styles. The tint and layout below "soft" are the card's own. */
-.pcard { --pcard-pad: 0px; }
+/* Product card styles. Every style is a class, so the preview in Admin uses the real thing. */
+.pcard { --pcard-pad: 0px; color: var(--ink); }
 .pcard-media { border-radius: var(--r-card); }
 .pcard-body { display: flex; flex: 1; flex-direction: column; padding: 0 var(--pcard-pad) var(--pcard-pad); }
-html:is([data-card="framed"], [data-card="elevated"], [data-card="glass"]) .pcard { --pcard-pad: 0.75rem; border-radius: var(--r-card); }
-html[data-card="framed"] .pcard { background: var(--surface); border: 1px solid var(--line); transition: border-color 0.2s, box-shadow 0.2s; }
-html[data-card="framed"] .pcard:hover { border-color: color-mix(in srgb, var(--accent) 45%, var(--line)); box-shadow: 0 16px 34px -24px rgb(0 0 0 / 0.45); }
-html[data-card="framed"] .pcard-media { background: transparent !important; border-radius: 0; }
-html[data-card="framed"] .pcard-price { color: var(--accent); font-size: 1.0625rem; font-weight: 700; }
-html[data-card="framed"] .pcard-cta { border-color: var(--accent); color: var(--accent); font-weight: 600; }
-html[data-card="framed"] .pcard-cta:hover { color: var(--accent-ink); }
-html[data-card="elevated"] .pcard { background: var(--surface); box-shadow: 0 14px 34px -20px rgb(0 0 0 / 0.38); overflow: hidden; transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.3s; }
-html[data-card="elevated"] .pcard:hover { box-shadow: 0 26px 46px -22px rgb(0 0 0 / 0.5); }
-@media (hover: hover) { html[data-card="elevated"] .pcard:hover { transform: translateY(-5px); } }
-html[data-card="elevated"] .pcard-media { border-radius: 0; }
-html[data-card="elevated"] .pcard-name { margin-top: 0.75rem; }
-html:is([data-card="elevated"], [data-card="bold"]) .pcard-cta { background-color: var(--accent); background-image: var(--fill, none); color: var(--accent-ink); border-color: transparent; font-weight: 600; }
-html[data-card="glass"] body { background-image: radial-gradient(45% 40% at 90% 10%, color-mix(in srgb, var(--accent) 16%, transparent), transparent 70%), radial-gradient(45% 40% at 5% 75%, color-mix(in srgb, var(--gold) 15%, transparent), transparent 70%); background-attachment: fixed; }
-html[data-card="glass"] .pcard { background: color-mix(in srgb, var(--surface) 58%, transparent); border: 1px solid color-mix(in srgb, var(--ink) 11%, transparent); -webkit-backdrop-filter: blur(16px) saturate(1.4); backdrop-filter: blur(16px) saturate(1.4); box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.25), 0 18px 38px -28px rgb(0 0 0 / 0.5); }
-html[data-card="glass"] .pcard-media { background: transparent !important; }
-html[data-card="minimal"] .pcard-media { background: transparent !important; }
-html[data-card="minimal"] :is(.pcard-name, .pcard-price-row) { justify-content: center; text-align: center; }
-html[data-card="minimal"] .pcard-cta { border-color: transparent; text-decoration: underline; text-underline-offset: 4px; }
-html[data-card="minimal"] .pcard-cta:hover { background: none; color: var(--accent); }
-html[data-card="bold"] .pcard-name { font-weight: 700; }
-html[data-card="bold"] .pcard-price { color: var(--accent); font-size: 1.25rem; font-weight: 800; }
+.pcard-cta { border-color: color-mix(in srgb, var(--ink) 22%, transparent); }
+:is(.pcard--ios, .pcard--framed, .pcard--elevated, .pcard--glass, .pcard--boutique) { --pcard-pad: 0.875rem; border-radius: var(--r-card); }
+
+.pcard--ios { background: var(--surface); box-shadow: 0 1px 2px rgb(0 0 0 / 0.04), 0 14px 34px -22px rgb(0 0 0 / 0.28); border-radius: 22px; overflow: hidden; transition: box-shadow 0.35s, translate 0.45s cubic-bezier(0.32, 0.72, 0, 1); }
+@media (hover: hover) { .pcard--ios:hover { translate: 0 -4px; box-shadow: 0 2px 4px rgb(0 0 0 / 0.05), 0 26px 46px -24px rgb(0 0 0 / 0.38); } }
+.pcard--ios .pcard-media { background: transparent !important; border-radius: 0; }
+.pcard--ios .pcard-body { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; column-gap: 0.5rem; }
+.pcard--ios .pcard-name { grid-column: 1 / -1; margin-top: 0; font-weight: 600; letter-spacing: -0.015em; }
+.pcard--ios .pcard-price { font-weight: 500; color: var(--muted); }
+.pcard--ios .pcard-foot { padding-top: 0.25rem; margin: 0; }
+.pcard--ios .pcard-cta { height: 1.875rem; width: auto; padding: 0 0.875rem; border: 0; border-radius: 9999px; background: color-mix(in srgb, var(--accent) 12%, transparent); color: var(--accent); font-size: 12.5px; font-weight: 700; }
+
+.pcard--framed { background: var(--surface); border: 1px solid var(--line); transition: border-color 0.2s, box-shadow 0.2s; }
+.pcard--framed:hover { border-color: color-mix(in srgb, var(--accent) 40%, var(--line)); box-shadow: 0 16px 34px -24px rgb(0 0 0 / 0.4); }
+.pcard--framed .pcard-media { background: transparent !important; border-radius: 0; }
+.pcard--framed .pcard-price { color: var(--accent); font-size: 1.0625rem; font-weight: 700; }
+.pcard--framed .pcard-cta { border-color: var(--accent); color: var(--accent); font-weight: 600; }
+
+.pcard--elevated { background: var(--surface); box-shadow: 0 14px 34px -22px rgb(0 0 0 / 0.34); overflow: hidden; transition: translate 0.4s cubic-bezier(0.32, 0.72, 0, 1), box-shadow 0.35s; }
+@media (hover: hover) { .pcard--elevated:hover { translate: 0 -5px; box-shadow: 0 26px 46px -22px rgb(0 0 0 / 0.46); } }
+.pcard--elevated .pcard-media { border-radius: 0; }
+.pcard--elevated .pcard-name { margin-top: 0.75rem; font-weight: 600; }
+:is(.pcard--elevated, .pcard--bold) .pcard-cta { background-color: var(--accent); background-image: var(--fill, none); color: var(--accent-ink); border-color: transparent; font-weight: 600; }
+
+.pcard--glass { background: color-mix(in srgb, var(--surface) 55%, transparent); border: 1px solid color-mix(in srgb, var(--ink) 9%, transparent); -webkit-backdrop-filter: blur(18px) saturate(1.6); backdrop-filter: blur(18px) saturate(1.6); box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.3), 0 18px 38px -28px rgb(0 0 0 / 0.5); }
+.pcard--glass .pcard-media { background: transparent !important; }
+.pcard--glass .pcard-cta { border: 0; background: color-mix(in srgb, var(--ink) 8%, transparent); font-weight: 600; }
+
+.pcard--minimal .pcard-media { background: transparent !important; }
+.pcard--minimal :is(.pcard-name, .pcard-price-row) { justify-content: center; text-align: center; }
+.pcard--minimal .pcard-cta { border-color: transparent; text-decoration: underline; text-underline-offset: 4px; }
+
+.pcard--bold .pcard-name { font-weight: 700; }
+.pcard--bold .pcard-price { color: var(--accent); font-size: 1.25rem; font-weight: 800; }
+
+.pcard--overlay { overflow: hidden; border-radius: var(--r-card); }
+.pcard--overlay .pcard-media { border-radius: 0; }
+.pcard--overlay .pcard-add, .pcard--overlay .pcard-note { display: none; }
+.pcard--overlay .pcard-body { position: absolute; right: 0.5rem; bottom: 0.5rem; left: 0.5rem; display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; column-gap: 0.5rem; border: 1px solid rgb(255 255 255 / 0.25); border-radius: calc(var(--r-card) * 0.75); background: color-mix(in srgb, var(--surface) 68%, transparent); -webkit-backdrop-filter: blur(18px) saturate(1.7); backdrop-filter: blur(18px) saturate(1.7); padding: 0.5rem 0.625rem; }
+.pcard--overlay .pcard-name { grid-column: 1 / -1; margin-top: 0; overflow: hidden; font-size: 13px; font-weight: 600; text-overflow: ellipsis; white-space: nowrap; }
+.pcard--overlay .pcard-price-row { margin: 0; }
+.pcard--overlay .pcard-price { font-size: 13px; font-weight: 600; }
+.pcard--overlay .pcard-foot { padding: 0; margin: 0; }
+.pcard--overlay .pcard-cta { height: 1.625rem; width: auto; padding: 0 0.625rem; border: 0; border-radius: 9999px; background-color: var(--accent); background-image: var(--fill, none); color: var(--accent-ink); font-size: 11.5px; font-weight: 600; }
+
+.pcard--editorial .pcard-media { border-radius: 4px; }
+.pcard--editorial .pcard-name { margin-top: 0.875rem; font-family: var(--ff-display); font-size: 1.0625rem; font-weight: var(--display-weight, 500); letter-spacing: var(--display-track, 0); }
+.pcard--editorial .pcard-price-row { margin-top: 0.5rem; padding-top: 0.5rem; border-top: 1px solid var(--line); }
+.pcard--editorial .pcard-cta { height: auto; border: 0; text-align: left; font-weight: 600; text-decoration: underline; text-underline-offset: 4px; }
+
+.pcard--boutique { background: var(--surface); border: 1px solid color-mix(in srgb, var(--gold) 45%, transparent); }
+.pcard--boutique .pcard-media { background: transparent !important; }
+.pcard--boutique :is(.pcard-name, .pcard-price-row) { justify-content: center; text-align: center; }
+.pcard--boutique .pcard-name { font-family: var(--ff-display); font-size: 1rem; }
+.pcard--boutique .pcard-price { color: var(--gold); font-weight: 600; }
+.pcard--boutique .pcard-cta { border-color: color-mix(in srgb, var(--gold) 70%, transparent); color: var(--ink); letter-spacing: 0.02em; }
+
+/* Whatever the style, the pointer turns a button into the filled accent. Text links stay links. */
+.pcard:not(.pcard--minimal, .pcard--editorial) .pcard-cta:hover:not(:disabled) { background-color: var(--accent); background-image: var(--fill, none); border-color: transparent; color: var(--accent-ink); }
+.pcard:is(.pcard--minimal, .pcard--editorial) .pcard-cta:hover { background: none; color: var(--accent); }
+
+/* The fine grid behind a section, the same one as on the sign in page. Neutral grey, so it shows on light and dark. */
+.section-grid { position: absolute; inset: 0; z-index: 1; pointer-events: none; background-image: linear-gradient(rgb(128 128 128 / 0.13) 1px, transparent 1px), linear-gradient(90deg, rgb(128 128 128 / 0.13) 1px, transparent 1px); background-size: 56px 56px; -webkit-mask-image: linear-gradient(180deg, transparent, black 12%, black 78%, transparent); mask-image: linear-gradient(180deg, transparent, black 12%, black 78%, transparent); }
+html[data-grid="off"] .section-grid { display: none; }
 
 /* Phone quick bar and cart tab. They hide when a product page's own buy bar is up. */
 .dock-item { display: flex; min-width: 0; flex-direction: column; align-items: center; justify-content: center; gap: 3px; font-size: 10.5px; font-weight: 600; letter-spacing: 0.01em; transition: opacity 0.2s, transform 0.15s; }

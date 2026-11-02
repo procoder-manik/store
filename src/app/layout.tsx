@@ -10,6 +10,7 @@ import { Tracking } from "@/components/Tracking";
 import { ConsentGate } from "@/components/ConsentGate";
 import { StoreOnly } from "@/components/StoreOnly";
 import { isPalette } from "@/lib/palettes";
+import { CardStyle } from "@/components/CardStyle";
 import { isCardStyle, isTheme, themeCss, themeOf, THEMES } from "@/lib/themes";
 import { CartChip, MobileDock } from "@/components/MobileDock";
 import { PromoPopup } from "@/components/PromoPopup";
@@ -59,13 +60,14 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   // Only the store's own theme and the one the admin panel uses go into the page, unless visitors may switch.
   const css = themeCss(s.appearance.visitorPicker ? THEMES : theme.id === "padma" ? [theme] : [THEMES[0], theme]);
   return (
-    <html lang="en" suppressHydrationWarning data-theme={isTheme(s.appearance.theme) ? s.appearance.theme : "padma"} data-buttons={s.appearance.buttons ?? "theme"} data-card={isCardStyle(s.appearance.card) ? s.appearance.card : s.appearance.glass ? "glass" : theme.card} data-shine={s.appearance.shine ? "on" : "off"} data-glass={s.appearance.glass ? "on" : "off"} {...(isPalette(s.appearance.accent) ? { "data-palette": s.appearance.accent } : {})} className={fontClasses}>
+    <html lang="en" suppressHydrationWarning data-theme={isTheme(s.appearance.theme) ? s.appearance.theme : "padma"} data-buttons={s.appearance.buttons ?? "theme"} data-grid={s.appearance.sectionGrid ? "on" : "off"} data-shine={s.appearance.shine ? "on" : "off"} data-glass={s.appearance.glass ? "on" : "off"} {...(isPalette(s.appearance.accent) ? { "data-palette": s.appearance.accent } : {})} className={fontClasses}>
       <head>
         <style dangerouslySetInnerHTML={{ __html: css }} />
         {s.appearance.visitorPicker && <script dangerouslySetInnerHTML={{ __html: "try{var t=localStorage.getItem('theme-pick');if(t&&/^[a-z]{3,12}$/.test(t)){var e=document.documentElement;e.setAttribute('data-theme',t);e.removeAttribute('data-palette')}}catch(e){}" }} />}
       </head>
       <body>
-        <Providers mode={s.appearance.mode}>
+        <Providers>
+          <CardStyle value={isCardStyle(s.appearance.card) ? s.appearance.card : s.appearance.glass ? "ios" : theme.card}>
           <ZonesProvider zones={zones}>
           <PaymentsProvider methods={methods} advance={s.payments.advance}>
           <Suspense fallback={null}><RefCapture /></Suspense>
@@ -88,6 +90,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           {s.proof.mode !== "off" && <SocialProof />}
           </PaymentsProvider>
           </ZonesProvider>
+          </CardStyle>
         </Providers>
         <ConsentGate ask={s.tracking.consent && !!(s.tracking.fbPixel || s.tracking.ga4 || s.tracking.gtm)}><Tracking t={s.tracking} /></ConsentGate>
       </body>

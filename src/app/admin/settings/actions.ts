@@ -106,22 +106,21 @@ export async function saveContact(fd: FormData) {
 export async function saveAppearance(fd: FormData) {
   const theme = String(fd.get("theme") ?? "");
   const accent = String(fd.get("accent") ?? "");
-  const mode = String(fd.get("mode") ?? "light");
+  const mode = "light";
   const buttons = String(fd.get("buttons") ?? "round");
   if (!["round", "soft", "square", "theme"].includes(buttons)) throw new Error("Choose a button shape");
   if (!isTheme(theme)) throw new Error("Choose one of the themes");
   if (accent && !isPalette(accent)) throw new Error("Choose one of the accent colors");
-  if (!["light", "dark", "system"].includes(mode)) throw new Error("Choose a mode");
   const card = String(fd.get("card") ?? "theme");
   if (card !== "theme" && !isCardStyle(card)) throw new Error("Choose a product card style");
-  // A theme can bring its whole layout along: header, footer and the light or dark it was designed for.
+  // A theme can bring its whole layout along: its header and footer.
   const look = on(fd.get("applyLayout")) ? themeOf(theme) : null;
   if (look) {
     const s = await getPublicSettings();
     await save("header_style", { ...s.headerStyle, style: look.header });
     await save("footer_style", { ...s.footerStyle, style: look.footer });
   }
-  await save("appearance", { theme, accent, mode: look?.prefers ?? mode, buttons, card, shine: on(fd.get("shine")), glass: on(fd.get("glass")), visitorPicker: on(fd.get("visitorPicker")) });
+  await save("appearance", { theme, accent, mode, buttons, card, shine: on(fd.get("shine")), glass: on(fd.get("glass")), sectionGrid: on(fd.get("sectionGrid")), visitorPicker: on(fd.get("visitorPicker")) });
 }
 
 export async function saveExtras(fd: FormData) {

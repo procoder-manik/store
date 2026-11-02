@@ -27,7 +27,8 @@ const typo = {
 const anim = z.enum(["none", "fade", "up", "zoom", "left", "right"]).default("up");
 // titleMode: use this section as the page's title section, with the page's own title and description.
 // crumbs: show Home / page name. Neither appears on the home page.
-const common = { id, anim, level, titleMode: z.boolean().optional(), crumbs: z.boolean().optional(), ...typo };
+// gridLines: fine grid behind the section. Unset means on for the sections at the top of a page, off for the rest.
+const common = { id, anim, level, titleMode: z.boolean().optional(), crumbs: z.boolean().optional(), gridLines: z.boolean().optional(), ...typo };
 export type HeadingLevel = "h1" | "h2" | "h3" | "h4" | "h5" | "h6" | "p";
 export type Anim = "none" | "fade" | "up" | "zoom" | "left" | "right";
 
@@ -85,6 +86,9 @@ export const blocksSchema = z.array(blockSchema).max(40);
 
 export type Block = z.infer<typeof blockSchema>;
 export type BlockType = Block["type"];
+
+const GRID_FIRST = new Set<string>(["hero", "herofull", "showcase", "showcasefull", "rail3d", "rail3dfull", "slider", "sliderfull", "pagehead", "spotlight", "cta"]);
+export const showsGrid = (b: Pick<Block, "type" | "gridLines">) => b.gridLines ?? GRID_FIRST.has(b.type);
 
 export const BLOCK_LABELS: Record<BlockType, string> = {
   hero: "Hero banner", herofull: "Hero banner, full width", sliderfull: "Image slider, full width", rail3dfull: "3D product slider, full width", bannerfull: "Banner, full width", split: "Picture and text side by side", trust: "Trust badges (delivery, returns, support)", html: "Custom HTML code", showcase: "Product showcase hero", showcasefull: "Product showcase hero, full width", rail3d: "3D product slider", slider: "Image slider", spotlight: "Product spotlight", pagehead: "Page title",

@@ -1,7 +1,7 @@
 import type { FooterStyleId, HeaderStyleId } from "@/lib/layout-styles";
 
 export type ThemeId = "kach" | "padma" | "sondha" | "kalo" | "komola" | "nodi" | "beli" | "shobuj" | "surjasto" | "akash" | "rani";
-export type CardStyleId = "soft" | "framed" | "elevated" | "glass" | "minimal" | "bold";
+export type CardStyleId = "ios" | "soft" | "framed" | "elevated" | "glass" | "minimal" | "bold" | "overlay" | "editorial" | "boutique";
 
 type Colors = { paper: string; surface: string; ink: string; muted: string; line: string; accent: string; accentInk: string; gold: string };
 
@@ -20,7 +20,6 @@ export type Theme = {
   card: CardStyleId;
   header: HeaderStyleId;
   footer: FooterStyleId;
-  prefers?: "dark";
   light: Colors;
   dark: Colors;
 };
@@ -33,68 +32,68 @@ export const THEMES: Theme[] = [
     dark: { paper: "#0b1513", surface: "#12201d", ink: "#ecebe3", muted: "#a2ada7", line: "#24332f", accent: "#c9a45c", accentInk: "#0b1513", gold: "#c9a45c" },
   },
   {
-    id: "kach", name: "Kach", about: "The clean Apple look: system font, iPhone blue and frosted glass.", kind: "solid", display: "--font-apple", body: "--font-apple",
-    radius: { box: "14px", card: "22px", button: "9999px" }, type: { weight: 600, h2: 700, track: "-0.025em" }, card: "glass", header: "classic", footer: "minimal",
-    light: { paper: "#f2f2f7", surface: "#ffffff", ink: "#1c1c1e", muted: "#636366", line: "#d8d8dc", accent: "#0a6fe0", accentInk: "#ffffff", gold: "#5e5ce6" },
-    dark: { paper: "#000000", surface: "#1c1c1e", ink: "#f5f5f7", muted: "#98989f", line: "#38383a", accent: "#0a7cf0", accentInk: "#ffffff", gold: "#64d2ff" },
+    id: "kach", name: "Kach", about: "The Apple look: system font, Apple blue and clean frosted glass.", kind: "solid", display: "--font-apple", body: "--font-apple",
+    radius: { box: "14px", card: "22px", button: "9999px" }, type: { weight: 600, h2: 700, track: "-0.025em" }, card: "ios", header: "classic", footer: "minimal",
+    light: { paper: "#f5f5f7", surface: "#ffffff", ink: "#1d1d1f", muted: "#6e6e73", line: "#d2d2d7", accent: "#0071e3", accentInk: "#ffffff", gold: "#a2845e" },
+    dark: { paper: "#000000", surface: "#1c1c1e", ink: "#f5f5f7", muted: "#98989d", line: "#38383a", accent: "#2997ff", accentInk: "#00142b", gold: "#c9a981" },
   },
   {
-    id: "sondha", name: "Sondha", about: "Evening oxblood on warm white, in a soft old-style serif.", kind: "solid", display: "--font-fraunces", body: "--font-dmsans",
-    radius: { box: "0.5rem", card: "1rem", button: "0.5rem" }, type: { weight: 500, h2: 500, track: "-0.015em" }, card: "elevated", header: "centered", footer: "minimal",
-    light: { paper: "#f6f3f0", surface: "#ffffff", ink: "#241014", muted: "#6f5c5f", line: "#e6dedc", accent: "#4e1119", accentInk: "#f6f3f0", gold: "#a8743f" },
+    id: "sondha", name: "Sondha", about: "Evening oxblood on warm ivory, in a soft old-style serif.", kind: "solid", display: "--font-fraunces", body: "--font-dmsans",
+    radius: { box: "0.5rem", card: "1rem", button: "0.5rem" }, type: { weight: 500, h2: 500, track: "-0.015em" }, card: "boutique", header: "centered", footer: "minimal",
+    light: { paper: "#f8f4ef", surface: "#fffdfa", ink: "#2a1518", muted: "#75615f", line: "#e8dfd8", accent: "#4e1119", accentInk: "#f8f4ef", gold: "#a8743f" },
     dark: { paper: "#150a0c", surface: "#1f1013", ink: "#f1e8e4", muted: "#b5a3a2", line: "#38201f", accent: "#d4a373", accentInk: "#150a0c", gold: "#d4a373" },
   },
   {
-    id: "kalo", name: "Kalo", about: "Black on white, hard edges, a sharp modern typeface.", kind: "solid", display: "--font-space", body: "--font-space",
+    id: "kalo", name: "Kalo", about: "Graphite on soft white, hard edges, a sharp modern typeface.", kind: "solid", display: "--font-space", body: "--font-space",
     radius: { box: "0", card: "0", button: "0" }, type: { weight: 600, h2: 600, track: "-0.035em" }, card: "minimal", header: "split", footer: "compact",
-    light: { paper: "#f4f4f2", surface: "#ffffff", ink: "#111111", muted: "#666662", line: "#deded9", accent: "#111111", accentInk: "#ffffff", gold: "#8a6d2f" },
-    dark: { paper: "#0c0c0c", surface: "#161616", ink: "#f2f2ee", muted: "#a3a3a0", line: "#2a2a2a", accent: "#f2f2ee", accentInk: "#0c0c0c", gold: "#c9a45c" },
+    light: { paper: "#f5f5f3", surface: "#ffffff", ink: "#1c1c1e", muted: "#68686a", line: "#deded9", accent: "#1c1c1e", accentInk: "#ffffff", gold: "#8a6d2f" },
+    dark: { paper: "#0c0c0d", surface: "#17171a", ink: "#f2f2ee", muted: "#a3a3a0", line: "#2a2a2c", accent: "#f2f2ee", accentInk: "#0c0c0d", gold: "#c9a45c" },
   },
   {
-    id: "komola", name: "Komola", about: "Bright bazaar orange on white. Friendly, busy and easy to shop.", kind: "solid", display: "--font-poppins", body: "--font-poppins",
-    radius: { box: "0.625rem", card: "0.75rem", button: "0.625rem" }, type: { weight: 700, h2: 700, track: "-0.02em" }, card: "framed", header: "marketplace", footer: "classic",
-    light: { paper: "#f5f6f8", surface: "#ffffff", ink: "#1f2430", muted: "#5f6878", line: "#e4e7ec", accent: "#d9650a", accentInk: "#ffffff", gold: "#d9650a" },
-    dark: { paper: "#14161b", surface: "#1d2027", ink: "#f2f3f5", muted: "#a5abb7", line: "#2e323b", accent: "#f7931e", accentInk: "#1a1204", gold: "#f7931e" },
+    id: "komola", name: "Komola", about: "Warm burnt amber on cream. Friendly, like a good bazaar.", kind: "solid", display: "--font-poppins", body: "--font-poppins",
+    radius: { box: "0.625rem", card: "0.875rem", button: "0.625rem" }, type: { weight: 600, h2: 700, track: "-0.02em" }, card: "framed", header: "marketplace", footer: "classic",
+    light: { paper: "#faf7f2", surface: "#ffffff", ink: "#2a211a", muted: "#6f6358", line: "#ece5da", accent: "#b4551a", accentInk: "#ffffff", gold: "#c98a3e" },
+    dark: { paper: "#15110d", surface: "#1f1a14", ink: "#f3ede4", muted: "#ada295", line: "#332b22", accent: "#e8975c", accentInk: "#1c1107", gold: "#e0ae6e" },
   },
   {
-    id: "nodi", name: "Nodi", about: "Clear river blue. Clean, trusted and confident.", kind: "solid", display: "--font-manrope", body: "--font-manrope",
-    radius: { box: "0.75rem", card: "1rem", button: "9999px" }, type: { weight: 800, h2: 800, track: "-0.03em" }, card: "bold", header: "classic", footer: "contact",
-    light: { paper: "#f3f6fb", surface: "#ffffff", ink: "#0d1b33", muted: "#566480", line: "#dfe6f1", accent: "#1456d9", accentInk: "#ffffff", gold: "#0e8fb8" },
-    dark: { paper: "#0a1120", surface: "#121b2e", ink: "#eaf0fb", muted: "#9eacc6", line: "#25314a", accent: "#6ea3ff", accentInk: "#0a1120", gold: "#4fc3e8" },
+    id: "nodi", name: "Nodi", about: "Deep navy and brushed brass. Calm, trusted and confident.", kind: "solid", display: "--font-manrope", body: "--font-manrope",
+    radius: { box: "0.75rem", card: "1rem", button: "9999px" }, type: { weight: 700, h2: 700, track: "-0.03em" }, card: "elevated", header: "classic", footer: "contact",
+    light: { paper: "#f4f6f9", surface: "#ffffff", ink: "#12203a", muted: "#5a6780", line: "#e0e5ee", accent: "#16325f", accentInk: "#ffffff", gold: "#a88a55" },
+    dark: { paper: "#0a1120", surface: "#131c30", ink: "#e9eef8", muted: "#9eacc6", line: "#26324c", accent: "#9dbcec", accentInk: "#0a1120", gold: "#d0b27c" },
   },
   {
     id: "beli", name: "Beli", about: "Quiet cream and sage, like a calm home. Soft and airy.", kind: "solid", display: "--font-dmserif", body: "--font-dmsans",
-    radius: { box: "0.375rem", card: "0.5rem", button: "9999px" }, type: { weight: 400, h2: 400, track: "-0.005em" }, card: "minimal", header: "centered", footer: "minimal",
-    light: { paper: "#faf7f0", surface: "#fffdf8", ink: "#2a2b24", muted: "#666859", line: "#e8e3d6", accent: "#4f6b4a", accentInk: "#fffdf8", gold: "#a58a4e" },
+    radius: { box: "0.375rem", card: "0.5rem", button: "9999px" }, type: { weight: 400, h2: 400, track: "-0.005em" }, card: "editorial", header: "centered", footer: "minimal",
+    light: { paper: "#faf7f0", surface: "#fffdf8", ink: "#2a2b24", muted: "#666859", line: "#e8e3d6", accent: "#566b51", accentInk: "#fffdf8", gold: "#a58a4e" },
     dark: { paper: "#13150f", surface: "#1c1f17", ink: "#efece2", muted: "#aaa998", line: "#2e3126", accent: "#a9c29f", accentInk: "#13150f", gold: "#cdb37a" },
   },
   {
-    id: "shobuj", name: "Shobuj", about: "Fresh emerald running into teal, on every button and band.", kind: "gradient", display: "--font-manrope", body: "--font-manrope",
-    fill: "linear-gradient(115deg, #067a5b 0%, #0b8476 100%)",
-    radius: { box: "0.875rem", card: "1.125rem", button: "9999px" }, type: { weight: 700, h2: 800, track: "-0.025em" }, card: "elevated", header: "marketplace", footer: "classic",
-    light: { paper: "#f2f8f5", surface: "#ffffff", ink: "#0d2a22", muted: "#50695f", line: "#dcebe4", accent: "#067a5b", accentInk: "#ffffff", gold: "#0b8476" },
-    dark: { paper: "#08130f", surface: "#101f19", ink: "#e6f4ee", muted: "#9bb5aa", line: "#20352c", accent: "#0b8476", accentInk: "#ffffff", gold: "#3dd6ae" },
+    id: "shobuj", name: "Shobuj", about: "A slow gradient of forest green. Rich, not loud.", kind: "gradient", display: "--font-manrope", body: "--font-manrope",
+    fill: "linear-gradient(135deg, #0f3d33 0%, #215f50 100%)",
+    radius: { box: "0.875rem", card: "1.125rem", button: "9999px" }, type: { weight: 700, h2: 700, track: "-0.025em" }, card: "elevated", header: "classic", footer: "classic",
+    light: { paper: "#f4f7f5", surface: "#ffffff", ink: "#12261f", muted: "#55695f", line: "#dfe8e3", accent: "#1a5245", accentInk: "#ffffff", gold: "#a58a4e" },
+    dark: { paper: "#08130f", surface: "#111f19", ink: "#e6f4ee", muted: "#9bb5aa", line: "#20352c", accent: "#74c9ad", accentInk: "#ffffff", gold: "#cdb37a" },
   },
   {
-    id: "surjasto", name: "Surjasto", about: "A warm sunset of pink and orange. Lively and full of energy.", kind: "gradient", display: "--font-poppins", body: "--font-poppins",
-    fill: "linear-gradient(115deg, #c81e6b 0%, #dc4415 100%)",
-    radius: { box: "1rem", card: "1.25rem", button: "9999px" }, type: { weight: 700, h2: 700, track: "-0.025em" }, card: "bold", header: "classic", footer: "dark",
-    light: { paper: "#fff7f3", surface: "#ffffff", ink: "#2b1420", muted: "#745a64", line: "#f4e2da", accent: "#d0305a", accentInk: "#ffffff", gold: "#dc4415" },
-    dark: { paper: "#160b10", surface: "#21121a", ink: "#fbecef", muted: "#bca5ad", line: "#3a222c", accent: "#d0305a", accentInk: "#ffffff", gold: "#ff8a5c" },
+    id: "surjasto", name: "Surjasto", about: "Dusk in rose gold and copper. Warm and elegant.", kind: "gradient", display: "--font-fraunces", body: "--font-dmsans",
+    fill: "linear-gradient(135deg, #7d3548 0%, #a8583f 100%)",
+    radius: { box: "1rem", card: "1.25rem", button: "9999px" }, type: { weight: 500, h2: 500, track: "-0.02em" }, card: "boutique", header: "centered", footer: "minimal",
+    light: { paper: "#fbf6f2", surface: "#fffdfb", ink: "#2d1a1c", muted: "#76625f", line: "#efe3dc", accent: "#8f4545", accentInk: "#ffffff", gold: "#b5805a" },
+    dark: { paper: "#160d0e", surface: "#221518", ink: "#f8ece8", muted: "#bca7a3", line: "#3a2629", accent: "#eba98f", accentInk: "#ffffff", gold: "#e0ac8c" },
   },
   {
-    id: "akash", name: "Akash", about: "Futuristic violet and electric blue on deep night, with glass cards.", kind: "gradient", display: "--font-sora", body: "--font-space",
-    fill: "linear-gradient(115deg, #6d3bff 0%, #0d7fd6 100%)",
-    radius: { box: "1rem", card: "1.25rem", button: "9999px" }, type: { weight: 600, h2: 600, track: "-0.035em" }, card: "glass", header: "split", footer: "dark", prefers: "dark",
-    light: { paper: "#f4f5ff", surface: "#ffffff", ink: "#12142b", muted: "#595d7e", line: "#e0e2f5", accent: "#5a35e0", accentInk: "#ffffff", gold: "#0d7fd6" },
-    dark: { paper: "#090a16", surface: "#141629", ink: "#eef0ff", muted: "#a3a8c9", line: "#272b48", accent: "#6d3bff", accentInk: "#ffffff", gold: "#4cc4ff" },
+    id: "akash", name: "Akash", about: "Midnight indigo in a slow gradient, with silver light. Quietly futuristic.", kind: "gradient", display: "--font-sora", body: "--font-space",
+    fill: "linear-gradient(135deg, #1b1f4d 0%, #3d4192 100%)",
+    radius: { box: "1rem", card: "1.25rem", button: "9999px" }, type: { weight: 600, h2: 600, track: "-0.035em" }, card: "glass", header: "split", footer: "dark",
+    light: { paper: "#f5f5fb", surface: "#ffffff", ink: "#15162b", muted: "#5c5e7c", line: "#e2e3f2", accent: "#2d3072", accentInk: "#ffffff", gold: "#7a80c9" },
+    dark: { paper: "#0b0c14", surface: "#16172a", ink: "#eef0fb", muted: "#a3a8c9", line: "#272a47", accent: "#aab1ff", accentInk: "#ffffff", gold: "#aab1ff" },
   },
   {
-    id: "rani", name: "Rani", about: "Royal plum melting into rose, with an elegant serif.", kind: "gradient", display: "--font-fraunces", body: "--font-manrope",
-    fill: "linear-gradient(115deg, #561a8a 0%, #b8175a 100%)",
-    radius: { box: "0.75rem", card: "1rem", button: "0.75rem" }, type: { weight: 600, h2: 500, track: "-0.02em" }, card: "elevated", header: "centered", footer: "contact",
-    light: { paper: "#faf5fb", surface: "#ffffff", ink: "#241030", muted: "#6d5a78", line: "#ece1f0", accent: "#7a1a78", accentInk: "#ffffff", gold: "#b8175a" },
-    dark: { paper: "#120a18", surface: "#1d1226", ink: "#f5ecf8", muted: "#b5a5be", line: "#35243f", accent: "#7a1a78", accentInk: "#ffffff", gold: "#f07fb0" },
+    id: "rani", name: "Rani", about: "Aubergine melting into wine, with an elegant serif.", kind: "gradient", display: "--font-fraunces", body: "--font-manrope",
+    fill: "linear-gradient(135deg, #371a3f 0%, #6e2a54 100%)",
+    radius: { box: "0.75rem", card: "1rem", button: "0.75rem" }, type: { weight: 500, h2: 500, track: "-0.02em" }, card: "editorial", header: "centered", footer: "contact",
+    light: { paper: "#faf6f9", surface: "#ffffff", ink: "#26142b", muted: "#6f5c76", line: "#ece3ee", accent: "#552248", accentInk: "#ffffff", gold: "#a8805f" },
+    dark: { paper: "#120a16", surface: "#1d1224", ink: "#f5ecf6", muted: "#b5a5be", line: "#35243f", accent: "#dcaacb", accentInk: "#ffffff", gold: "#d4a98a" },
   },
 ];
 
@@ -102,10 +101,14 @@ export const isTheme = (v: string): v is ThemeId => THEMES.some((t) => t.id === 
 export const themeOf = (v: string) => THEMES.find((t) => t.id === v) ?? THEMES[0];
 
 export const CARD_STYLES: { id: CardStyleId; name: string; about: string }[] = [
-  { id: "soft", name: "Soft tint", about: "Each product on a soft wash of its own colour." },
-  { id: "framed", name: "Framed", about: "White card with a thin border, like a big online shop." },
-  { id: "elevated", name: "Lifted", about: "A floating card with a shadow that rises under the pointer." },
+  { id: "ios", name: "App Store", about: "A clean white tile with a small tinted button, like the App Store." },
   { id: "glass", name: "Glass", about: "See-through frosted cards over a soft glow." },
+  { id: "overlay", name: "Picture first", about: "The product fills the card, with its words on a frosted bar." },
+  { id: "elevated", name: "Lifted", about: "A floating card with a shadow that rises under the pointer." },
+  { id: "boutique", name: "Boutique", about: "Centered, with a fine gold line and an outlined button." },
+  { id: "editorial", name: "Editorial", about: "Tall picture and a magazine-style title. No box." },
+  { id: "framed", name: "Framed", about: "White card with a thin border, like a big online shop." },
+  { id: "soft", name: "Soft tint", about: "Each product on a soft wash of its own colour." },
   { id: "minimal", name: "Minimal", about: "No box at all. Just the product and centered words." },
   { id: "bold", name: "Bold", about: "Big price and a full, filled button." },
 ];

@@ -1,7 +1,9 @@
 import { createClient } from "@/lib/supabase/server";
 import { mergeSettings } from "@/lib/settings";
 import { PALETTES } from "@/lib/palettes";
-import { CARD_STYLES, THEMES, themeOf } from "@/lib/themes";
+import { getCatalog } from "@/lib/catalog";
+import { ThemeLook } from "@/components/admin/ThemeLook";
+import { THEMES, themeCss } from "@/lib/themes";
 import { InfoTip } from "@/components/admin/InfoTip";
 import { ImageField } from "@/components/admin/ImageField";
 import { saveAnnouncement, saveBump, saveAppearance, saveChat, saveContact, saveExtras, savePopup, saveProof, saveTracking } from "./actions";
@@ -13,8 +15,9 @@ const save = "rounded-pill bg-accent px-6 py-2.5 text-sm font-semibold text-acce
 
 export default async function Settings() {
   const supabase = await createClient();
-  const { data } = await supabase.from("site_settings").select("key, value");
+  const [{ data }, { products }] = await Promise.all([supabase.from("site_settings").select("key, value"), getCatalog()]);
   const s = mergeSettings((data ?? []) as { key: string; value: unknown }[]);
+  const samples = [...products.filter((p) => p.image && (p.compareAt ?? 0) > p.basePrice), ...products.filter((p) => p.image)].slice(0, 2);
   const { data: vs } = await supabase.from("product_variants").select("id, sku, color_name, size, products(name, status)").gt("stock", 0).limit(300);
   const variants = ((vs ?? []) as unknown as { id: string; sku: string; color_name: string | null; size: string | null; products: { name: string; status: string } | { name: string; status: string }[] | null }[])
     .map((v) => ({ id: v.id, prod: Array.isArray(v.products) ? v.products[0] : v.products, label: [v.color_name, v.size].filter(Boolean).join(", ") || v.sku }))
@@ -26,56 +29,12 @@ export default async function Settings() {
       <div className="mt-6 grid max-w-3xl gap-5">
         <form action={saveAppearance} className={`${card} grid gap-5`}>
           <div><h2 className="font-display text-base font-semibold">Theme<InfoTip text="Changes the colors, fonts and corner shapes of the whole store at once, so it looks like one designed brand." /></h2><p className="mt-1 text-xs text-muted">A theme changes everything at once: colors, backgrounds, text, heading and body fonts, and how rounded buttons and cards are. Dark mode has its own matching colors.</p></div>
-          <div className="grid gap-3 sm:grid-cols-2">
-            {THEMES.map((t) => (
-              <label key={t.id} className="group relative cursor-pointer overflow-hidden rounded-xl border border-line has-[:checked]:border-ink has-[:checked]:ring-2 has-[:checked]:ring-ink/20">
-                <input type="radio" name="theme" value={t.id} defaultChecked={s.appearance.theme === t.id} className="sr-only" />
-                <span className="flex h-full items-stretch">
-                  <span style={{ background: t.light.paper, color: t.light.ink }} className="flex-1 p-4">
-                    <span className="flex items-center justify-between gap-2">
-                      <span style={{ fontFamily: `var(${t.display}), system-ui`, fontWeight: t.type.weight }} className="block text-lg">{t.name}</span>
-                      <span style={{ borderColor: t.light.ink + "33" }} className="rounded-full border px-2 py-0.5 text-[10px]">{t.kind === "gradient" ? "Gradient" : "Solid"}</span>
-                    </span>
-                    <span style={{ fontFamily: `var(${t.body}), system-ui`, opacity: 0.72 }} className="mt-1 block text-xs">{t.about}</span>
-                    <span className="mt-3 flex items-center gap-1.5">
-                      <span style={{ background: t.fill ?? t.light.accent, color: t.light.accentInk, borderRadius: t.radius.button, fontFamily: `var(${t.body}), system-ui` }} className="px-3 py-1 text-[11px] font-semibold">Buy now</span>
-                      <span style={{ background: t.light.surface, borderColor: t.light.ink + "22", borderRadius: t.radius.card }} className="h-6 w-6 border" />
-                    </span>
-                  </span>
-                  <span style={{ background: t.dark.paper, color: t.dark.ink }} className="grid w-14 content-center justify-items-center gap-2 p-2">
-                    <span style={{ background: t.fill ?? t.dark.accent }} className="h-5 w-9 rounded" /><span className="text-[10px] opacity-70">Dark</span>
-                  </span>
-                </span>
-              </label>
-            ))}
-          </div>
-          <label className="flex items-start gap-2 text-sm"><input type="checkbox" name="applyLayout" className="mt-1" /> <span>Also use this theme&apos;s header and footer layout, and its favourite light or dark mode<span className="block text-xs text-muted">Tick this to change the whole look at once. You can still change the header and footer afterwards.</span></span></label>
-          <div>
-            <label className={label}>Product card style</label>
-            <div className="grid gap-2 sm:grid-cols-2">
-              <label className="cursor-pointer">
-                <input type="radio" name="card" value="theme" defaultChecked={!CARD_STYLES.some((c) => c.id === s.appearance.card)} className="peer sr-only" />
-                <span className="block h-full rounded-xl border border-line p-3 text-sm peer-checked:border-ink peer-checked:ring-2 peer-checked:ring-ink/20"><span className="block font-medium">Follow the theme</span><span className="mt-0.5 block text-xs text-muted">Right now: {CARD_STYLES.find((c) => c.id === (s.appearance.glass ? "glass" : themeOf(s.appearance.theme).card))?.name}.</span></span>
-              </label>
-              {CARD_STYLES.map((c) => (
-                <label key={c.id} className="cursor-pointer">
-                  <input type="radio" name="card" value={c.id} defaultChecked={s.appearance.card === c.id} className="peer sr-only" />
-                  <span className="block h-full rounded-xl border border-line p-3 text-sm peer-checked:border-ink peer-checked:ring-2 peer-checked:ring-ink/20"><span className="block font-medium">{c.name}</span><span className="mt-0.5 block text-xs text-muted">{c.about}</span></span>
-                </label>
-              ))}
-            </div>
-          </div>
-          <label className="flex items-start gap-2 text-sm"><input type="checkbox" name="glass" defaultChecked={s.appearance.glass} className="mt-1" /> <span>Apple-style glass across the whole shop<span className="block text-xs text-muted">Floating frosted header and quick bar, rounded buttons and panels. It works with every theme, and while it is on, buttons are always fully round.</span></span></label>
+          <style dangerouslySetInnerHTML={{ __html: themeCss(THEMES) }} />
+          <ThemeLook theme={s.appearance.theme} card={s.appearance.card} glass={s.appearance.glass} samples={samples} />
+          <label className="flex items-start gap-2 text-sm"><input type="checkbox" name="applyLayout" className="mt-1" /> <span>Also use this theme&apos;s header and footer layout<span className="block text-xs text-muted">You can still change the header and footer afterwards.</span></span></label>
+          <label className="flex items-start gap-2 text-sm"><input type="checkbox" name="glass" defaultChecked={s.appearance.glass} className="mt-1" /> <span>Apple-style glass across the whole shop<span className="block text-xs text-muted">Glass header on scroll, floating quick bar, iPhone switches and the Apple system font. It works with every theme. While it is on, buttons are always round and the theme&apos;s own fonts rest.</span></span></label>
+          <label className="flex items-center gap-2 text-sm"><input type="checkbox" name="sectionGrid" defaultChecked={s.appearance.sectionGrid} /> Show fine grid lines behind sections (each section can also turn them on or off in the page builder)</label>
           <label className="flex items-center gap-2 text-sm"><input type="checkbox" name="shine" defaultChecked={s.appearance.shine} /> Filled buttons catch the light every few seconds, by themselves</label>
-          <div className="grid gap-4 sm:grid-cols-2">
-            
-            <div>
-              <label className={label}>Light or dark by default</label>
-              <select name="mode" defaultValue={s.appearance.mode} className={input}>
-                <option value="light">Light</option><option value="dark">Dark</option><option value="system">Follow the visitor&apos;s device</option>
-              </select>
-            </div>
-          </div>
           <div>
             <label className={label}>Button shape</label>
             <div className="flex flex-wrap gap-2">

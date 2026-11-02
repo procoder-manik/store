@@ -1,6 +1,7 @@
 import "server-only";
 import { createHmac, timingSafeEqual } from "crypto";
 import { SITE_URL } from "@/lib/config";
+import { themedEmail } from "@/lib/email-html";
 
 export const emailConfigured = () => !!(process.env.RESEND_API_KEY && process.env.EMAIL_FROM);
 
@@ -35,10 +36,13 @@ export async function sendEmails(msgs: Outgoing[], kind = "other"): Promise<{ se
   }
   let sent = 0, failed = 0, error: string | undefined;
   const from = await senderLine();
+  const { getPublicSettings } = await import("@/lib/settings");
+  const { themeOf } = await import("@/lib/themes");
+  const theme = themeOf((await getPublicSettings()).appearance.theme);
   for (let i = 0; i < msgs.length; i += 100) {
     const chunk = msgs.slice(i, i + 100);
     try {
-      const payload = chunk.map((m) => ({ from, to: [m.to], subject: m.subject, html: m.html, text: m.text }));
+      const payload = chunk.map((m) => ({ from, to: [m.to], subject: m.subject, html: themedEmail(m.html, theme), text: m.text }));
       const res = await fetch(payload.length === 1 ? "https://api.resend.com/emails" : "https://api.resend.com/emails/batch", {
         method: "POST",
         headers: { "content-type": "application/json", authorization: `Bearer ${process.env.RESEND_API_KEY}` },

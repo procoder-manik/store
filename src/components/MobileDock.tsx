@@ -3,7 +3,8 @@
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
-import { House, LayoutGrid, ShoppingBag, User, X } from "lucide-react";
+import { useTheme } from "next-themes";
+import { House, LayoutGrid, Moon, ShoppingBag, Sun, User, X } from "lucide-react";
 import { formatPrice } from "@/lib/config";
 import { useCart } from "@/lib/cart";
 import { Portal, useOverlay } from "./Portal";
@@ -29,6 +30,7 @@ export function MobileDock({ links }: { links: L[] }) {
   const { count } = useCartSummary();
   const setOpen = useCart((s) => s.setOpen);
   const close = useCallback(() => setMenu(false), []);
+  const { theme, setTheme } = useTheme();
   useOverlay(menu, close);
   useEffect(() => setMenu(false), [path]);
   if (HIDE.test(path)) return null;
@@ -64,6 +66,7 @@ export function MobileDock({ links }: { links: L[] }) {
                   <li key={l.label + l.href}><Link href={l.href} onClick={close} className="flex min-h-12 items-center rounded-xl border border-line px-3.5 py-2 text-sm font-medium transition hover:border-ink/40">{l.label}</Link></li>
                 ))}
               </ul>
+              <button type="button" onClick={() => setTheme(theme === "dark" ? "light" : "dark")} className="mt-3 flex min-h-12 w-full items-center justify-center gap-2 rounded-xl border border-line text-sm font-medium">{theme === "dark" ? <Sun size={16} /> : <Moon size={16} />}{theme === "dark" ? "Light mode" : "Dark mode"}</button>
             </div>
           </div>
         </Portal>

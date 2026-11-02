@@ -3,6 +3,7 @@ import type { Product } from "@/lib/demo-products";
 import type { Cat } from "@/lib/catalog";
 import type { Banner } from "@/lib/banners";
 import type { Block } from "@/lib/blocks";
+import { showsGrid } from "@/lib/blocks";
 import { formatPrice } from "@/lib/config";
 import { Clock, CreditCard, Gift, Headset, RefreshCcw, ShieldCheck, Star, Truck } from "lucide-react";
 import { HtmlBlock } from "./HtmlBlock";
@@ -44,8 +45,9 @@ export function BlockView({ b: raw, ctx }: { b: Block; ctx: BlockCtx }) {
   const titled = (asTitle && "heading" in raw ? { ...raw, heading: page.title, sub: page.description || ("sub" in raw ? raw.sub : "") } : raw) as Block;
   const crumb = raw.crumbs && page ? page.title : "";
   const view = <BlockBody b={titled} ctx={ctx} asTitle={asTitle} crumb={crumb} />;
-  if (crumb && CRUMB_BAR.has(raw.type)) return <><div className="mx-auto max-w-7xl px-5 py-3 md:px-8"><Crumbs title={crumb} /></div>{view}</>;
-  return view;
+  const body = showsGrid(raw) ? <div className="relative">{view}<span aria-hidden className="section-grid" /></div> : view;
+  if (crumb && CRUMB_BAR.has(raw.type)) return <><div className="mx-auto max-w-7xl px-5 py-3 md:px-8"><Crumbs title={crumb} /></div>{body}</>;
+  return body;
 }
 
 function BlockBody({ b, ctx, asTitle, crumb }: { b: Block; ctx: BlockCtx; asTitle: boolean; crumb: string }) {

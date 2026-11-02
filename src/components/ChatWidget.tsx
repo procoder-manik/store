@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useRef, useState, useTransition } from "react";
-import { RotateCcw, SendHorizontal, Volume2, VolumeX, X } from "lucide-react";
+import { ArrowUp, RotateCcw, Volume2, VolumeX, X } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { chatLead } from "@/app/actions/leads";
 import { formatPrice } from "@/lib/config";
@@ -120,21 +120,22 @@ export function ChatWidget({ name, greeting, avatar = "", whatsapp = "", waNote 
         </button>
       )}
       {open && (
-        <section aria-label={name} className="chat-glass pop-in fixed inset-x-2 bottom-2 z-50 flex h-[min(620px,86dvh)] flex-col overflow-hidden rounded-[22px] text-ink md:inset-x-auto md:bottom-5 md:left-5 md:w-[400px]">
-          <header className="flex items-center gap-3 border-b border-ink/10 px-4 py-3">
-            <Face avatar={avatar} size="h-10 w-10" />
-            <div className="min-w-0 flex-1">
-              <p className="truncate font-display text-base font-semibold leading-tight">{name}</p>
-              <p className="truncate text-xs text-ink/70">Automated assistant, answers right away</p>
+        <section aria-label={name} className="chat-glass pop-in fixed inset-x-2 bottom-2 z-50 flex h-[min(640px,88dvh)] flex-col overflow-hidden rounded-[28px] text-ink md:inset-x-auto md:bottom-5 md:left-5 md:w-[390px]">
+          <header className="relative grid justify-items-center gap-1 border-b border-ink/10 px-4 pb-2.5 pt-3">
+            <div className="absolute left-3 top-3 flex items-center">
+              {users > 0 && <button aria-label="Start over" onClick={restart} className="grid h-8 w-8 place-items-center rounded-full bg-ink/[0.07] transition hover:bg-ink/[0.12]"><RotateCcw size={14} /></button>}
             </div>
-            {users > 0 && <button aria-label="Start over" onClick={restart} className="grid h-9 w-9 place-items-center rounded-full transition hover:bg-ink/10"><RotateCcw size={15} /></button>}
-            <button aria-label={muted ? "Turn sound on" : "Turn sound off"} onClick={toggleSound} className="grid h-9 w-9 place-items-center rounded-full transition hover:bg-ink/10">{muted ? <VolumeX size={16} /> : <Volume2 size={16} />}</button>
-            <button aria-label="Close chat" onClick={() => setOpen(false)} className="grid h-9 w-9 place-items-center rounded-full transition hover:bg-ink/10"><X size={17} /></button>
+            <div className="absolute right-3 top-3 flex items-center gap-1.5">
+              <button aria-label={muted ? "Turn sound on" : "Turn sound off"} onClick={toggleSound} className="grid h-8 w-8 place-items-center rounded-full bg-ink/[0.07] transition hover:bg-ink/[0.12]">{muted ? <VolumeX size={14} /> : <Volume2 size={14} />}</button>
+              <button aria-label="Close chat" onClick={() => setOpen(false)} className="grid h-8 w-8 place-items-center rounded-full bg-ink/[0.07] transition hover:bg-ink/[0.12]"><X size={15} /></button>
+            </div>
+            <Face avatar={avatar} size="h-11 w-11" />
+            <p className="max-w-[60%] truncate text-[13px] font-semibold tracking-[-0.01em]">{name}</p>
           </header>
 
           <div className="flex-1 space-y-4 overflow-y-auto px-4 py-4" aria-live="polite">
             {msgs.map((m, i) => (
-              <div key={i} className={`flex flex-col gap-2 ${m.role === "user" ? "items-end" : "items-start"}`}>
+              <div key={i} className={`msg-in flex flex-col gap-2 ${m.role === "user" ? "items-end" : "items-start"}`}>
                 <p className={`max-w-[88%] whitespace-pre-line rounded-[18px] px-4 py-2.5 text-sm leading-relaxed ${m.role === "user" ? "rounded-br-[6px] bg-accent text-accent-ink" : "rounded-bl-[6px] bg-ink/[0.07]"}`}>{m.content}</p>
                 {m.products?.map((p) => (
                   <Link key={p.slug} href={`/product/${p.slug}`} className="flex w-[88%] items-center gap-3 rounded-[14px] border border-ink/15 p-2 transition hover:border-ink/50">
@@ -151,7 +152,7 @@ export function ChatWidget({ name, greeting, avatar = "", whatsapp = "", waNote 
             ))}
             {users === 0 && !busy && (
               <div className="flex flex-wrap gap-2">
-                {STARTERS.map((s) => <button key={s} onClick={() => ask(s)} className="rounded-full border border-ink/25 px-3 py-1.5 text-xs font-medium transition hover:bg-ink/10">{s}</button>)}
+                {STARTERS.map((s) => <button key={s} onClick={() => ask(s)} className="rounded-full bg-ink/[0.07] px-3.5 py-2 text-xs font-medium transition hover:bg-ink/[0.12]">{s}</button>)}
               </div>
             )}
             {busy && <p role="status" aria-label="Typing" className="flex w-fit gap-1.5 rounded-[18px] rounded-bl-[6px] bg-ink/[0.07] px-4 py-3.5"><i className="typing-dot" /><i className="typing-dot" /><i className="typing-dot" /></p>}
@@ -168,9 +169,11 @@ export function ChatWidget({ name, greeting, avatar = "", whatsapp = "", waNote 
             <div ref={end} />
           </div>
 
-          <form onSubmit={(e) => { e.preventDefault(); ask(text.trim()); }} className="flex items-center gap-2 p-3 pt-1">
-            <input value={text} onChange={(e) => setText(e.target.value)} maxLength={500} placeholder="Ask in Bangla or English" aria-label="Your message" className="min-w-0 flex-1 rounded-full bg-ink/[0.07] px-4 py-3 text-base outline-none placeholder:text-ink/60 focus:ring-2 focus:ring-accent md:text-sm" />
-            <button aria-label="Send" disabled={busy || !text.trim()} className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-accent text-accent-ink transition disabled:opacity-40"><SendHorizontal size={17} /></button>
+          <form onSubmit={(e) => { e.preventDefault(); ask(text.trim()); }} className="p-3 pt-1">
+            <div className="flex items-center gap-1 rounded-full border border-ink/15 bg-surface/70 py-1 pl-4 pr-1 transition focus-within:border-ink/30">
+              <input value={text} onChange={(e) => setText(e.target.value)} maxLength={500} placeholder="Message" aria-label="Your message" className="chat-input min-w-0 flex-1 bg-transparent py-1.5 text-base outline-none placeholder:text-ink/50 md:text-sm" />
+              <button aria-label="Send" disabled={busy || !text.trim()} className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-accent text-accent-ink transition disabled:opacity-30"><ArrowUp size={17} strokeWidth={2.5} /></button>
+            </div>
           </form>
           {whatsapp && (
             <p className="px-4 pb-3 text-center text-xs text-ink/70">

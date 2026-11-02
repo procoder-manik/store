@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import { useTheme } from "next-themes";
-import { Heart, Menu, Monitor, Moon, Phone, ShoppingBag, Sun, User, X } from "lucide-react";
+import { Heart, Menu, Moon, Phone, ShoppingBag, Sun, User, X } from "lucide-react";
 import { useCart } from "@/lib/cart";
 import { useWishlist } from "@/lib/lists";
 import type { Cat } from "@/lib/catalog";
@@ -14,7 +14,6 @@ import { ThemePicker } from "./ThemePicker";
 import { SearchOverlay } from "./SearchOverlay";
 import { Portal, useOverlay } from "./Portal";
 
-const ORDER = ["light", "dark", "system"] as const;
 type L = { label: string; href: string };
 type Props = { brand: string; logo?: string; links: L[]; categories?: Cat[]; themePicker?: boolean; cfg?: HeaderStyleCfg; contact?: { phone: string; whatsapp: string } };
 
@@ -39,8 +38,8 @@ export function Header({ brand, logo = "", links, categories = [], themePicker =
   useOverlay(menu, closeMenu);
 
   const dark = cfg.style === "bold";
-  const next = ORDER[(ORDER.indexOf((theme ?? "light") as (typeof ORDER)[number]) + 1) % ORDER.length];
-  const ThemeIcon = !mounted ? Sun : theme === "dark" ? Moon : theme === "system" ? Monitor : Sun;
+  const next = theme === "dark" ? "light" : "dark";
+  const ThemeIcon = mounted && theme === "dark" ? Moon : Sun;
   const active = (href: string) => (href === "/" ? path === "/" : path.startsWith(href.split("?")[0]));
   const icon = `grid h-10 w-10 place-items-center rounded-full transition ${dark ? "hover:bg-white/10" : "hover:bg-surface"}`;
   const badge = (accent: boolean) => `absolute right-0.5 top-0.5 grid h-4 min-w-4 place-items-center rounded-full px-1 text-[10px] font-semibold ${accent ? "bg-accent text-accent-ink" : "bg-ink text-paper"}`;

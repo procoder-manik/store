@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { ArrowDown, ArrowUp, ChevronDown, ChevronRight, ExternalLink, GripVertical, Plus, Trash2 } from "lucide-react";
 import { deletePage, savePage } from "@/app/admin/pages/actions";
 import { ANIMATIONS, BLOCK_GROUPS, BLOCK_LABELS, FONT_WEIGHTS, HEADING_LEVELS, HEADING_LEVEL_LABEL, RAIL_STYLES, SLIDER_STYLES, TAG_SIZE_PX, TEXT_CASES, newBlock, type Block, type BlockType, type HeadingLevel } from "@/lib/blocks";
+import { showsGrid } from "@/lib/blocks";
 import type { Product } from "@/lib/demo-products";
 import type { Cat } from "@/lib/catalog";
 import { formatPrice } from "@/lib/config";
@@ -130,6 +131,10 @@ function StyleRow({ b, set }: { b: Block; set: Setter }) {
 const TITLE_SECTIONS: BlockType[] = ["pagehead", "showcase", "showcasefull", "hero", "herofull", "rail3d", "rail3dfull", "slider", "sliderfull"];
 
 /** Lets any top-of-page section act as the page's title section, with a breadcrumb. The home page never shows these. */
+function GridOption({ b, set }: { b: Block; set: Setter }) {
+  return <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={showsGrid(b)} onChange={(e) => set({ gridLines: e.target.checked })} /> Show fine grid lines behind this section</label>;
+}
+
 function TitleOptions({ b, set, isHome }: { b: Block; set: Setter; isHome: boolean }) {
   if (!TITLE_SECTIONS.includes(b.type)) return null;
   if (isHome) return <p className="rounded-xl bg-paper p-3 text-xs text-muted">The home page has no breadcrumb or page title section, so this section uses the text you type here.</p>;
@@ -323,7 +328,7 @@ export function PageBuilder({ initial = EMPTY, products, categories, kind = "pag
                 <button type="button" aria-label="Move down" onClick={() => mv(i, i + 1)} className="grid h-8 w-8 place-items-center rounded-full hover:bg-paper"><ArrowDown size={14} /></button>
                 <button type="button" aria-label="Delete block" onClick={() => setBlocks(blocks.filter((_, j) => j !== i))} className="grid h-8 w-8 place-items-center rounded-full hover:bg-paper"><Trash2 size={14} /></button>
               </div>
-              {open === b.id && <div className="grid gap-3 border-t border-line p-4"><TitleOptions b={b} set={(p) => patch(i, p)} isHome={builtin?.path === "/"} /><Fields b={b} set={(p) => patch(i, p)} cats={categories} products={products} /><StyleRow b={b} set={(p) => patch(i, p)} /></div>}
+              {open === b.id && <div className="grid gap-3 border-t border-line p-4"><GridOption b={b} set={(p) => patch(i, p)} /><TitleOptions b={b} set={(p) => patch(i, p)} isHome={builtin?.path === "/"} /><Fields b={b} set={(p) => patch(i, p)} cats={categories} products={products} /><StyleRow b={b} set={(p) => patch(i, p)} /></div>}
             </div>
           ))}
         </section>
