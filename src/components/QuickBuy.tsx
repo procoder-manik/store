@@ -26,7 +26,9 @@ export function QuickBuy({ product, zones, onClose }: { product: Product; zones:
   const [size, setSize] = useState(product.sizes[1] ?? product.sizes[0] ?? "");
   const [qty, setQty] = useState(1);
   const [zoneId, setZoneId] = useState(zones[0]?.id ?? "");
-  const [quote, setQuote] = useState<{ subtotal: number; shipping: number; total: number; hasPreorder: boolean } | null>(null);
+  const [quote, setQuote] = useState<{ subtotal: number; shipping: number; discount: number; total: number; hasPreorder: boolean; couponError?: string } | null>(null);
+  const [couponInput, setCouponInput] = useState("");
+  const [coupon, setCoupon] = useState("");
   const [error, setError] = useState("");
   const [pending, start] = useTransition();
   const methods = usePaymentMethods();
@@ -45,13 +47,13 @@ export function QuickBuy({ product, zones, onClose }: { product: Product; zones:
   useEffect(() => {
     if (!zoneId || demo || !variant) { setQuote(null); return; }
     let live = true;
-    quoteOrder({ items: [{ productId: product.id, variantId: variant.id, qty }], zoneId }).then((r) => {
+    quoteOrder({ items: [{ productId: product.id, variantId: variant.id, qty }], zoneId, coupon }).then((r) => {
       if (!live) return;
-      if (r.ok) { setQuote({ subtotal: r.subtotal, shipping: r.shipping, total: r.total, hasPreorder: r.hasPreorder }); setError(""); }
+      if (r.ok) { setQuote({ subtotal: r.subtotal, shipping: r.shipping, discount: r.discount, total: r.total, hasPreorder: r.hasPreorder, couponError: r.couponError }); setError(""); }
       else setError(r.error);
     });
     return () => { live = false; };
-  }, [product.id, variant, qty, zoneId, demo]);
+  }, [product.id, variant, qty, zoneId, demo, coupon]);
 
   function addToCart() {
     add({ id: product.id, variantId: variant?.id, name: product.name, color: hasColors ? color.name : "", size, price, image: product.image, kind: product.kind, hex: color?.hex }, qty);
@@ -68,7 +70,7 @@ export function QuickBuy({ product, zones, onClose }: { product: Product; zones:
     start(async () => {
       const r = await placeOrder({
         name: String(f.get("name")), phone: String(f.get("phone")), email: String(f.get("email") ?? ""),
-        zoneId, district: String(f.get("district")), address: fullAddress(f), note: "", coupon: "",
+        zoneId, district: String(f.get("district")), address: fullAddress(f), note: "", coupon: quote?.couponError ? "" : coupon,
         bump: false, useCredit: true, ref: readRef(), paymentMethod: method, payerNumber: String(f.get("payer") ?? ""), trxId: String(f.get("trxId") ?? ""), plan: String(f.get("plan") ?? ""), advanceMethod: String(f.get("advanceMethod") ?? ""), website: String(f.get("qz_hp") ?? ""),
         items: [{ productId: product.id, variantId: variant?.id, qty }],
       });
@@ -146,8 +148,20 @@ export function QuickBuy({ product, zones, onClose }: { product: Product; zones:
           <p className="mt-1 text-sm font-medium">Payment</p>
           <PaymentPicker methods={methods} value={method} onChange={setMethod} amount={quote?.total} shipping={quote?.shipping} hasPreorder={quote?.hasPreorder ?? product.preorder} />
 
+          <div>
+            <div className="flex gap-2">
+              <input aria-label="Promo code" placeholder="Promo code" value={couponInput} onChange={(e) => setCouponInput(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); setCoupon(couponInput.trim()); } }} autoComplete="off" autoCapitalize="characters" className={field} />
+              <button type="button" onClick={() => setCoupon(couponInput.trim())} disabled={demo || !couponInput.trim()} className="shrink-0 rounded-full border border-line px-5 text-sm font-medium transition hover:bg-paper disabled:opacity-50">Apply</button>
+            </div>
+            {quote?.couponError && <p role="alert" className="mt-1.5 text-xs text-[var(--madder)]">{quote.couponError}</p>}
+            {coupon && quote && !quote.couponError && quote.discount > 0 && (
+              <p className="mt-1.5 flex items-center gap-2 text-xs text-muted"><Check size={13} /> {coupon.toUpperCase()} applied.<button type="button" onClick={() => { setCoupon(""); setCouponInput(""); }} className="underline">Remove</button></p>
+            )}
+          </div>
+
           <dl className="mt-1 grid gap-1.5 rounded-2xl border border-line bg-paper p-4 text-sm">
             <div className="flex justify-between"><dt className="text-muted">Items</dt><dd className="tabular-nums">{formatPrice(quote?.subtotal ?? price * qty)}</dd></div>
+            {!!quote && quote.discount > 0 && <div className="flex justify-between"><dt className="text-muted">Discount</dt><dd className="tabular-nums">-{formatPrice(quote.discount)}</dd></div>}
             <div className="flex justify-between"><dt className="text-muted">Delivery</dt><dd className="tabular-nums">{quote ? (quote.shipping === 0 ? "Free" : formatPrice(quote.shipping)) : "Calculated next"}</dd></div>
             <div className="mt-1 flex justify-between border-t border-line pt-2.5 text-base font-semibold"><dt>Total</dt><dd className="tabular-nums">{formatPrice(quote?.total ?? price * qty)}</dd></div>
           </dl>

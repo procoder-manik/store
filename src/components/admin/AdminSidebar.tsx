@@ -40,6 +40,7 @@ const GROUPS = [
     { href: "/admin/menus", label: "Site and menu", icon: PanelsTopLeft },
     { href: "/admin/permalinks", label: "URLs and search", icon: Link2 },
     { href: "/admin/settings", label: "Settings", icon: Settings },
+    { href: "/admin/ai", label: "AI services", icon: Sparkles },
     { href: "/admin/users", label: "Users", icon: Users },
     { href: "/admin/audit", label: "Audit log", icon: ScrollText },
     { href: "/admin/health", label: "Health check", icon: HeartPulse },

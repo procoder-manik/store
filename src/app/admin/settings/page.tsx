@@ -125,7 +125,7 @@ export default async function Settings() {
 
         <form action={saveChat} className={`${card} grid gap-4`}>
           <h2 className="font-display text-base font-semibold">AI shopping assistant<InfoTip text="A chat helper that answers customers from your real products, prices and delivery fees, so you answer fewer repeated questions." /></h2>
-          <p className="text-xs text-muted">A chat button for visitors. It reads your store live: products, prices, stock, pre-orders, offer banners, delivery areas and fees, payment options, contact details and the words on your published pages. When you change any of these, it knows at once. It can never see customers, orders, staff or private coupons.</p>
+          <p className="text-xs text-muted">A chat button for visitors. It reads your store live: products, prices, stock, pre-orders, offer banners, delivery areas and fees, payment options, contact details and the words on your published pages. When you change any of these, it knows at once. It can never see customers, orders, staff or private coupons. Connect AI services and keys under AI services in the menu.</p>
           <label className="flex items-center gap-2 text-sm"><input type="checkbox" name="enabled" defaultChecked={s.chat.enabled} /> Show the chat button</label>
           <div className="grid gap-4 sm:grid-cols-2">
             <div><label className={label}>Assistant name</label><input name="name" required maxLength={40} defaultValue={s.chat.name} className={input} /></div>
