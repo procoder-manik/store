@@ -10,6 +10,7 @@ export const BUILTIN: { slug: string; title: string; path: string }[] = [
   { slug: "size-guide", title: INFO_TITLES["size-guide"], path: "/size-guide" },
   { slug: "privacy", title: INFO_TITLES.privacy, path: "/privacy" },
   { slug: "terms", title: INFO_TITLES.terms, path: "/terms" },
+  { slug: "data-deletion", title: INFO_TITLES["data-deletion"], path: "/data-deletion" },
 ];
 
 /** The built-in version of a page as blocks, so it can be edited, reordered and extended. */

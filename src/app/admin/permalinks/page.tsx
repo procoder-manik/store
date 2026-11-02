@@ -17,7 +17,7 @@ export default async function Permalinks() {
     ["A category", `/category/${cat?.[0]?.slug ?? "hoodies"}`, "Set in Categories. Add a short description for search results"],
     ["A product", `/product/${first?.[0]?.slug ?? "everyday-hoodie"}`, "Set in the product form under Search listing"],
     ["A page you built", "/p/about-our-story", "Set in Pages"],
-    ["Store pages", "/about, /faq, /contact, /shipping, /returns, /privacy, /terms, /size-guide", "Built in. Make a page with the same address to replace one"],
+    ["Store pages", "/about, /faq, /contact, /shipping, /returns, /privacy, /terms, /data-deletion, /size-guide", "Built in. Make a page with the same address to replace one"],
     ["Order tracking", "/track", "Customers need the order number and phone"],
   ];
   return (

@@ -1,11 +1,11 @@
 export type Section = { heading: string; body: string };
 export type InfoDefault = { title: string; description: string; intro: string; sections: Section[]; faq?: { q: string; a: string }[] };
 
-export const INFO_SLUGS = ["about", "contact", "faq", "shipping", "returns", "size-guide", "privacy", "terms"] as const;
+export const INFO_SLUGS = ["about", "contact", "faq", "shipping", "returns", "size-guide", "privacy", "terms", "data-deletion"] as const;
 export type InfoSlug = (typeof INFO_SLUGS)[number];
 export const INFO_TITLES: Record<InfoSlug, string> = {
   about: "About us", contact: "Contact us", faq: "Questions and answers", shipping: "Delivery", returns: "Returns and exchanges",
-  "size-guide": "Size guide", privacy: "Privacy policy", terms: "Terms of service",
+  "size-guide": "Size guide", privacy: "Privacy policy", terms: "Terms of service", "data-deletion": "Delete your data",
 };
 
 /** Built-in text for the store pages. Create a page in Admin, Pages with the same address to replace any of them. */
@@ -62,6 +62,14 @@ export function infoDefault(slug: InfoSlug, brand: string, email: string): InfoD
         { heading: "Cookies and saved items", body: "Your browser saves your cart, wishlist, theme and color choices on your own device. If the store uses analytics or advertising tools, they may set cookies. When a cookie banner is shown, they only start after you accept." },
         { heading: "Your choices", body: `You can ask us to correct or delete your information, or to stop marketing emails, by contacting ${mail}. We keep order records for as long as we need them for accounting and legal reasons.` },
         { heading: "Security", body: "We use secure connections, limit who can open the admin area and require a second step to sign in there. No online service is perfectly secure, so please keep your own passwords private." },
+      ] };
+    case "data-deletion":
+      return { title: "Delete your data", description: `How to ask ${brand} to delete your account and personal information.`, intro: `You can ask ${brand} to delete the information we hold about you at any time. This includes accounts made with Google or Facebook.`, sections: [
+        { heading: "How to ask", body: `Send us a message from the Contact page, or email ${mail}, from the email address or with the mobile number you used. Write "Delete my data" and your name. We may ask you to confirm it is you before we delete anything.` },
+        { heading: "What we delete", body: "- Your account and sign in details, including a sign in made with Google or Facebook.\n- Your saved addresses, wishlist and referral details.\n- Your email from our marketing list." },
+        { heading: "What we keep", body: "Orders you have already placed stay in our records for as long as accounting and the law require. We remove your name and contact details from them when we are allowed to." },
+        { heading: "How long it takes", body: "We aim to finish within 30 days and we tell you when it is done." },
+        { heading: "Signed in with Facebook or Google?", body: "You can also remove our app from the connected apps in your Facebook or Google account settings. That stops the sign in, and you can then ask us to delete the account itself." },
       ] };
     case "terms":
       return { title: "Terms of service", description: `The terms for shopping at ${brand}.`, intro: `By placing an order with ${brand} you agree to these terms. Please read them before you order.`, sections: [

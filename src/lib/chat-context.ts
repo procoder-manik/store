@@ -131,7 +131,7 @@ export async function buildChatContext(question: string, path = ""): Promise<Cha
     if (href !== "/") links.set(href, p.title);
     return `${p.title} (${href}): ${[p.description, pageText(p.blocks)].filter(Boolean).join(". ")}`;
   });
-  const builtIn = (INFO_SLUGS as readonly InfoSlug[]).filter((s) => !edited.has(s) && s !== "contact" && s !== "privacy" && s !== "terms").map((slug) => {
+  const builtIn = (INFO_SLUGS as readonly InfoSlug[]).filter((s) => !edited.has(s) && s !== "contact" && s !== "privacy" && s !== "terms" && s !== "data-deletion").map((slug) => {
     const d = infoDefault(slug, settings.brand.name, settings.contact.email);
     return `${d.title} (/${slug}): ${[d.intro, ...d.sections.map((x) => `${x.heading}: ${x.body}`), ...(d.faq ?? []).map((f) => `${f.q} ${f.a}`)].join(" ").replace(/\s+/g, " ").slice(0, PAGE_TEXT)}`;
   });
