@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Suspense, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Eye, EyeOff } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
@@ -14,15 +14,46 @@ function safePath(n: string | null) {
   return n && /^\/(?![/\\])/.test(n) && !/[\\\r\n]/.test(n) ? n : "/";
 }
 
+const SOCIAL = [{ id: "google" as const, name: "Google" }];
+
+function GoogleMark() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 48 48" aria-hidden>
+      <path fill="#EA4335" d="M24 9.5c3.5 0 6.6 1.2 9.1 3.6l6.8-6.8C35.8 2.4 30.3 0 24 0 14.6 0 6.5 5.4 2.6 13.2l7.9 6.1C12.4 13.6 17.7 9.5 24 9.5z" />
+      <path fill="#4285F4" d="M46.1 24.5c0-1.6-.1-3.1-.4-4.5H24v9h12.4c-.5 2.9-2.2 5.3-4.6 6.9l7.1 5.5c4.3-4 6.7-9.8 6.7-16.9z" />
+      <path fill="#FBBC05" d="M10.5 28.7c-.5-1.4-.8-2.9-.8-4.7s.3-3.3.8-4.7l-7.9-6.1C.9 16.4 0 20.1 0 24s.9 7.6 2.6 10.8l7.9-6.1z" />
+      <path fill="#34A853" d="M24 48c6.5 0 11.9-2.1 15.9-5.8l-7.1-5.5c-2 1.4-4.9 2.3-8.8 2.3-6.3 0-11.6-4.1-13.5-9.8l-7.9 6.1C6.5 42.6 14.6 48 24 48z" />
+    </svg>
+  );
+}
+
 function LoginForm() {
   const router = useRouter();
   const params = useSearchParams();
   const [mode, setMode] = useState<"in" | "up" | "forgot">("in");
-  const [error, setError] = useState("");
+  const [error, setError] = useState(params.get("error") === "social" ? "Sign in with Google did not finish. Please try again, or use your email." : "");
+  const [social, setSocial] = useState<string[]>([]);
   const [note, setNote] = useState("");
   const [busy, setBusy] = useState(false);
   const [show, setShow] = useState(false);
   const next = safePath(params.get("next"));
+
+  // A provider shows up here by itself once it is switched on in Supabase, so nobody sees a button that cannot work.
+  useEffect(() => {
+    const url = process.env.NEXT_PUBLIC_SUPABASE_URL, key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+    if (!url || !key) return;
+    fetch(`${url}/auth/v1/settings`, { headers: { apikey: key } })
+      .then((r) => r.json())
+      .then((d: { external?: Record<string, boolean> }) => setSocial(SOCIAL.filter((p) => d.external?.[p.id]).map((p) => p.id)))
+      .catch(() => setSocial([]));
+  }, []);
+
+  async function continueWith(provider: (typeof SOCIAL)[number]["id"]) {
+    setError("");
+    setBusy(true);
+    const { error: err } = await createClient().auth.signInWithOAuth({ provider, options: { redirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(next)}` } });
+    if (err) { setError("Could not start sign in. Please try again."); setBusy(false); }
+  }
 
   function switchTo(m: typeof mode) {
     setMode(m);
@@ -72,7 +103,13 @@ function LoginForm() {
         <div className="w-full max-w-sm">
           <h1 className="font-display text-3xl font-bold">{TITLES[mode]}</h1>
           {mode === "forgot" && <p className="mt-2 text-sm text-muted">Enter your email and we will send you a link to set a new password.</p>}
-          <form onSubmit={submit} className="mt-6 grid gap-3">
+          {mode !== "forgot" && social.includes("google") && (
+            <>
+              <button type="button" disabled={busy} onClick={() => continueWith("google")} className="mt-6 flex h-12 w-full items-center justify-center gap-3 rounded-pill border border-line bg-surface text-sm font-semibold transition hover:bg-paper active:scale-[0.99] disabled:opacity-50"><GoogleMark /> Continue with Google</button>
+              <p className="mt-5 flex items-center gap-3 text-xs text-muted"><span className="h-px flex-1 bg-line" />or use your email<span className="h-px flex-1 bg-line" /></p>
+            </>
+          )}
+          <form onSubmit={submit} className={`${mode !== "forgot" && social.includes("google") ? "mt-5" : "mt-6"} grid gap-3`}>
             {mode === "up" && <div><label htmlFor="name" className="mb-1.5 block text-sm font-medium">Full name</label><input id="name" name="name" required autoComplete="name" className={field} /></div>}
             <div><label htmlFor="email" className="mb-1.5 block text-sm font-medium">Email</label><input id="email" name="email" type="email" required autoComplete="email" inputMode="email" className={field} /></div>
             {mode !== "forgot" && (
