@@ -14,7 +14,7 @@ function safePath(n: string | null) {
   return n && /^\/(?![/\\])/.test(n) && !/[\\\r\n]/.test(n) ? n : "/";
 }
 
-const SOCIAL = [{ id: "google" as const, name: "Google" }];
+const SOCIAL = [{ id: "google" as const, name: "Google" }, { id: "facebook" as const, name: "Facebook" }];
 
 function GoogleMark() {
   return (
@@ -27,11 +27,19 @@ function GoogleMark() {
   );
 }
 
+function FacebookMark() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden>
+      <path fill="#1877F2" d="M24 12a12 12 0 1 0-13.9 11.9v-8.4H7.1V12h3V9.4c0-3 1.8-4.7 4.5-4.7 1.3 0 2.7.2 2.7.2v3h-1.5c-1.5 0-2 .9-2 1.9V12h3.4l-.5 3.5h-2.9v8.4A12 12 0 0 0 24 12z" />
+    </svg>
+  );
+}
+
 function LoginForm() {
   const router = useRouter();
   const params = useSearchParams();
   const [mode, setMode] = useState<"in" | "up" | "forgot">("in");
-  const [error, setError] = useState(params.get("error") === "social" ? "Sign in with Google did not finish. Please try again, or use your email." : "");
+  const [error, setError] = useState(params.get("error") === "social" ? "Sign in did not finish. Please try again, or use your email." : "");
   const [social, setSocial] = useState<string[]>([]);
   const [note, setNote] = useState("");
   const [busy, setBusy] = useState(false);
@@ -103,13 +111,17 @@ function LoginForm() {
         <div className="w-full max-w-sm">
           <h1 className="font-display text-3xl font-bold">{TITLES[mode]}</h1>
           {mode === "forgot" && <p className="mt-2 text-sm text-muted">Enter your email and we will send you a link to set a new password.</p>}
-          {mode !== "forgot" && social.includes("google") && (
+          {mode !== "forgot" && social.length > 0 && (
             <>
-              <button type="button" disabled={busy} onClick={() => continueWith("google")} className="mt-6 flex h-12 w-full items-center justify-center gap-3 rounded-pill border border-line bg-surface text-sm font-semibold transition hover:bg-paper active:scale-[0.99] disabled:opacity-50"><GoogleMark /> Continue with Google</button>
+              <div className="mt-6 grid gap-2.5">
+                {SOCIAL.filter((p) => social.includes(p.id)).map((p) => (
+                  <button key={p.id} type="button" disabled={busy} onClick={() => continueWith(p.id)} className="flex h-12 w-full items-center justify-center gap-3 rounded-pill border border-line bg-surface text-sm font-semibold transition hover:bg-paper active:scale-[0.99] disabled:opacity-50">{p.id === "google" ? <GoogleMark /> : <FacebookMark />} Continue with {p.name}</button>
+                ))}
+              </div>
               <p className="mt-5 flex items-center gap-3 text-xs text-muted"><span className="h-px flex-1 bg-line" />or use your email<span className="h-px flex-1 bg-line" /></p>
             </>
           )}
-          <form onSubmit={submit} className={`${mode !== "forgot" && social.includes("google") ? "mt-5" : "mt-6"} grid gap-3`}>
+          <form onSubmit={submit} className={`${mode !== "forgot" && social.length > 0 ? "mt-5" : "mt-6"} grid gap-3`}>
             {mode === "up" && <div><label htmlFor="name" className="mb-1.5 block text-sm font-medium">Full name</label><input id="name" name="name" required autoComplete="name" className={field} /></div>}
             <div><label htmlFor="email" className="mb-1.5 block text-sm font-medium">Email</label><input id="email" name="email" type="email" required autoComplete="email" inputMode="email" className={field} /></div>
             {mode !== "forgot" && (
