@@ -62,7 +62,7 @@ function Field({ id, label, icon: Icon, children, ...rest }: { id: string; label
   );
 }
 
-export function LoginView({ shelf, next, failed }: { shelf: Shelf; next: string; failed: boolean }) {
+export function LoginView({ shelf, next, failed, direct }: { shelf: Shelf; next: string; failed: boolean; direct: boolean }) {
   const router = useRouter();
   const [mode, setMode] = useState<Mode>("in");
   const [error, setError] = useState(failed ? "Sign in did not finish. Please try again, or use your email." : "");
@@ -86,6 +86,7 @@ export function LoginView({ shelf, next, failed }: { shelf: Shelf; next: string;
   async function continueWith(provider: (typeof SOCIAL)[number]["id"]) {
     setError("");
     setBusy(true);
+    if (provider === "google" && direct) { window.location.assign(`/auth/google?next=${encodeURIComponent(next)}`); return; }
     const { error: err } = await createClient().auth.signInWithOAuth({ provider, options: { redirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(next)}` } });
     if (err) { setError("Could not start sign in. Please try again."); setBusy(false); }
   }

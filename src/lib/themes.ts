@@ -1,6 +1,6 @@
 import type { FooterStyleId, HeaderStyleId } from "@/lib/layout-styles";
 
-export type ThemeId = "padma" | "sondha" | "kalo" | "komola" | "nodi" | "beli" | "shobuj" | "surjasto" | "akash" | "rani";
+export type ThemeId = "kach" | "padma" | "sondha" | "kalo" | "komola" | "nodi" | "beli" | "shobuj" | "surjasto" | "akash" | "rani";
 export type CardStyleId = "soft" | "framed" | "elevated" | "glass" | "minimal" | "bold";
 
 type Colors = { paper: string; surface: string; ink: string; muted: string; line: string; accent: string; accentInk: string; gold: string };
@@ -31,6 +31,12 @@ export const THEMES: Theme[] = [
     radius: { box: "0.125rem", card: "0.875rem", button: "0.125rem" }, type: { weight: 500, h2: 400, track: "-0.012em" }, card: "soft", header: "classic", footer: "classic",
     light: { paper: "#f5f5f1", surface: "#ffffff", ink: "#0f1f1c", muted: "#5d6b66", line: "#dedfd8", accent: "#12332d", accentInk: "#f5f5f1", gold: "#a8843f" },
     dark: { paper: "#0b1513", surface: "#12201d", ink: "#ecebe3", muted: "#a2ada7", line: "#24332f", accent: "#c9a45c", accentInk: "#0b1513", gold: "#c9a45c" },
+  },
+  {
+    id: "kach", name: "Kach", about: "The clean Apple look: system font, iPhone blue and frosted glass.", kind: "solid", display: "--font-apple", body: "--font-apple",
+    radius: { box: "14px", card: "22px", button: "9999px" }, type: { weight: 600, h2: 700, track: "-0.025em" }, card: "glass", header: "classic", footer: "minimal",
+    light: { paper: "#f2f2f7", surface: "#ffffff", ink: "#1c1c1e", muted: "#636366", line: "#d8d8dc", accent: "#0a6fe0", accentInk: "#ffffff", gold: "#5e5ce6" },
+    dark: { paper: "#000000", surface: "#1c1c1e", ink: "#f5f5f7", muted: "#98989f", line: "#38383a", accent: "#0a7cf0", accentInk: "#ffffff", gold: "#64d2ff" },
   },
   {
     id: "sondha", name: "Sondha", about: "Evening oxblood on warm white, in a soft old-style serif.", kind: "solid", display: "--font-fraunces", body: "--font-dmsans",

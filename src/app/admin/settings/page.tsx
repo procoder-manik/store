@@ -55,7 +55,7 @@ export default async function Settings() {
             <div className="grid gap-2 sm:grid-cols-2">
               <label className="cursor-pointer">
                 <input type="radio" name="card" value="theme" defaultChecked={!CARD_STYLES.some((c) => c.id === s.appearance.card)} className="peer sr-only" />
-                <span className="block h-full rounded-xl border border-line p-3 text-sm peer-checked:border-ink peer-checked:ring-2 peer-checked:ring-ink/20"><span className="block font-medium">Follow the theme</span><span className="mt-0.5 block text-xs text-muted">Right now: {CARD_STYLES.find((c) => c.id === themeOf(s.appearance.theme).card)?.name}.</span></span>
+                <span className="block h-full rounded-xl border border-line p-3 text-sm peer-checked:border-ink peer-checked:ring-2 peer-checked:ring-ink/20"><span className="block font-medium">Follow the theme</span><span className="mt-0.5 block text-xs text-muted">Right now: {CARD_STYLES.find((c) => c.id === (s.appearance.glass ? "glass" : themeOf(s.appearance.theme).card))?.name}.</span></span>
               </label>
               {CARD_STYLES.map((c) => (
                 <label key={c.id} className="cursor-pointer">
@@ -65,6 +65,7 @@ export default async function Settings() {
               ))}
             </div>
           </div>
+          <label className="flex items-start gap-2 text-sm"><input type="checkbox" name="glass" defaultChecked={s.appearance.glass} className="mt-1" /> <span>Apple-style glass across the whole shop<span className="block text-xs text-muted">Floating frosted header and quick bar, rounded buttons and panels. It works with every theme, and while it is on, buttons are always fully round.</span></span></label>
           <label className="flex items-center gap-2 text-sm"><input type="checkbox" name="shine" defaultChecked={s.appearance.shine} /> Filled buttons catch the light every few seconds, by themselves</label>
           <div className="grid gap-4 sm:grid-cols-2">
             

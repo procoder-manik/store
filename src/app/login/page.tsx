@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { LoginView } from "@/components/LoginView";
 import { getCatalog } from "@/lib/catalog";
+import { googleDirect } from "@/lib/google-signin";
 
 export const metadata: Metadata = { title: "Sign in", robots: { index: false } };
 
@@ -14,5 +15,5 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
   // A few real products, so the page shows what the store sells instead of a flat colour.
   const pick = [...products.filter((p) => p.image && p.tags.some((t) => t === "hot" || t === "featured" || t === "bestseller")), ...products.filter((p) => p.image)];
   const shelf = [...new Map(pick.map((p) => [p.id, p])).values()].slice(0, 3).map((p) => ({ name: p.name, image: p.image as string }));
-  return <LoginView shelf={shelf} next={safePath(q.next)} failed={q.error === "social"} />;
+  return <LoginView shelf={shelf} next={safePath(q.next)} failed={q.error === "social"} direct={googleDirect()} />;
 }

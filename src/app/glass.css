@@ -1,0 +1,123 @@
+/*
+ * The Apple-style glass layer for the whole shop, on top of whichever theme is active. Switched on or off in Admin, Settings.
+ * Blur is kept to bars, sheets and dialogs: it is costly on phones, and a blurred parent would trap anything fixed inside it.
+ */
+html[data-glass="on"] {
+  --glass: color-mix(in srgb, var(--surface) 62%, transparent);
+  --glass-strong: color-mix(in srgb, var(--surface) 80%, transparent);
+  --glass-edge: rgb(255 255 255 / 0.55);
+  --glass-line: color-mix(in srgb, var(--ink) 9%, transparent);
+  --glass-blur: blur(28px) saturate(180%);
+  --glass-shadow: 0 1px 1px rgb(0 0 0 / 0.03), 0 16px 40px -20px rgb(0 0 0 / 0.3), inset 0 1px 0 var(--glass-edge);
+  --spring: cubic-bezier(0.32, 0.72, 0, 1);
+  --r-xl: 14px;
+  --r-2xl: 20px;
+  --r-3xl: 26px;
+  --r-card: 22px;
+  --r-pill: 9999px;
+  scrollbar-width: thin;
+}
+html.dark[data-glass="on"] {
+  --glass: color-mix(in srgb, var(--surface) 58%, transparent);
+  --glass-strong: color-mix(in srgb, var(--surface) 78%, transparent);
+  --glass-edge: rgb(255 255 255 / 0.12);
+  --glass-line: rgb(255 255 255 / 0.1);
+  --glass-shadow: 0 16px 40px -20px rgb(0 0 0 / 0.75), inset 0 1px 0 var(--glass-edge);
+}
+@media (prefers-reduced-transparency: reduce) {
+  html[data-glass="on"] { --glass: var(--surface); --glass-strong: var(--surface); }
+}
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  html[data-glass="on"] { --glass-strong: var(--surface); }
+}
+
+html[data-glass="on"] body:not(:has([data-admin-shell])) {
+  /* Soft colour behind everything, so the glass has something to catch. */
+  background-image:
+    radial-gradient(60vmax 50vmax at 90% -8%, color-mix(in srgb, var(--accent) 13%, transparent), transparent 70%),
+    radial-gradient(55vmax 50vmax at -8% 32%, color-mix(in srgb, var(--gold) 11%, transparent), transparent 70%),
+    radial-gradient(50vmax 45vmax at 72% 100%, color-mix(in srgb, var(--accent) 8%, transparent), transparent 70%);
+  background-attachment: fixed;
+
+  & svg.lucide { stroke-width: 1.75; }
+
+  /* The top bar floats, like the bars on an iPhone. */
+  & .site-header {
+    top: 0.5rem;
+    margin: 0.5rem 0.5rem 0;
+    border: 1px solid var(--glass-line);
+    border-radius: 22px;
+    background: var(--glass-strong);
+    -webkit-backdrop-filter: var(--glass-blur);
+    backdrop-filter: var(--glass-blur);
+    box-shadow: var(--glass-shadow);
+    transition: background-color 0.35s, box-shadow 0.35s;
+  }
+  & .site-header.bg-ink { background: color-mix(in srgb, var(--ink) 80%, transparent); }
+  & .site-header nav a { border-radius: 9999px; font-size: 0.875rem; font-weight: 500; letter-spacing: -0.01em; text-transform: none; transition: background-color 0.2s; }
+  & .site-header nav a:hover, & .site-header nav a[aria-current="page"] { background: color-mix(in srgb, currentColor 9%, transparent); }
+  & .thread::after { display: none; }
+  & .site-header button.rounded-full:hover, & .site-header a.rounded-full:hover { background: color-mix(in srgb, currentColor 9%, transparent); }
+  & .announce { background: transparent; color: var(--ink); }
+
+  /* Over an opening photograph the bar turns to dark glass with white words. */
+  &:has([data-overhero]) .site-header:not(.scrolled) { border-color: rgb(255 255 255 / 0.2); background: rgb(18 18 20 / 0.24); box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.18); -webkit-backdrop-filter: var(--glass-blur); backdrop-filter: var(--glass-blur); }
+  & [data-overhero].-mt-16 { margin-top: -4.5rem; }
+
+  /* Buttons press in with a little spring. */
+  & :is(button, a.rounded-pill, a.rounded-full, label.rounded-pill) { transition: scale 0.3s var(--spring), background-color 0.2s, color 0.2s, border-color 0.2s, opacity 0.2s, box-shadow 0.2s; }
+  & :is(button, a.rounded-pill, a.rounded-full):active:not(:disabled) { scale: 0.96; }
+  & :is(a, button).bg-accent { box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.28), 0 10px 22px -12px var(--accent); font-weight: 600; }
+  & :is(a, button).rounded-pill.border:not(.bg-accent), & .pcard-cta { border-color: var(--glass-line); background-color: var(--glass); box-shadow: inset 0 1px 0 var(--glass-edge); }
+  & :is(a, button).hover\:bg-accent:hover { background-color: var(--accent); background-image: var(--fill, none); }
+  & :is(button, a).bg-surface.rounded-full { background-color: var(--glass-strong); box-shadow: 0 4px 14px -6px rgb(0 0 0 / 0.3), inset 0 1px 0 var(--glass-edge); }
+  & :is(button, a).bg-surface.rounded-full:hover { background-color: var(--accent); }
+
+  /* Fields, panels and everything else that sits on the page. */
+  & :is(input:not([type="checkbox"], [type="radio"], [type="file"], [type="range"]), select, textarea):not(.peer) { border-color: var(--glass-line); background-color: var(--glass-strong); }
+  & .bg-surface.border-line, & .border-line.bg-surface { border-color: var(--glass-line); background-color: var(--glass); box-shadow: var(--glass-shadow); }
+  & .pcard-media { box-shadow: inset 0 0 0 1px var(--glass-line); }
+  & footer { margin: 0 0.5rem 0.5rem; border: 1px solid var(--glass-line); border-radius: 28px; overflow: hidden; box-shadow: var(--glass-shadow); }
+  & footer:not(.bg-ink) { background: var(--glass); }
+
+  /* Sheets and dialogs are the real frosted glass. */
+  & :is(.pop-in.bg-surface, .pop-in .bg-surface, .drawer-left, .dock-sheet, aside[role="dialog"]) { background: var(--glass-strong); -webkit-backdrop-filter: var(--glass-blur); backdrop-filter: var(--glass-blur); }
+  & .drawer-left { border-radius: 0 26px 26px 0; }
+  & aside[role="dialog"] { border-radius: 26px 0 0 26px; }
+
+  /* The phone quick bar floats too, like the tab bar on an iPhone. */
+  & .mobile-dock {
+    right: 0.625rem;
+    bottom: calc(0.625rem + env(safe-area-inset-bottom));
+    left: 0.625rem;
+    padding-bottom: 0;
+    overflow: hidden;
+    border: 1px solid var(--glass-line);
+    border-radius: 26px;
+    background: var(--glass-strong);
+    background-image: none;
+    color: var(--ink);
+    -webkit-backdrop-filter: var(--glass-blur);
+    backdrop-filter: var(--glass-blur);
+    box-shadow: var(--glass-shadow);
+  }
+  & .dock-item[aria-current="page"] { color: var(--accent); }
+  & .dock-item[aria-current="page"]::before { display: none; }
+  & .cart-chip { border: 1px solid var(--glass-line); border-right: 0; border-radius: 16px 0 0 16px; -webkit-backdrop-filter: var(--glass-blur); backdrop-filter: var(--glass-blur); }
+  & .cart-chip > span:last-child { background: var(--glass-strong); }
+
+  /* Glass product cards sit in a list, so on phones they keep the look without the costly blur. */
+  & .pcard-body { padding-bottom: var(--pcard-pad); }
+}
+
+@media (min-width: 768px) {
+  html[data-glass="on"] body:not(:has([data-admin-shell])) .site-header { margin: 0.625rem 1rem 0; top: 0.625rem; }
+  html[data-glass="on"] body:not(:has([data-admin-shell])) footer { margin: 0 1rem 1rem; }
+}
+@media (max-width: 767px) {
+  html[data-glass="on"] body:not(:has([data-admin-shell])):has(.mobile-dock) { padding-bottom: calc(5.25rem + env(safe-area-inset-bottom)); }
+  html[data-glass="on"] body:not(:has([data-admin-shell])):has(.mobile-dock) .float-lift { translate: 0 calc(-5rem - env(safe-area-inset-bottom)); }
+  html[data-glass="on"] body:has(.buy-bar) { padding-bottom: 0; }
+  html[data-glass="on"] body:has(.buy-bar) .float-lift { translate: 0 -64px; }
+  html[data-glass="on"][data-card="glass"] .pcard { -webkit-backdrop-filter: none; backdrop-filter: none; background: var(--glass-strong); }
+}

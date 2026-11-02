@@ -13,6 +13,7 @@ import { placeOrder, quoteOrder } from "@/app/checkout/actions";
 import { readRef } from "./RefCapture";
 import { ProductArt } from "./ProductArt";
 import { PaymentPicker } from "./PaymentPicker";
+import { Portal } from "./Portal";
 import { usePaymentMethods } from "./PaymentsProvider";
 
 export type Zone = { id: string; name: string; fee: number; freeOver: number | null };
@@ -89,6 +90,7 @@ export function QuickBuy({ product, zones, onClose }: { product: Product; zones:
   const chip = (on: boolean) => `grid h-9 min-w-10 place-items-center rounded-full border px-3 text-sm transition ${on ? "border-white bg-white font-semibold text-black" : "border-white/25 bg-white/10 text-white hover:bg-white/20"}`;
 
   return (
+    <Portal>
     <div className="fixed inset-0 z-50 grid place-items-end sm:place-items-center">
       <div className="absolute inset-0 bg-black/55 backdrop-blur-md" onClick={onClose} />
       <div role="dialog" aria-modal="true" aria-label={`Order ${product.name}`} className="panel-in relative grid max-h-[94dvh] w-full overflow-y-auto overscroll-contain rounded-t-[28px] border border-line shadow-[0_30px_80px_-20px_rgba(0,0,0,0.6)] sm:max-w-3xl sm:rounded-[28px] md:grid-cols-[0.92fr_1.08fr] md:overflow-hidden">
@@ -171,5 +173,6 @@ export function QuickBuy({ product, zones, onClose }: { product: Product; zones:
         </form>
       </div>
     </div>
+    </Portal>
   );
 }

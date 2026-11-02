@@ -12,7 +12,7 @@ export type Settings = {
   bump: { enabled: boolean; variantId: string; headline: string; text: string; price: number | null };
   chat: { enabled: boolean; name: string; greeting: string; knowledge: string; avatar: string; waNote: string; waEnabled: boolean; waNumber: string };
   contact: { phone: string; whatsapp: string; email: string; address: string; hours: string; businessName: string; phone2: string; mapUrl: string };
-  appearance: { theme: string; accent: string; visitorPicker: boolean; mode: "light" | "dark" | "system"; buttons: "round" | "soft" | "square" | "theme"; card: string; shine: boolean };
+  appearance: { theme: string; accent: string; visitorPicker: boolean; mode: "light" | "dark" | "system"; buttons: "round" | "soft" | "square" | "theme"; card: string; shine: boolean; glass: boolean };
   brand: { name: string; tagline: string; logo: string };
   header: { links: { label: string; href: string }[] };
   footer: { about: string; columns: { title: string; links: { label: string; href: string }[] }[]; copyright: string; newsletter: boolean };
@@ -30,7 +30,7 @@ export const DEFAULTS: Settings = {
   bump: { enabled: false, variantId: "", headline: "Add this to your order", text: "", price: null },
   chat: { enabled: false, name: "Shopping assistant", greeting: "Hi! Ask me about products, sizes, delivery or your order.", knowledge: "", avatar: "", waNote: "Hi, I need help with an order.", waEnabled: true, waNumber: "" },
   contact: { phone: "", whatsapp: "", email: "", address: "", hours: "", businessName: "", phone2: "", mapUrl: "" },
-  appearance: { theme: "padma", accent: "", visitorPicker: false, mode: "light", buttons: "theme", card: "theme", shine: true },
+  appearance: { theme: "padma", accent: "", visitorPicker: false, mode: "light", buttons: "theme", card: "theme", shine: true, glass: true },
   brand: { name: BRAND.name, tagline: BRAND.tagline, logo: "" },
   header: { links: [{ label: "Shop", href: "/shop" }] },
   footer: { about: "", columns: [], copyright: "", newsletter: true },

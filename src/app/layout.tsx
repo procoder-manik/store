@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { fontClasses } from "./fonts";
 import "./globals.css";
+import "./glass.css";
 import { Providers } from "@/components/Providers";
 import { Header } from "@/components/Header";
 import { CartDrawer } from "@/components/CartDrawer";
@@ -58,7 +59,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   // Only the store's own theme and the one the admin panel uses go into the page, unless visitors may switch.
   const css = themeCss(s.appearance.visitorPicker ? THEMES : theme.id === "padma" ? [theme] : [THEMES[0], theme]);
   return (
-    <html lang="en" suppressHydrationWarning data-theme={isTheme(s.appearance.theme) ? s.appearance.theme : "padma"} data-buttons={s.appearance.buttons ?? "theme"} data-card={isCardStyle(s.appearance.card) ? s.appearance.card : theme.card} data-shine={s.appearance.shine ? "on" : "off"} {...(isPalette(s.appearance.accent) ? { "data-palette": s.appearance.accent } : {})} className={fontClasses}>
+    <html lang="en" suppressHydrationWarning data-theme={isTheme(s.appearance.theme) ? s.appearance.theme : "padma"} data-buttons={s.appearance.buttons ?? "theme"} data-card={isCardStyle(s.appearance.card) ? s.appearance.card : s.appearance.glass ? "glass" : theme.card} data-shine={s.appearance.shine ? "on" : "off"} data-glass={s.appearance.glass ? "on" : "off"} {...(isPalette(s.appearance.accent) ? { "data-palette": s.appearance.accent } : {})} className={fontClasses}>
       <head>
         <style dangerouslySetInnerHTML={{ __html: css }} />
         {s.appearance.visitorPicker && <script dangerouslySetInnerHTML={{ __html: "try{var t=localStorage.getItem('theme-pick');if(t&&/^[a-z]{3,12}$/.test(t)){var e=document.documentElement;e.setAttribute('data-theme',t);e.removeAttribute('data-palette')}}catch(e){}" }} />}

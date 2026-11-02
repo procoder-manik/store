@@ -4,6 +4,7 @@
 
 /* Theme tokens. Every theme sets colors, fonts and corner shapes. Dark mode has its own values per theme. */
 :root {
+  --font-apple: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", var(--font-inter), "Helvetica Neue", Arial, sans-serif;
   --paper: #f5f6f8; --surface: #ffffff; --ink: #15171c; --muted: #5e6470; --line: #e3e6eb; --accent: #1f6f78; --accent-ink: #ffffff;
   --wall-hi: color-mix(in srgb, var(--accent) 5%, var(--surface));
   --wall-lo: color-mix(in srgb, var(--accent) 9%, var(--paper));

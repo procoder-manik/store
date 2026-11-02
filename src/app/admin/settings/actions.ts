@@ -121,7 +121,7 @@ export async function saveAppearance(fd: FormData) {
     await save("header_style", { ...s.headerStyle, style: look.header });
     await save("footer_style", { ...s.footerStyle, style: look.footer });
   }
-  await save("appearance", { theme, accent, mode: look?.prefers ?? mode, buttons, card, shine: on(fd.get("shine")), visitorPicker: on(fd.get("visitorPicker")) });
+  await save("appearance", { theme, accent, mode: look?.prefers ?? mode, buttons, card, shine: on(fd.get("shine")), glass: on(fd.get("glass")), visitorPicker: on(fd.get("visitorPicker")) });
 }
 
 export async function saveExtras(fd: FormData) {
