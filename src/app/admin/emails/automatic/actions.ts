@@ -30,7 +30,7 @@ export async function saveAutoEmail(input: unknown): Promise<{ ok: true } | { ok
   const { key, ...tpl } = p.data;
   const { data } = await ctx.supabase.from("site_settings").select("value").eq("key", "auto_emails").maybeSingle();
   const value = { ...((data?.value ?? {}) as object), [key]: tpl };
-  const { error } = await ctx.supabase.from("site_settings").upsert({ key: "auto_emails", value, is_public: false, updated_at: new Date().toISOString() }, { onConflict: "key" });
+  const { error } = await ctx.supabase.from("site_settings").upsert({ key: "auto_emails", value, is_public: false }, { onConflict: "key" });
   if (error) return { ok: false, error: error.message };
   revalidatePath("/admin/emails/automatic");
   return { ok: true };
@@ -42,7 +42,7 @@ export async function resetAutoEmail(key: string): Promise<{ ok: boolean }> {
   const { data } = await supabase.from("site_settings").select("value").eq("key", "auto_emails").maybeSingle();
   const value = { ...((data?.value ?? {}) as Record<string, unknown>) };
   delete value[k];
-  await supabase.from("site_settings").upsert({ key: "auto_emails", value, is_public: false, updated_at: new Date().toISOString() }, { onConflict: "key" });
+  await supabase.from("site_settings").upsert({ key: "auto_emails", value, is_public: false }, { onConflict: "key" });
   revalidatePath("/admin/emails/automatic");
   return { ok: true };
 }

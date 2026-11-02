@@ -54,7 +54,7 @@ export async function loadSaved(): Promise<SavedAi> {
 }
 
 export async function writeSaved(value: SavedAi) {
-  const { error } = await createAdminClient().from("site_settings").upsert({ key: AI_SETTINGS_KEY, value, is_public: false, updated_at: new Date().toISOString() }, { onConflict: "key" });
+  const { error } = await createAdminClient().from("site_settings").upsert({ key: AI_SETTINGS_KEY, value, is_public: false }, { onConflict: "key" });
   if (error) throw new Error(error.message);
   cache = null;
 }
