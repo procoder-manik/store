@@ -2,8 +2,8 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { ActionForm } from "@/components/admin/ActionForm";
 import { ImageField } from "@/components/admin/ImageField";
-import { BANNER_DESIGNS, BANNER_SLOTS, bannerShortcode } from "@/lib/banners";
-import { OfferSlider } from "@/components/OfferSlider";
+import { BANNER_DESIGNS, BANNER_SLOTS, BANNER_TEMPLATES, bannerShortcode, POPUP_TEMPLATES } from "@/lib/banners";
+import { OfferSlider, TemplateCard } from "@/components/OfferSlider";
 import { deleteBanner, saveBanner, toggleBanner } from "./actions";
 
 export const metadata = { title: "Banners" };
@@ -28,8 +28,17 @@ export default async function Banners({ searchParams }: { searchParams: Promise<
       <h1 className="font-display text-2xl font-semibold">Banners</h1>
       <p className="mt-1 max-w-2xl text-sm text-muted">Show offers as a slider that changes by itself. Use your own picture, or a ready-made design with your words. Every banner can open a page when clicked.</p>
 
-      <ActionForm key={e?.id ?? "new"} action={saveBanner} goTo="/admin/banners" className="mt-5 grid max-w-3xl gap-4 rounded-xl border border-line bg-surface p-5 sm:grid-cols-2">
-        <h2 className="font-display text-base font-semibold sm:col-span-2">{e ? "Edit banner" : "Add a banner"}</h2>
+      <section className="mt-5 max-w-4xl rounded-xl border border-line bg-surface p-5">
+        <h2 className="font-display text-base font-semibold">Start from a template</h2>
+        <p className="mt-1 text-xs text-muted">Choose one and it fills in the form below. Then change any word, the design, or add your own picture.</p>
+        <p className="mb-2 mt-4 text-xs font-medium text-muted">Banners</p>
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">{BANNER_TEMPLATES.map((t) => <TemplateCard key={t.id} t={t} slot="home" />)}</div>
+        <p className="mb-2 mt-5 text-xs font-medium text-muted">Popups</p>
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">{POPUP_TEMPLATES.map((t) => <TemplateCard key={t.id} t={t} slot="popup" square />)}</div>
+      </section>
+
+      <ActionForm key={e?.id ?? `new-${pre.slot ?? ""}-${pre.design ?? ""}-${pre.title ?? ""}`} action={saveBanner} goTo="/admin/banners" className="mt-5 grid max-w-3xl gap-4 rounded-xl border border-line bg-surface p-5 sm:grid-cols-2">
+        <h2 id="banner-form" className="scroll-mt-24 font-display text-base font-semibold sm:col-span-2">{e ? "Edit banner" : pre.title ? "Your template, ready to edit" : "Add a banner"}</h2>
         {e && <input type="hidden" name="id" value={e.id} />}
         <div>
           <label className={label} htmlFor="slot">Where it shows</label>

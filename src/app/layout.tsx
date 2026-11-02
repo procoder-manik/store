@@ -30,6 +30,7 @@ import { PaymentsProvider } from "@/components/PaymentsProvider";
 import { availableMethods } from "@/lib/payments";
 import { sslConfigured } from "@/lib/sslcommerz";
 import { ruleLive } from "@/lib/free-delivery";
+import { showMenu } from "@/lib/mega-menu";
 import { getZones } from "@/lib/zones";
 import { getPublicSettings } from "@/lib/settings";
 import { SITE_URL } from "@/lib/config";
@@ -56,7 +57,10 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   const preorderLink = products.some((p) => p.preorder) ? [{ label: "Pre-order", href: "/pre-order" }] : [];
   const hasOffers = ruleLive(s.freeDelivery) || s.offers.coupons.length > 0 || banners.some((b) => b.title || b.image) || products.some((p) => (p.compareAt ?? 0) > p.basePrice);
   const autoLinks = [...categoryLinks, ...preorderLink, ...(hasOffers ? [{ label: "Offers", href: "/offers" }] : [])];
-  const menuLinks = [...autoLinks, ...s.header.links.filter((l) => !autoLinks.some((c) => c.href === l.href))];
+  const baseLinks = [...autoLinks, ...s.header.links.filter((l) => !autoLinks.some((c) => c.href === l.href))];
+  // A mega menu can bring its own item to the top menu. Prices and products in it are read fresh with the page.
+  const mega = s.mega.menus.filter((m) => m.enabled && m.columns.length > 0).map((m) => showMenu(m, products, categories));
+  const menuLinks = [...baseLinks.map((l) => ({ ...l, label: mega.find((m) => m.href === l.href)?.label ?? l.label })), ...mega.filter((m) => !baseLinks.some((l) => l.href === m.href)).map((m) => ({ label: m.label, href: m.href }))];
   const methods = availableMethods(s.payments, { sslReady: await sslConfigured() });
   const theme = themeOf(s.appearance.theme);
   // Only the store's own theme and the one the admin panel uses go into the page, unless visitors may switch.
@@ -77,7 +81,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           <RecoveryCatcher />
           <StoreOnly>
             {inSlot("header").length > 0 ? <OfferSlider banners={inSlot("header")} size="strip" /> : a.enabled && a.text && <AnnouncementBar text={a.text} link={a.link} />}
-            <Header brand={s.brand.name} logo={s.brand.logo} links={menuLinks} categories={categories} themePicker={s.appearance.visitorPicker} cfg={s.headerStyle} contact={{ phone: s.contact.phone, whatsapp: s.contact.whatsapp }} />
+            <Header mega={mega} brand={s.brand.name} logo={s.brand.logo} links={menuLinks} categories={categories} themePicker={s.appearance.visitorPicker} cfg={s.headerStyle} contact={{ phone: s.contact.phone, whatsapp: s.contact.whatsapp }} />
           </StoreOnly>
           {children}
           <StoreOnly><div className="footer-gap mt-16"><OfferSlider banners={inSlot("pre-footer")} size="band" /></div></StoreOnly>

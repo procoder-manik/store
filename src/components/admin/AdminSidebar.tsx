@@ -38,6 +38,7 @@ const GROUPS = [
     { href: "/admin/pages", label: "Pages", icon: FileText },
     { href: "/admin/header-footer", label: "Header and footer", icon: PanelTop },
     { href: "/admin/menus", label: "Site and menu", icon: PanelsTopLeft },
+    { href: "/admin/mega-menu", label: "Mega menu", icon: PanelTop },
     { href: "/admin/permalinks", label: "URLs and search", icon: Link2 },
     { href: "/admin/settings", label: "Settings", icon: Settings },
     { href: "/admin/ai", label: "AI services", icon: Sparkles },

@@ -3,14 +3,15 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { X } from "lucide-react";
-import type { Banner } from "@/lib/banner-config";
+import type { Banner, BannerTemplate } from "@/lib/banner-config";
 
-export type OfferSize = "strip" | "hero" | "band";
+export type OfferSize = "strip" | "hero" | "band" | "square";
 
 const FRAME: Record<OfferSize, string> = {
   strip: "h-11 md:h-14",
   hero: "aspect-[16/10] sm:aspect-[21/8] md:aspect-[3/1]",
   band: "aspect-[16/8] md:aspect-[4/1]",
+  square: "aspect-square",
 };
 const DESIGN: Record<string, string> = {
   river: "bg-[#12332d] text-[#f5f5f1]",
@@ -18,7 +19,15 @@ const DESIGN: Record<string, string> = {
   gold: "bg-[#f3ead6] text-[#3a2c12]",
   ink: "bg-[#111111] text-white",
   sand: "bg-[#e7e0d4] text-[#2b2620]",
+  theme: "bg-accent text-accent-ink",
+  glass: "banner-glass text-ink",
+  flash: "bg-gradient-to-br from-[#b3122a] to-[#2a0a12] text-white",
+  noir: "bg-[#0d0d0f] text-[#e6c88a]",
+  rose: "bg-gradient-to-br from-[#f7e4e1] to-[#f1d3cf] text-[#4a2024]",
+  sky: "bg-gradient-to-br from-[#dfeefa] to-[#c7def2] text-[#12324f]",
 };
+// These read best with the words in the middle.
+const CENTERED = new Set(["flash", "noir", "glass"]);
 
 function Slide({ b, size }: { b: Banner; size: OfferSize }) {
   const strip = size === "strip";
@@ -37,10 +46,10 @@ function Slide({ b, size }: { b: Banner; size: OfferSize }) {
             {b.button && <span className="shrink-0 underline underline-offset-4">{b.button}</span>}
           </div>
         ) : (
-          <div className="relative flex h-full flex-col justify-center gap-2 p-6 md:gap-3 md:px-[6%]">
+          <div className={`relative flex h-full flex-col justify-center gap-2 p-6 md:gap-3 md:px-[6%] ${CENTERED.has(b.design) || size === "square" ? "items-center text-center" : ""}`}>
             <p className="max-w-2xl font-display text-[clamp(1.6rem,1rem+3.2vw,4rem)] font-normal leading-[1.05]">{b.title}</p>
             {b.subtitle && <p className="max-w-xl text-sm opacity-85 md:text-lg">{b.subtitle}</p>}
-            {b.button && <span className="mt-1 w-fit border border-current px-6 py-2.5 text-sm font-medium md:mt-3">{b.button}</span>}
+            {b.button && <span className="mt-1 w-fit rounded-full border border-current px-6 py-2.5 text-sm font-medium md:mt-3">{b.button}</span>}
           </div>
         )
       )}
@@ -105,8 +114,21 @@ export function BannerPopup({ banners }: { banners: Banner[] }) {
     <div role="dialog" aria-modal="true" aria-label="Offer" className="fade-in fixed inset-0 z-[75] grid place-items-center bg-black/55 p-5" onClick={() => setOpen(false)}>
       <div onClick={(e) => e.stopPropagation()} className="pop-in relative aspect-square w-full max-w-md overflow-hidden rounded-[18px] shadow-2xl">
         <button aria-label="Close offer" onClick={() => setOpen(false)} className="absolute right-3 top-3 z-10 grid h-9 w-9 place-items-center rounded-full bg-black/45 text-white"><X size={16} /></button>
-        <Slide b={banners[0]} size="band" />
+        <Slide b={banners[0]} size="square" />
       </div>
     </div>
+  );
+}
+
+/** A small live picture of a template, for choosing in Admin. */
+export function TemplateCard({ t, slot, square = false, size = square ? "square" : "band" }: { t: BannerTemplate; slot: string; square?: boolean; size?: OfferSize }) {
+  const q = new URLSearchParams({ slot, title: t.title, text: t.text, button: t.button, link: t.link, design: t.design });
+  return (
+    <Link href={`/admin/banners?${q}#banner-form`} className="group grid gap-1.5 text-left">
+      <span className={`relative block overflow-hidden rounded-xl border border-line text-[10px] transition group-hover:border-ink/40 ${square ? "aspect-square" : "aspect-[2/1]"}`}>
+        <span className={`tpl-mini absolute inset-0 block ${size}`}><Slide b={{ id: t.id, title: t.title, subtitle: t.text, image: "", link: "", button: t.button, slot, design: t.design }} size={size} /></span>
+      </span>
+      <span className="text-xs font-medium">{t.name}</span>
+    </Link>
   );
 }

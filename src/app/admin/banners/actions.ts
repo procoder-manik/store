@@ -3,13 +3,14 @@
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { requireAdmin } from "@/lib/admin";
+import { BANNER_DESIGNS, type BannerDesign } from "@/lib/banner-config";
 import { isAllowedImageUrl } from "@/lib/utils";
 
 const when = z.string().max(20).transform((v) => (v ? new Date(v).toISOString() : null));
 const schema = z.object({
   id: z.string().uuid().optional(),
   slot: z.string().trim().toLowerCase().regex(/^[a-z0-9-]{1,40}$/, "A group name can use only letters, numbers and dashes, like eid-offer."),
-  design: z.enum(["image", "river", "dusk", "gold", "ink", "sand"]),
+  design: z.enum(BANNER_DESIGNS.map((d) => d.id) as [BannerDesign, ...BannerDesign[]]),
   title: z.string().trim().max(80),
   subtitle: z.string().trim().max(160),
   image: z.union([z.literal(""), z.string().max(500).refine(isAllowedImageUrl, "The image link must come from your uploads, Pexels, Unsplash or Pixabay")]),

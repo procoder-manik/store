@@ -398,3 +398,17 @@ body:has(.login-stage) .footer-gap { display: none; }
 .btn-preorder:hover:not(:disabled) { filter: brightness(1.07); }
 :is(.pcard--minimal, .pcard--editorial) .btn-preorder { height: 2.5rem; border-radius: 9999px; text-align: center; text-decoration: none; }
 
+/* The mega menu sheet: frosted glass, tinted by the active theme. */
+.mega-panel { background: color-mix(in srgb, var(--surface) 86%, transparent); -webkit-backdrop-filter: blur(30px) saturate(180%); backdrop-filter: blur(30px) saturate(180%); box-shadow: 0 30px 70px -30px rgb(0 0 0 / 0.45), inset 0 1px 0 rgb(255 255 255 / 0.3); }
+.mega-drop { animation: megaDrop 0.34s cubic-bezier(0.32, 0.72, 0, 1); }
+@keyframes megaDrop { from { opacity: 0; translate: 0 -8px; } }
+@media (prefers-reduced-motion: reduce) { .mega-drop { animation: none; } }
+@media (prefers-reduced-transparency: reduce) { .mega-panel { background: var(--surface); } }
+
+/* Banners. */
+.banner-glass { background: color-mix(in srgb, var(--surface) 62%, transparent); -webkit-backdrop-filter: blur(24px) saturate(180%); backdrop-filter: blur(24px) saturate(180%); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--ink) 9%, transparent); }
+/* Templates in Admin are full designs drawn small. */
+.tpl-mini p { font-size: 15px !important; line-height: 1.15; }
+.tpl-mini p + p { font-size: 10px !important; }
+.tpl-mini > * > div { gap: 4px !important; padding: 10px !important; }
+.tpl-mini span.w-fit { margin-top: 2px; padding: 3px 10px !important; font-size: 10px !important; }
