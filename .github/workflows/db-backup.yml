@@ -38,12 +38,18 @@ jobs:
         env:
           DB_URL: ${{ secrets.SUPABASE_DB_URL }}
         run: |
-          set -euo pipefail
+          set -uo pipefail
           # pg_dump 17 can read older servers too. Saves the store data (public) and the sign-in accounts (auth).
-          docker run --rm -e DB_URL postgres:17 sh -c 'pg_dump "$DB_URL" --no-owner --no-privileges --schema=public --schema=auth' | gzip -9 > backup.sql.gz
-          # Refuse to continue with an empty or broken dump.
-          test "$(stat -c%s backup.sql.gz)" -gt 5000
-          zcat backup.sql.gz | grep -q "CREATE TABLE public.orders"
+          # Dump to a plain file first so any connection error from Postgres is shown in full, instead of being hidden behind a "broken pipe" from gzip.
+          docker run --rm -e DB_URL postgres:17 sh -c 'pg_dump "$DB_URL" --no-owner --no-privileges --schema=public --schema=auth' > backup.sql 2> dump_err.txt || true
+          if [ ! -s backup.sql ]; then
+            echo "::error::The database could not be dumped. Postgres said:"
+            sed 's/^/  /' dump_err.txt || true
+            echo "::error::Fix the SUPABASE_DB_URL secret. It must be the Session pooler URI (host ends in pooler.supabase.com, port 5432) with the correct database password. A password with special characters such as @ or # must be percent-encoded, so the simplest fix is to reset the database password to letters and numbers only and rebuild the URL."
+            exit 1
+          fi
+          grep -q "CREATE TABLE public.orders" backup.sql || { echo "::error::The dump ran but did not contain the orders table. Check that the URL points to the right project."; exit 1; }
+          gzip -9 backup.sql
 
       - name: Encrypt it
         env:
