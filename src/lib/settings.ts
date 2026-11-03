@@ -3,6 +3,7 @@ import { createPublicClient } from "@/lib/supabase/public";
 import { BRAND } from "@/lib/config";
 import { DEFAULT_FREE_DELIVERY, type FreeDeliveryRule } from "@/lib/free-delivery";
 import type { MegaConfig } from "@/lib/mega-menu";
+import type { PopupConfig } from "@/lib/popup";
 import type { ThemeColors } from "@/lib/themes";
 import { DEFAULT_PAYMENTS, mergePayments, type PaymentsSettings } from "@/lib/payments";
 import { DEFAULT_FOOTER_STYLE, DEFAULT_HEADER_STYLE, mergeFooterStyle, mergeHeaderStyle, type FooterStyleCfg, type HeaderStyleCfg } from "@/lib/layout-styles";
@@ -10,7 +11,7 @@ import { DEFAULT_FOOTER_STYLE, DEFAULT_HEADER_STYLE, mergeFooterStyle, mergeHead
 export type Settings = {
   announcement: { enabled: boolean; text: string; link: string };
   tracking: { fbPixel: string; ga4: string; gtm: string; gscToken: string; consent: boolean };
-  popup: { enabled: boolean; title: string; text: string; code: string; button: string; trigger: "delay" | "exit"; delay: number; maxShows: number; gapDays: number; hideAfterOrder: boolean; hideSignedIn: boolean; stopAfterClaim: boolean };
+  popup: PopupConfig;
   proof: { mode: "off" | "real" };
   bump: { enabled: boolean; variantId: string; headline: string; text: string; price: number | null };
   chat: { enabled: boolean; name: string; greeting: string; knowledge: string; avatar: string; waNote: string; waEnabled: boolean; waNumber: string };
@@ -32,7 +33,7 @@ export type Settings = {
 export const DEFAULTS: Settings = {
   announcement: { enabled: true, text: "Cash on delivery available across Bangladesh", link: "" },
   tracking: { fbPixel: "", ga4: "", gtm: "", gscToken: "", consent: false },
-  popup: { enabled: false, title: "Take 10% off your first order", text: "Use this code at checkout.", code: "WELCOME10", button: "Shop now", trigger: "delay", delay: 8, maxShows: 1, gapDays: 7, hideAfterOrder: true, hideSignedIn: true, stopAfterClaim: true },
+  popup: { enabled: false, design: "classic", position: "center", title: "Take 10% off your first order", text: "Use this code at checkout.", code: "WELCOME10", button: "Shop now", image: "", bg: "", fg: "", accent: "", trigger: "delay", delay: 8, scrollPercent: 50, clickSelector: "", clickCount: 1, maxShows: 1, gapDays: 7, hideAfterOrder: true, hideSignedIn: true, stopAfterClaim: true },
   proof: { mode: "off" },
   bump: { enabled: false, variantId: "", headline: "Add this to your order", text: "", price: null },
   chat: { enabled: false, name: "Shopping assistant", greeting: "Hi! Ask me about products, sizes, delivery or your order.", knowledge: "", avatar: "", waNote: "Hi, I need help with an order.", waEnabled: true, waNumber: "" },

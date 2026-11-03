@@ -1,11 +1,10 @@
 "use client";
 
-import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
-import { X } from "lucide-react";
+import { usePathname, useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 import type { Settings } from "@/lib/settings";
 import { createClient } from "@/lib/supabase/client";
+import { PopupCard } from "@/components/PopupCard";
 
 const KEY = "promo-v2";
 const DAY = 86_400_000;
@@ -26,11 +25,19 @@ function write(v: Seen) {
   try { localStorage.setItem(KEY, JSON.stringify(v)); } catch { /* storage blocked */ }
 }
 
+const POS: Record<string, string> = {
+  "bottom-right": "fixed bottom-0 right-0 z-[60] m-4 w-[calc(100%-2rem)] max-w-sm",
+  "bottom-left": "fixed bottom-0 left-0 z-[60] m-4 w-[calc(100%-2rem)] max-w-sm",
+  "top-right": "fixed right-0 top-0 z-[60] m-4 w-[calc(100%-2rem)] max-w-sm",
+  "top-left": "fixed left-0 top-0 z-[60] m-4 w-[calc(100%-2rem)] max-w-sm",
+  "bottom-bar": "fixed inset-x-0 bottom-0 z-[60]",
+};
+
 export function PromoPopup({ p }: { p: Settings["popup"] }) {
   const path = usePathname();
+  const router = useRouter();
   const [open, setOpen] = useState(false);
   const [copied, setCopied] = useState(false);
-  const closeBtn = useRef<HTMLButtonElement>(null);
   const blocked = /^\/(admin|checkout|thank-you|login|reset-password|mfa|pay)/.test(path);
   const offer = `${p.code}|${p.title}`;
 
@@ -59,23 +66,43 @@ export function PromoPopup({ p }: { p: Settings["popup"] }) {
         write({ ...seen, shown: seen.shown + 1, last: Date.now() });
         setOpen(true);
       };
+
       if (p.trigger === "delay") {
-        const t = window.setTimeout(show, p.delay * 1000);
+        const t = window.setTimeout(show, Math.max(0, p.delay) * 1000);
         cleanup = () => window.clearTimeout(t);
-        return;
+      } else if (p.trigger === "exit") {
+        const out = (e: MouseEvent) => { if (e.clientY <= 0 && !e.relatedTarget) show(); };
+        const fallback = window.setTimeout(show, 30000);
+        document.addEventListener("mouseout", out);
+        cleanup = () => { document.removeEventListener("mouseout", out); window.clearTimeout(fallback); };
+      } else if (p.trigger === "scroll") {
+        const onScroll = () => {
+          const h = document.documentElement.scrollHeight - window.innerHeight;
+          const pct = h > 0 ? (window.scrollY / h) * 100 : 100;
+          if (pct >= Math.min(100, Math.max(5, p.scrollPercent))) show();
+        };
+        window.addEventListener("scroll", onScroll, { passive: true });
+        onScroll();
+        cleanup = () => window.removeEventListener("scroll", onScroll);
+      } else {
+        // click: count clicks, on a chosen area or anywhere, until the target number is reached
+        let n = 0;
+        const sel = p.clickSelector.trim();
+        const onClick = (e: MouseEvent) => {
+          const target = e.target as Element | null;
+          if (sel) { try { if (!target?.closest(sel)) return; } catch { return; } }
+          if (++n >= Math.max(1, p.clickCount)) show();
+        };
+        document.addEventListener("click", onClick, true);
+        cleanup = () => document.removeEventListener("click", onClick, true);
       }
-      const out = (e: MouseEvent) => { if (e.clientY <= 0 && !e.relatedTarget) show(); };
-      const fallback = window.setTimeout(show, 30000);
-      document.addEventListener("mouseout", out);
-      cleanup = () => { document.removeEventListener("mouseout", out); window.clearTimeout(fallback); };
     })();
 
     return () => { cancelled = true; cleanup(); };
-  }, [p.enabled, p.trigger, p.delay, p.maxShows, p.gapDays, p.hideAfterOrder, p.hideSignedIn, p.stopAfterClaim, offer, blocked]);
+  }, [p.enabled, p.trigger, p.delay, p.scrollPercent, p.clickSelector, p.clickCount, p.maxShows, p.gapDays, p.hideAfterOrder, p.hideSignedIn, p.stopAfterClaim, offer, blocked]);
 
   useEffect(() => {
     if (!open) return;
-    closeBtn.current?.focus();
     const esc = (e: KeyboardEvent) => { if (e.key === "Escape") setOpen(false); };
     window.addEventListener("keydown", esc);
     return () => window.removeEventListener("keydown", esc);
@@ -84,25 +111,21 @@ export function PromoPopup({ p }: { p: Settings["popup"] }) {
   if (!open || blocked) return null;
 
   const claim = () => { const seen = read(offer); if (seen) write({ ...seen, claimed: true }); };
+  const close = () => setOpen(false);
   const copy = async () => {
     try { await navigator.clipboard.writeText(p.code); setCopied(true); } catch { /* clipboard blocked */ }
     claim();
   };
+  const go = () => { claim(); setOpen(false); router.push("/shop"); };
 
-  return (
-    <div role="dialog" aria-modal="true" aria-label={p.title} onClick={() => setOpen(false)} className="fixed inset-0 z-[60] grid place-items-center bg-black/50 p-4 backdrop-blur-sm">
-      <div onClick={(e) => e.stopPropagation()} className="pop-in relative w-full max-w-md rounded-3xl bg-surface p-8 shadow-2xl">
-        <button ref={closeBtn} aria-label="Close" onClick={() => setOpen(false)} className="absolute right-4 top-4 grid h-9 w-9 place-items-center rounded-full hover:bg-paper"><X size={18} /></button>
-        <h2 className="pr-8 font-display text-2xl font-semibold leading-tight">{p.title}</h2>
-        {p.text && <p className="mt-2 text-sm text-muted">{p.text}</p>}
-        {p.code && (
-          <button onClick={copy} className="mt-5 flex w-full items-center justify-between rounded-2xl border border-dashed border-accent px-5 py-4">
-            <span className="font-display text-xl tracking-wider">{p.code}</span>
-            <span className="text-sm text-accent">{copied ? "Copied" : "Copy code"}</span>
-          </button>
-        )}
-        <Link href="/shop" onClick={() => { claim(); setOpen(false); }} className="mt-4 block rounded-pill bg-accent py-3 text-center text-sm font-semibold text-accent-ink">{p.button || "Shop now"}</Link>
+  const card = <PopupCard p={p} onClose={close} onCopy={copy} copied={copied} onButton={go} />;
+
+  if (p.position === "center") {
+    return (
+      <div role="dialog" aria-modal="true" aria-label={p.title} onClick={close} className="fixed inset-0 z-[60] grid place-items-center bg-black/50 p-4 backdrop-blur-sm">
+        <div onClick={(e) => e.stopPropagation()} className="pop-in w-full max-w-md">{card}</div>
       </div>
-    </div>
-  );
+    );
+  }
+  return <div role="dialog" aria-label={p.title} className={`panel-in ${POS[p.position] ?? POS["bottom-right"]}`}>{card}</div>;
 }

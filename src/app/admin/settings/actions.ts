@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { getPublicSettings } from "@/lib/settings";
 import { requireAdmin } from "@/lib/admin";
-import { isLogoUrl, normalizePhone } from "@/lib/utils";
+import { isAllowedImageUrl, isLogoUrl, normalizePhone } from "@/lib/utils";
 import { isPalette } from "@/lib/palettes";
 import { isCardStyle, isHex, isTheme, themeOf, type Colors, type ThemeColors } from "@/lib/themes";
 
@@ -45,16 +45,29 @@ export async function saveTracking(fd: FormData) {
 }
 
 export async function savePopup(fd: FormData) {
+  const colour = z.union([z.literal(""), z.string().refine(isHex, "Use a colour like #aabbcc")]);
   const d = parse(z.object({
+    design: z.enum(["classic", "minimal", "spotlight", "coupon", "sidebyside"]),
+    position: z.enum(["center", "bottom-right", "bottom-left", "top-right", "top-left", "bottom-bar"]),
     title: z.string().trim().min(1, "Add a popup title").max(80),
     text: z.string().trim().max(240),
     code: z.string().trim().toUpperCase().regex(/^[A-Z0-9_-]{0,30}$/, "Coupon code can use letters, numbers, dashes and underscores"),
     button: z.string().trim().max(30),
-    trigger: z.enum(["delay", "exit"]),
-    delay: z.coerce.number().int().min(3).max(120),
+    image: z.union([z.literal(""), z.string().max(500).refine(isAllowedImageUrl, "The picture must be uploaded here or come from Pexels, Unsplash or Pixabay")]),
+    bg: colour, fg: colour, accent: colour,
+    trigger: z.enum(["delay", "exit", "scroll", "click"]),
+    delay: z.coerce.number().int().min(1).max(120),
+    scrollPercent: z.coerce.number().int().min(5).max(100),
+    clickSelector: z.string().trim().max(100),
+    clickCount: z.coerce.number().int().min(1).max(50),
     maxShows: z.coerce.number().int().min(1).max(20),
     gapDays: z.coerce.number().int().min(0).max(365),
-  }), { title: fd.get("title"), text: fd.get("text"), code: fd.get("code"), button: fd.get("button"), trigger: fd.get("trigger"), delay: fd.get("delay"), maxShows: fd.get("maxShows"), gapDays: fd.get("gapDays") });
+  }), {
+    design: fd.get("design"), position: fd.get("position"), title: fd.get("title"), text: fd.get("text"), code: fd.get("code"), button: fd.get("button"), image: fd.get("image") ?? "",
+    bg: fd.get("bg") ?? "", fg: fd.get("fg") ?? "", accent: fd.get("accent") ?? "",
+    trigger: fd.get("trigger"), delay: fd.get("delay"), scrollPercent: fd.get("scrollPercent"), clickSelector: fd.get("clickSelector") ?? "", clickCount: fd.get("clickCount"),
+    maxShows: fd.get("maxShows"), gapDays: fd.get("gapDays"),
+  });
   await save("popup", { enabled: on(fd.get("enabled")), hideAfterOrder: on(fd.get("hideAfterOrder")), hideSignedIn: on(fd.get("hideSignedIn")), stopAfterClaim: on(fd.get("stopAfterClaim")), ...d });
 }
 
