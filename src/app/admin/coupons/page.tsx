@@ -15,11 +15,15 @@ export default async function Coupons() {
       <form action={createCoupon} className="mt-5 grid max-w-4xl gap-3 md:grid-cols-3">
         <input name="code" placeholder="Code, like EID10" required maxLength={30} className={input} />
         <select name="type" className={input}><option value="percent">Percent off</option><option value="fixed">Fixed amount off</option></select>
-        <input name="value" type="number" min={1} step="0.01" placeholder="Value" required className={input} />
+        <input name="value" type="number" min={0} step="0.01" placeholder="Value (0 for free delivery only)" required className={input} />
         <input name="min_subtotal" type="number" min={0} step="0.01" placeholder="Minimum order (optional)" className={input} />
         <input name="max_uses" type="number" min={1} step={1} placeholder="Max uses (optional)" className={input} />
         <label className="grid gap-1 text-xs text-muted">Starts on (optional)<input name="starts_at" type="date" className={input} /></label>
         <label className="grid gap-1 text-xs text-muted">Expires on (optional)<input name="ends_at" type="date" className={input} /></label>
+        <input name="per_customer_limit" type="number" min={1} step={1} placeholder="Uses per customer (optional)" className={input} />
+        <label className="flex items-center gap-2 text-sm"><input type="checkbox" name="free_shipping" className="h-4 w-4" /> Free delivery</label>
+        <label className="flex items-center gap-2 text-sm"><input type="checkbox" name="first_order_only" className="h-4 w-4" /> First order only</label>
+        <p className="text-xs text-muted md:col-span-3">Add the coupon, then press Edit to limit it to certain products or categories.</p>
         <button className="rounded-pill bg-accent px-5 py-2.5 text-sm font-semibold text-accent-ink md:col-span-3 md:w-40">Add coupon</button>
       </form>
       <div className="mt-6 overflow-x-auto rounded-xl border border-line bg-surface">

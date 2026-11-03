@@ -2,7 +2,7 @@
 
 import { headers } from "next/headers";
 import { z } from "zod";
-import { priceCart, type Priced } from "@/lib/checkout";
+import { priceCart, checkCustomerCoupon, type Priced } from "@/lib/checkout";
 import { checkFraud } from "@/lib/fraud";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
@@ -146,6 +146,11 @@ export async function placeOrder(input: unknown): Promise<Placed> {
       // Customers always get the same vague message. The reason goes to the server log, and to staff.
       console.warn(`[order-blocked] reason=${fraud.reason} phone=***${phone.slice(-4)} ip=${ip}`);
       return { ok: false, error: staff ? `Blocked by fraud protection (${fraud.reason}). Customers only see a general message. See Admin > Fraud protection.` : GENERIC };
+    }
+
+    if (priced.couponCode) {
+      const cErr = await checkCustomerCoupon(priced.couponCode, { userId: user?.id, phone });
+      if (cErr) return { ok: false, error: cErr };
     }
 
     const db = createAdminClient();
