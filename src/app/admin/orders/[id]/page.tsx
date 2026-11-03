@@ -3,9 +3,9 @@ import { notFound } from "next/navigation";
 import { Check } from "lucide-react";
 import { formatPrice } from "@/lib/config";
 import { NEXT_STEPS, statusColor, statusLabel } from "@/lib/order-status";
-import { steadfastConfigured } from "@/lib/steadfast";
+import { autoBookCourier } from "@/lib/courier-config";
 import { createClient } from "@/lib/supabase/server";
-import { addOrderNote, bookSteadfast, changeStatus, refundOrder, saveShipment, setAnyStatus, verifyPayment } from "../actions";
+import { addOrderNote, bookParcel, changeStatus, refundOrder, saveShipment, setAnyStatus, verifyPayment } from "../actions";
 import { amountDue, paymentLabel } from "@/lib/payments";
 
 type Item = { id: string; name_snapshot: string; unit_price: number | string; qty: number };
@@ -26,6 +26,7 @@ export default async function OrderDetail({ params }: { params: Promise<{ id: st
     supabase.from("payments").select("tran_id, amount, status, method, created_at").eq("order_id", id).order("created_at", { ascending: false }),
     supabase.from("order_refunds").select("id, amount, method, note, created_at").eq("order_id", id).order("created_at", { ascending: false }),
   ]);
+  const auto = await autoBookCourier();
   const addr = o.shipping_address as { district?: string; address?: string };
   const actions = (NEXT_STEPS[o.status as string] ?? []).filter((a) => a.to !== "cancelled" && a.to !== "returned");
   const refunded = Number(o.refunded_amount ?? 0);
@@ -179,9 +180,9 @@ export default async function OrderDetail({ params }: { params: Promise<{ id: st
               <input name="tracking" maxLength={60} defaultValue={(o.tracking_code as string) ?? ""} placeholder="Tracking number" className={field} />
               <button className="rounded-pill border border-line py-2 text-sm font-medium hover:bg-paper">Save shipment</button>
             </form>
-            {o.consignment_id && <p className="mt-3 text-xs text-muted">Booked with Steadfast. Consignment {o.consignment_id}.</p>}
-            {steadfastConfigured() && !o.consignment_id && ["confirmed", "processing"].includes(o.status as string) && (
-              <form action={bookSteadfast} className="mt-3"><input type="hidden" name="id" value={o.id} /><button className="w-full rounded-pill bg-ink py-2.5 text-sm font-semibold text-paper">Book with Steadfast</button></form>
+            {o.consignment_id && <p className="mt-3 text-xs text-muted">Booked with {(o.courier as string) || auto?.name}. Consignment {o.consignment_id}.</p>}
+            {auto && !o.consignment_id && ["confirmed", "processing"].includes(o.status as string) && (
+              <form action={bookParcel} className="mt-3"><input type="hidden" name="id" value={o.id} /><input type="hidden" name="courier" value={auto.id} /><button className="w-full rounded-pill bg-ink py-2.5 text-sm font-semibold text-paper">Book with {auto.name}</button></form>
             )}
           </section>
         </aside>

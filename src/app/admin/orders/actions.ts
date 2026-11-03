@@ -9,7 +9,8 @@ import { sendOrderEmail, type OrderEmailKind } from "@/lib/order-emails";
 import { sendAutoEmail } from "@/lib/auto-emails";
 import { rewardReferrer } from "@/lib/credit";
 import { formatPrice } from "@/lib/config";
-import { bookSteadfastParcel } from "@/lib/steadfast";
+import { bookWithCourier } from "@/lib/courier-book";
+import { courierName } from "@/lib/couriers";
 
 const schema = z.object({
   id: z.string().uuid(),
@@ -144,16 +145,17 @@ export async function addOrderNote(formData: FormData) {
   revalidatePath(`/admin/orders/${d.id}`);
 }
 
-export async function bookSteadfast(formData: FormData) {
+export async function bookParcel(formData: FormData) {
   const id = z.string().uuid().parse(formData.get("id"));
-  await requireStaff("order.steadfast");
+  const courier = z.string().trim().min(1).max(40).parse(formData.get("courier"));
+  await requireStaff("order.book-courier");
   const db = createAdminClient();
   const { data: o } = await db.from("orders").select("order_no, total, guest_name, guest_phone, note, payment_status, advance_amount, advance_status, consignment_id, shipping_address").eq("id", id).maybeSingle();
   if (!o) throw new Error("Order not found");
   if (o.consignment_id) throw new Error("This order is already booked.");
   const a = o.shipping_address as { district?: string; address?: string };
-  const r = await bookSteadfastParcel({ invoice: String(o.order_no), name: o.guest_name as string, phone: o.guest_phone as string, address: `${a?.address ?? ""}, ${a?.district ?? ""}`, cod: amountDue(o), note: (o.note as string) ?? "" });
+  const r = await bookWithCourier(courier, { invoice: String(o.order_no), name: o.guest_name as string, phone: o.guest_phone as string, address: `${a?.address ?? ""}, ${a?.district ?? ""}`, cod: amountDue(o), note: (o.note as string) ?? "" });
   if (!r.ok) throw new Error(r.error);
-  await db.from("orders").update({ courier: "Steadfast", consignment_id: r.consignmentId, tracking_code: r.trackingCode }).eq("id", id);
+  await db.from("orders").update({ courier: courierName(courier), consignment_id: r.consignmentId, tracking_code: r.trackingCode }).eq("id", id);
   revalidatePath(`/admin/orders/${id}`);
 }
