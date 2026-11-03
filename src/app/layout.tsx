@@ -32,6 +32,7 @@ import { sslConfigured } from "@/lib/sslcommerz";
 import { ruleLive } from "@/lib/free-delivery";
 import { showMenu } from "@/lib/mega-menu";
 import { getZones } from "@/lib/zones";
+import { couponDead } from "@/lib/offers";
 import { getPublicSettings } from "@/lib/settings";
 import { SITE_URL } from "@/lib/config";
 
@@ -62,6 +63,8 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   const mega = s.mega.menus.filter((m) => m.enabled && m.columns.length > 0).map((m) => showMenu(m, products, categories));
   const menuLinks = [...baseLinks.map((l) => ({ ...l, label: mega.find((m) => m.href === l.href)?.label ?? l.label })), ...mega.filter((m) => !baseLinks.some((l) => l.href === m.href)).map((m) => ({ label: m.label, href: m.href }))];
   const methods = availableMethods(s.payments, { sslReady: await sslConfigured() });
+  // Don't let the popup advertise a coupon customers can no longer use (switched off, expired or fully used).
+  const popup = s.popup.enabled && s.popup.code && (await couponDead(s.popup.code)) ? { ...s.popup, enabled: false } : s.popup;
   const theme = themeOf(s.appearance.theme);
   // Only the store's own theme and the one the admin panel uses go into the page, unless visitors may switch.
   const dressed = (t: typeof theme) => withColors(t, s.appearance.colors[t.id]);
@@ -90,7 +93,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           <CartDrawer />
           {s.extras.quickBar && <StoreOnly><MobileDock links={menuLinks} /></StoreOnly>}
           {s.extras.cartChip && <StoreOnly><CartChip /></StoreOnly>}
-          <PromoPopup p={s.popup} />
+          <PromoPopup p={popup} />
           <CompareBar />
           {s.extras.backToTop && <StoreOnly><BackToTop withText={s.extras.backToTopText} /></StoreOnly>}
           {s.chat.enabled && <ChatWidget name={s.chat.name} greeting={s.chat.greeting} avatar={s.chat.avatar || s.brand.logo} whatsapp={s.chat.waEnabled ? s.chat.waNumber || s.contact.whatsapp : ""} waNote={s.chat.waNote} />}
