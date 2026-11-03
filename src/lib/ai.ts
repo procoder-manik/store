@@ -1,5 +1,6 @@
 import "server-only";
 import { activeProviders, providerById, type Resolved } from "@/lib/ai-config";
+import { reportAiFailures, type DownKind, type DownProvider } from "@/lib/ai-alerts";
 
 export type Msg = { role: "user" | "assistant"; content: string };
 type R = { ok: true; text: string; via?: string } | { ok: false; error: string };
@@ -19,6 +20,14 @@ function restFor(p: Resolved, model: string, status: number) {
   else if (status === 429) rest(`${p.id}:${model}`, 20);
   else if (status === 400 || status === 404) rest(`${p.id}:${model}`, 60);
   else rest(`${p.id}:${model}`, 1);
+}
+
+// A status the owner should hear about: out of free requests, needs billing, or a bad key. Others are transient.
+function downKind(status: number): DownKind | null {
+  if (status === 429) return "limit";
+  if (status === 402) return "payment";
+  if (status === 401 || status === 403) return "key";
+  return null;
 }
 
 /** Some models think out loud first. Customers must only see the answer. */
@@ -98,17 +107,34 @@ export async function chatAI(system: string, messages: Msg[], opts: Opts = {}): 
   const max = opts.maxTokens ?? 1500;
   const start = Date.now();
   let last = "Could not reach any AI service.";
+  // Services that ran out, need billing, or had a bad key — the owner is warned about these at the end.
+  const down: DownProvider[] = [];
+  const noteDown = (p: Resolved, status: number) => {
+    const kind = downKind(status);
+    if (kind && !down.some((d) => d.id === p.id)) down.push({ id: p.id, name: p.name, kind });
+  };
+  const succeed = (via: string, text: string): R => {
+    // A backup answered, but still let the owner know any service that ran out, so they can top it up.
+    void reportAiFailures({ down, allFailed: false, lastError: last });
+    return { ok: true, text, via };
+  };
+  const giveUp = async (): Promise<R> => {
+    await reportAiFailures({ down, allFailed: true, lastError: last });
+    return { ok: false, error: last };
+  };
+
   for (const p of providers) {
     if (isResting(p.id)) continue;
     for (const model of p.models) {
       if (isResting(`${p.id}:${model}`)) continue;
       if (isResting(p.id)) break;
       const left = BUDGET_MS - (Date.now() - start);
-      if (left < 2_000) return { ok: false, error: last };
+      if (left < 2_000) return giveUp();
       const r = await ask(p, model, system, messages, opts, max, Math.min(ATTEMPT_MS, left));
-      if (r.ok) return { ok: true, text: r.text, via: `${p.id}:${model}` };
+      if (r.ok) return succeed(`${p.id}:${model}`, r.text);
       last = r.error;
       restFor(p, model, r.status);
+      noteDown(p, r.status);
     }
   }
   // Everything was resting. Try once more, ignoring the pause, rather than turning a customer away.
@@ -118,11 +144,12 @@ export async function chatAI(system: string, messages: Msg[], opts: Opts = {}): 
       const left = BUDGET_MS - (Date.now() - start);
       if (left < 2_000) break;
       const r = await ask(p, p.models[0], system, messages, opts, max, Math.min(ATTEMPT_MS, left));
-      if (r.ok) return { ok: true, text: r.text, via: `${p.id}:${p.models[0]}` };
+      if (r.ok) return succeed(`${p.id}:${p.models[0]}`, r.text);
       last = r.error;
+      noteDown(p, r.status);
     }
   }
-  return { ok: false, error: last };
+  return giveUp();
 }
 
 export const callAI = (system: string, user: string, json: boolean) => chatAI(system, [{ role: "user", content: user }], { json });
