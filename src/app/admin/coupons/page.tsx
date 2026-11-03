@@ -18,7 +18,8 @@ export default async function Coupons() {
         <input name="value" type="number" min={1} step="0.01" placeholder="Value" required className={input} />
         <input name="min_subtotal" type="number" min={0} step="0.01" placeholder="Minimum order (optional)" className={input} />
         <input name="max_uses" type="number" min={1} step={1} placeholder="Max uses (optional)" className={input} />
-        <input name="ends_at" type="date" aria-label="Expires on" className={input} />
+        <label className="grid gap-1 text-xs text-muted">Starts on (optional)<input name="starts_at" type="date" className={input} /></label>
+        <label className="grid gap-1 text-xs text-muted">Expires on (optional)<input name="ends_at" type="date" className={input} /></label>
         <button className="rounded-pill bg-accent px-5 py-2.5 text-sm font-semibold text-accent-ink md:col-span-3 md:w-40">Add coupon</button>
       </form>
       <div className="mt-6 overflow-x-auto rounded-xl border border-line bg-surface">
@@ -33,7 +34,8 @@ export default async function Coupons() {
                 <td className="p-3">{Number(c.min_subtotal) > 0 ? `৳${Number(c.min_subtotal)}` : "None"}</td>
                 <td className="p-3">{c.used_count}{c.max_uses ? ` / ${c.max_uses}` : ""}</td>
                 <td className="p-3 text-muted">{c.ends_at ? new Date(c.ends_at).toLocaleDateString("en-GB") : "Never"}</td>
-                <td className="flex gap-3 p-3 text-xs">
+                <td className="flex flex-wrap gap-3 p-3 text-xs">
+                  <Link href={`/admin/coupons/${c.id}`} className="font-medium underline">Edit</Link>
                   <form action={toggleOfferCoupon}><input type="hidden" name="code" value={c.code} /><button className={shown.includes(c.code) ? "font-semibold text-emerald-700 underline" : "underline"}>{shown.includes(c.code) ? "On Offers page" : "Show on Offers page"}</button></form>
                   <form action={toggleCoupon}><input type="hidden" name="id" value={c.id} /><input type="hidden" name="active" value={String(c.active)} /><button className="underline">{c.active ? "Turn off" : "Turn on"}</button></form>
                   <form action={deleteCoupon}><input type="hidden" name="id" value={c.id} /><button className="text-red-600 underline">Delete</button></form>
