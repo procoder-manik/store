@@ -1,7 +1,7 @@
 import { cache } from "react";
 import { createPublicClient } from "@/lib/supabase/public";
 import { CATEGORIES, DEMO_PRODUCTS, type ColorOpt, type Product } from "@/lib/demo-products";
-import { imageUrl, slugify } from "@/lib/utils";
+import { imageUrl, slugify, videoUrl } from "@/lib/utils";
 
 export type Cat = { id: string; label: string; description?: string };
 
@@ -74,7 +74,7 @@ function mapRow(r: Row): Product {
     variants,
     image: imgs[0]?.url,
     images: imgs,
-    video: r.video_url || undefined,
+    video: r.video_url ? videoUrl(r.video_url) : undefined,
     seo: r.seo ?? {},
     updatedAt: r.updated_at ?? undefined,
     offerEndsAt: r.offer_ends_at ?? undefined,

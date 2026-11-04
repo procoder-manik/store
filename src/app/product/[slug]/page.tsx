@@ -3,6 +3,9 @@ import { notFound, permanentRedirect } from "next/navigation";
 import { findRedirect } from "@/lib/redirects";
 import { getCatalog, getProduct } from "@/lib/catalog";
 import { SITE_URL } from "@/lib/config";
+
+/** Search engines and share previews need the full address of a picture that lives on this site. */
+const abs = (u: string) => (u.startsWith("/") ? `${SITE_URL}${u}` : u);
 import { getPublicSettings } from "@/lib/settings";
 import { ProductDetail } from "@/components/ProductDetail";
 import { ReviewsSection } from "@/components/ReviewsSection";
@@ -29,7 +32,7 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
     title,
     description,
     alternates: { canonical: `${SITE_URL}/product/${p.slug}` },
-    openGraph: { title, description, type: "website", images: p.image ? [p.image] : undefined },
+    openGraph: { title, description, type: "website", images: p.image ? [abs(p.image)] : undefined },
   };
 }
 
@@ -60,7 +63,7 @@ export default async function ProductPage({ params }: Params) {
         "@type": "Product",
         name: p.name,
         description: p.description,
-        image: (p.images ?? []).map((i) => i.url),
+        image: (p.images ?? []).map((i) => abs(i.url)),
         brand: { "@type": "Brand", name: brand.name },
         ...(count > 0 ? { aggregateRating: { "@type": "AggregateRating", ratingValue: avg.toFixed(1), reviewCount: count } } : {}),
         offers: {

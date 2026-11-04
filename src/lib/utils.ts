@@ -15,8 +15,16 @@ export function isAllowedImageUrl(u: string) {
 /** "2027-01-15" becomes "15 January 2027". */
 export const preorderDate = (d: string) => new Date(`${d}T00:00:00Z`).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric", timeZone: "UTC" });
 
+const SOURCE_IMAGES = "https://img.kwcdn.com/product/";
+const SOURCE_VIDEOS = "https://goods-vod.kwcdn.com/goods-video/";
+
+/** A supplier's picture is shown through this store's own /media address, so visitors never see the supplier. */
 export const imageUrl = (path: string) =>
-  path.startsWith("https://") ? path : `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/product-images/${path}`;
+  path.startsWith(SOURCE_IMAGES) ? `/media/i/${path.slice(SOURCE_IMAGES.length)}`
+  : path.startsWith("https://") ? path
+  : `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/product-images/${path}`;
+
+export const videoUrl = (u: string) => (u.startsWith(SOURCE_VIDEOS) ? `/media/v/${u.slice(SOURCE_VIDEOS.length)}` : u);
 
 /** Returns a Bangladeshi mobile number as 01XXXXXXXXX, or null if invalid. */
 export function normalizePhone(raw: string): string | null {
