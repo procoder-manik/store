@@ -252,6 +252,7 @@ export function ProductForm({ categories, initial = EMPTY, allProducts = [] }: {
             </div>
           )}
           <input type="file" accept="video/mp4,video/webm" disabled={uploading} onChange={(e) => { onVideo(e.target.files?.[0]); e.target.value = ""; }} className="mt-3 text-sm" />
+          <input className={`${input} mt-3`} placeholder="Or paste a video link (an MP4 link from the supplier)" value={f.videoUrl} onChange={(e) => set("videoUrl", e.target.value.trim())} data-no-ai />
         </section>
 
         <section className={box}>

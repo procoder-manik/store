@@ -10,7 +10,7 @@ const csp = [
   `script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ""} https://www.googletagmanager.com https://connect.facebook.net`,
   "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
   "img-src 'self' blob: data: https:  https://*.supabase.co https://images.pexels.com https://images.unsplash.com https://cdn.pixabay.com https://www.google-analytics.com https://www.googletagmanager.com https://www.facebook.com",
-  "media-src 'self' https://*.supabase.co",
+  "media-src 'self' https://*.supabase.co https://goods-vod.kwcdn.com",
   "font-src 'self' data: https://fonts.gstatic.com",
   "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://www.google-analytics.com https://*.google-analytics.com https://*.analytics.google.com https://www.googletagmanager.com https://www.facebook.com https://connect.facebook.net",
   "frame-ancestors 'none'",

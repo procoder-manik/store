@@ -17,6 +17,7 @@ export function isOwnVideoUrl(v: string): boolean {
   try {
     const base = process.env.NEXT_PUBLIC_SUPABASE_URL;
     const u = new URL(v);
+    if (u.protocol === "https:" && u.host === "goods-vod.kwcdn.com" && u.pathname.startsWith("/goods-video/") && /\.mp4$/i.test(u.pathname)) return true; // a supplier's own video link
     return !!base && u.protocol === "https:" && u.host === new URL(base).host && u.pathname.startsWith("/storage/v1/object/public/product-videos/") && /\.(mp4|webm)$/i.test(u.pathname);
   } catch {
     return false;
