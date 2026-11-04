@@ -1,6 +1,16 @@
 import { z } from "zod";
 import { isAllowedImageUrl } from "@/lib/utils";
 
+/** Products listed from a supplier keep that supplier's picture links, which are only accepted on product images. */
+export function isSourceImage(u: string): boolean {
+  try {
+    const x = new URL(u);
+    return x.protocol === "https:" && x.hostname === "img.kwcdn.com" && x.pathname.startsWith("/product/");
+  } catch {
+    return false;
+  }
+}
+
 /** A product video lives in our own storage, never on someone else's server. Empty means no video. */
 export function isOwnVideoUrl(v: string): boolean {
   if (v === "") return true;
@@ -44,10 +54,10 @@ export const productSchema = z.object({
   images: z.array(z.object({
     path: z.union([
       z.string().regex(/^[a-zA-Z0-9._-]+$/).max(120),
-      z.string().max(500).refine(isAllowedImageUrl, "Image links must come from Pexels, Unsplash or Pixabay"),
+      z.string().max(500).refine((u) => isAllowedImageUrl(u) || isSourceImage(u), "Image links must come from Pexels, Unsplash or Pixabay"),
     ]),
     alt: z.string().max(200),
-  })).max(20),
+  })).max(60),
   relatedIds: z.array(z.string().uuid()).max(12),
 });
 

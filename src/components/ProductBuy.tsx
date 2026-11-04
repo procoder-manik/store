@@ -31,7 +31,10 @@ export function ProductBuy({ product, colorIdx, onColor, compact = false }: Prop
   const tracked = (product.variants?.length ?? 0) > 0;
   const available = tracked ? !!variant && variant.stock > 0 : true;
   const price = product.basePrice + (variant ? variant.priceDelta : color.delta);
-  const saving = product.compareAt && product.compareAt > price ? product.compareAt - price : 0;
+  // A bigger size costs more, so its crossed-out price rises by the same amount and the saving stays the same.
+  const was = product.compareAt ? product.compareAt + (price - product.basePrice) : 0;
+  const saving = was > price ? was - price : 0;
+  const offPct = saving > 0 ? Math.round((saving / was) * 100) : 0;
   const maxQty = variant ? Math.max(1, Math.min(10, variant.stock)) : 10;
   const q = Math.min(qty, maxQty);
   const stockNote = !tracked || !variant ? "" : variant.stock <= 0 ? "Sold out in this option" : variant.stock <= 5 ? `Only ${variant.stock} left` : "In stock";
@@ -64,8 +67,8 @@ export function ProductBuy({ product, colorIdx, onColor, compact = false }: Prop
     <div>
       <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
         <p className="font-display text-3xl font-semibold">{formatPrice(price)}</p>
-        {saving > 0 && <p className="text-sm text-muted line-through">{formatPrice(product.compareAt as number)}</p>}
-        {saving > 0 && <p className="rounded-pill bg-accent/10 px-2.5 py-0.5 text-xs font-medium text-accent">Save {formatPrice(saving)}</p>}
+        {saving > 0 && <p className="text-sm text-muted line-through">{formatPrice(was)}</p>}
+        {saving > 0 && <p className="rounded-pill bg-accent/10 px-2.5 py-0.5 text-xs font-medium text-accent">{offPct}% off, save {formatPrice(saving)}</p>}
       </div>
 
       {hasColors && (
@@ -73,7 +76,9 @@ export function ProductBuy({ product, colorIdx, onColor, compact = false }: Prop
           <p className="text-sm font-medium">Color <span className="font-normal text-muted">{color.name}</span></p>
           <div className="mt-2 flex flex-wrap gap-2.5">
             {product.colors.map((c, i) => (
-              <button key={c.name} aria-label={c.name} aria-pressed={i === colorIdx} onClick={() => onColor(i)} style={{ background: c.hex }} className={`h-9 w-9 rounded-full border border-line transition ${i === colorIdx ? "ring-2 ring-ink ring-offset-2 ring-offset-surface" : "hover:scale-110"}`} />
+              <button key={c.name} aria-label={c.name} title={c.name} aria-pressed={i === colorIdx} onClick={() => onColor(i)} style={c.image ? undefined : { background: c.hex }} className={`overflow-hidden rounded-full border border-line transition ${c.image ? "h-12 w-12" : "h-9 w-9"} ${i === colorIdx ? "ring-2 ring-ink ring-offset-2 ring-offset-surface" : "hover:scale-110"}`}>
+                {c.image && <img src={c.image} alt="" loading="lazy" className="h-full w-full object-cover" />}
+              </button>
             ))}
           </div>
         </div>

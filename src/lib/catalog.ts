@@ -48,7 +48,14 @@ function mapRow(r: Row): Product {
   const sizes: string[] = [];
   for (const v of r.product_variants ?? []) if (v.size && !sizes.includes(v.size)) sizes.push(v.size);
 
-  const imgs = [...(r.product_images ?? [])].sort((a, b) => a.sort - b.sort).map((i) => ({ url: imageUrl(i.path), alt: i.alt ?? r.name }));
+  // A picture whose alt text is "design:Name" is the swatch for that design, not part of the gallery.
+  const imgs: { url: string; alt: string }[] = [];
+  const designImage = new Map<string, string>();
+  for (const i of [...(r.product_images ?? [])].sort((a, b) => a.sort - b.sort)) {
+    if (i.alt?.startsWith("design:")) designImage.set(i.alt.slice(7), imageUrl(i.path));
+    else imgs.push({ url: imageUrl(i.path), alt: i.alt ?? r.name });
+  }
+  for (const c of colors) c.image = designImage.get(c.name);
   const cat = Array.isArray(r.categories) ? r.categories[0] : r.categories;
 
   return {

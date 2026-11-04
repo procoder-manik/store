@@ -1,6 +1,6 @@
 export type Kind = "tee" | "hoodie" | "cover" | "decor";
 export type Tag = "new" | "hot" | "bestseller" | "featured" | "sale";
-export type ColorOpt = { name: string; hex: string; delta: number };
+export type ColorOpt = { name: string; hex: string; delta: number; image?: string };
 
 export type VariantOpt = { id: string; colorName: string; size: string; priceDelta: number; stock: number };
 
