@@ -16,7 +16,7 @@ const PASS = ["content-type", "content-length", "content-range", "accept-ranges"
 export async function GET(req: Request, { params }: { params: Promise<{ kind: string; path: string[] }> }) {
   const { kind, path } = await params;
   const src = SOURCES[kind as keyof typeof SOURCES];
-  if (!src || path.length > 3 || !path.every((p) => PART.test(p)) || !src.ext.test(path[path.length - 1])) return new NextResponse("Not found", { status: 404 });
+  if (!src || path.length > 6 || !path.every((p) => PART.test(p)) || !src.ext.test(path[path.length - 1])) return new NextResponse("Not found", { status: 404 });
 
   const range = req.headers.get("range");
   let up: Response;

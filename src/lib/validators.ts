@@ -29,7 +29,7 @@ export const variantSchema =z.object({
   sku: z.string().trim().min(1, "Every variant needs a SKU").max(64),
   colorName: z.string().trim().max(40),
   colorHex: z.union([z.string().regex(/^#[0-9a-fA-F]{6}$/, "Color must look like #aabbcc"), z.literal("")]),
-  size: z.string().trim().max(20),
+  size: z.string().trim().max(30),
   priceDelta: z.number().min(-1_000_000).max(1_000_000),
   stock: z.number().int("Stock must be a whole number").min(0).max(1_000_000),
 });
