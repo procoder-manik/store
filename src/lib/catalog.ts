@@ -15,14 +15,15 @@ type Row = {
   offer_ends_at?: string | null;
   preorder?: boolean | null;
   preorder_date?: string | null;
+  video_url?: string | null;
   categories: { slug: string } | { slug: string }[] | null;
   product_variants: VRow[]; product_images: IRow[];
 };
 
 const SELECT =
-  "id, slug, name, kind, description, base_price, compare_at_price, tags, seo, updated_at, offer_ends_at, preorder, preorder_date, categories(slug), product_variants(id, color_name, color_hex, size, price_delta, stock), product_images(path, alt, sort)";
-// Older databases do not have offer_ends_at yet, so a failed query is retried without it.
-const SELECT_OLD = SELECT.replace(", offer_ends_at, preorder, preorder_date", "");
+  "id, slug, name, kind, description, base_price, compare_at_price, tags, seo, updated_at, offer_ends_at, preorder, preorder_date, video_url, categories(slug), product_variants(id, color_name, color_hex, size, price_delta, stock), product_images(path, alt, sort)";
+// Older databases do not have offer_ends_at or video_url yet, so a failed query is retried without them.
+const SELECT_OLD = SELECT.replace(", offer_ends_at, preorder, preorder_date, video_url", "");
 
 function mapRow(r: Row): Product {
   const variants = (r.product_variants ?? []).map((v) => ({
@@ -66,6 +67,7 @@ function mapRow(r: Row): Product {
     variants,
     image: imgs[0]?.url,
     images: imgs,
+    video: r.video_url || undefined,
     seo: r.seo ?? {},
     updatedAt: r.updated_at ?? undefined,
     offerEndsAt: r.offer_ends_at ?? undefined,

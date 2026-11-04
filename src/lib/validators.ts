@@ -1,7 +1,19 @@
 import { z } from "zod";
 import { isAllowedImageUrl } from "@/lib/utils";
 
-export const variantSchema = z.object({
+/** A product video lives in our own storage, never on someone else's server. Empty means no video. */
+export function isOwnVideoUrl(v: string): boolean {
+  if (v === "") return true;
+  try {
+    const base = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const u = new URL(v);
+    return !!base && u.protocol === "https:" && u.host === new URL(base).host && u.pathname.startsWith("/storage/v1/object/public/product-videos/") && /\.(mp4|webm)$/i.test(u.pathname);
+  } catch {
+    return false;
+  }
+}
+
+export const variantSchema =z.object({
   id: z.string().uuid().optional(),
   sku: z.string().trim().min(1, "Every variant needs a SKU").max(64),
   colorName: z.string().trim().max(40),
@@ -25,6 +37,7 @@ export const productSchema = z.object({
   preorder: z.boolean().default(false),
   preorderDate: z.string().max(10).default(""),
   status: z.enum(["draft", "active", "archived"]),
+  videoUrl: z.string().trim().max(500).refine(isOwnVideoUrl, "The video must be uploaded here as an MP4 or WebM file").default(""),
   seoTitle: z.string().max(70),
   seoDescription: z.string().max(170),
   variants: z.array(variantSchema).max(200),
@@ -34,7 +47,7 @@ export const productSchema = z.object({
       z.string().max(500).refine(isAllowedImageUrl, "Image links must come from Pexels, Unsplash or Pixabay"),
     ]),
     alt: z.string().max(200),
-  })).max(12),
+  })).max(20),
   relatedIds: z.array(z.string().uuid()).max(12),
 });
 

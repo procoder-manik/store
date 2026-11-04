@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { Banknote, RotateCcw, Truck } from "lucide-react";
+import { Banknote, Play, RotateCcw, Truck } from "lucide-react";
 import type { Product } from "@/lib/demo-products";
 import { OfferCountdown } from "./OfferCountdown";
 import { TagBadge } from "./TagBadge";
@@ -15,6 +15,10 @@ export function ProductDetail({ product, related, pairs, reviews, bundle, whatsa
   const [colorIdx, setColorIdx] = useState(0);
   const [img, setImg] = useState(0);
   const images = product.images ?? [];
+  // A video, when there is one, takes the first slot so it plays before anyone sees the photos.
+  const off = product.video ? 1 : 0;
+  const isVideo = off === 1 && img === 0;
+  const shown = images[img - off];
   const [zoom, setZoom] = useState<string | null>(null);
 
   return (
@@ -24,21 +28,31 @@ export function ProductDetail({ product, related, pairs, reviews, bundle, whatsa
       </nav>
       <div className="grid gap-8 md:grid-cols-2 md:gap-14">
         <div className="md:sticky md:top-24 md:self-start">
-          {images.length > 0 ? (
+          {isVideo ? (
+            <div className="overflow-hidden rounded-[18px] bg-black">
+              <video key={product.video} src={product.video} poster={images[0]?.url} controls autoPlay muted loop playsInline preload="metadata" className="aspect-[4/5] w-full object-contain" />
+            </div>
+          ) : shown ? (
             <div
               style={{ background: `color-mix(in srgb, ${product.colors[colorIdx]?.hex ?? product.colors[0].hex} 17%, var(--surface))` }} className="overflow-hidden rounded-[18px]"
               onMouseMove={(e) => { const r = e.currentTarget.getBoundingClientRect(); setZoom(`${((e.clientX - r.left) / r.width) * 100}% ${((e.clientY - r.top) / r.height) * 100}%`); }}
               onMouseLeave={() => setZoom(null)}
             >
-              <img src={images[img]?.url} alt={images[img]?.alt} style={zoom ? { transformOrigin: zoom, transform: "scale(1.7)" } : undefined} className="aspect-[4/5] w-full cursor-zoom-in object-contain p-[8%] drop-shadow-[0_22px_24px_rgba(15,31,28,0.22)] transition-transform duration-200" />
+              <img src={shown.url} alt={shown.alt} style={zoom ? { transformOrigin: zoom, transform: "scale(1.7)" } : undefined} className="aspect-[4/5] w-full cursor-zoom-in object-contain p-[8%] drop-shadow-[0_22px_24px_rgba(15,31,28,0.22)] transition-transform duration-200" />
             </div>
           ) : (
             <ProductArt kind={product.kind} color={product.colors[colorIdx]?.hex ?? product.colors[0].hex} className="aspect-[4/5] w-full rounded-3xl" />
           )}
-          {images.length > 1 && (
+          {images.length + off > 1 && (
             <div className="mt-3 flex gap-2 no-scrollbar overflow-x-auto">
+              {off === 1 && (
+                <button aria-label="Play video" aria-pressed={img === 0} onClick={() => setImg(0)} className={`relative h-16 w-16 shrink-0 overflow-hidden rounded-xl border bg-black ${img === 0 ? "border-ink" : "border-line"}`}>
+                  {images[0] && <img src={images[0].url} alt="" className="h-full w-full object-cover opacity-80" />}
+                  <span aria-hidden className="absolute inset-0 grid place-items-center"><span className="grid h-7 w-7 place-items-center rounded-full bg-white/90 text-black"><Play size={13} fill="currentColor" /></span></span>
+                </button>
+              )}
               {images.map((im, i) => (
-                <button key={im.url} aria-label={`Image ${i + 1}`} aria-pressed={i === img} onClick={() => setImg(i)} className={`h-16 w-16 shrink-0 overflow-hidden rounded-xl border ${i === img ? "border-ink" : "border-line"}`}>
+                <button key={im.url} aria-label={`Image ${i + 1}`} aria-pressed={i + off === img} onClick={() => setImg(i + off)} className={`h-16 w-16 shrink-0 overflow-hidden rounded-xl border ${i + off === img ? "border-ink" : "border-line"}`}>
                   <img src={im.url} alt="" className="h-full w-full object-cover" />
                 </button>
               ))}

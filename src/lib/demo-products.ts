@@ -19,6 +19,7 @@ export type Product = {
   variants?: VariantOpt[];
   image?: string;
   images?: { url: string; alt: string }[];
+  video?: string;
   compareAt?: number | null;
   related?: string[];
   updatedAt?: string;

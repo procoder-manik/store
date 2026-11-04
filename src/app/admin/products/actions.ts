@@ -32,6 +32,7 @@ export async function saveProduct(input: unknown): Promise<Result> {
     compare_at_price: d.compareAtPrice,
     tags: d.tags,
     status: d.status,
+    video_url: d.videoUrl || null,
     seo: { title: d.seoTitle, description: d.seoDescription },
     updated_at: new Date().toISOString(),
   };
@@ -121,7 +122,7 @@ export async function duplicateProduct(id: string): Promise<{ ok: true; id: stri
   const tag = Math.random().toString(36).slice(2, 6);
   const { data: np, error } = await supabase.from("products").insert({
     slug: `${p.slug}-copy-${tag}`.slice(0, 120), name: `${p.name} (copy)`.slice(0, 120), kind: p.kind, category_id: p.category_id, description: p.description,
-    base_price: p.base_price, compare_at_price: p.compare_at_price, tags: p.tags, status: "draft", seo: {},
+    base_price: p.base_price, compare_at_price: p.compare_at_price, tags: p.tags, status: "draft", seo: {}, video_url: p.video_url ?? null,
   }).select("id").single();
   if (error || !np) return { ok: false, error: error?.message ?? "Could not copy the product." };
   const variants = (p.product_variants ?? []) as { sku: string; color_name: string | null; color_hex: string | null; size: string | null; price_delta: number }[];

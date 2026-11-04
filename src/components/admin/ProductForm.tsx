@@ -15,12 +15,12 @@ type Img = { path: string; alt: string };
 export type ProductInitial = {
   id?: string; name: string; slug: string; kind: string; categoryId: string; description: string;
   basePrice: string; compareAtPrice: string; offerEndsAt: string; preorder: boolean; preorderDate: string; tags: string[]; status: string;
-  seoTitle: string; seoDescription: string; variants: V[]; images: Img[]; relatedIds: string[];
+  seoTitle: string; seoDescription: string; variants: V[]; images: Img[]; videoUrl: string; relatedIds: string[];
 };
 
 const EMPTY: ProductInitial = {
   name: "", slug: "", kind: "tee", categoryId: "", description: "", basePrice: "", compareAtPrice: "", offerEndsAt: "", preorder: false, preorderDate: "",
-  tags: [], status: "draft", seoTitle: "", seoDescription: "", variants: [], images: [], relatedIds: [],
+  tags: [], status: "draft", seoTitle: "", seoDescription: "", variants: [], images: [], videoUrl: "", relatedIds: [],
 };
 const TAGS = ["new", "hot", "bestseller", "featured", "sale"] as const;
 const MIME: Record<string, string> = { "image/jpeg": "jpg", "image/png": "png", "image/webp": "webp", "image/avif": "avif" };
@@ -102,7 +102,7 @@ export function ProductForm({ categories, initial = EMPTY, allProducts = [] }: {
   function addUrl() {
     const u = urlInput.trim();
     if (!isAllowedImageUrl(u)) return setError("Paste a direct https image link from Pexels, Unsplash or Pixabay.");
-    if (f.images.length >= 12) return setError("You can add up to 12 images.");
+    if (f.images.length >= 20) return setError("You can add up to 20 images.");
     setError("");
     set("images", [...f.images, { path: u, alt: f.name }]);
     setUrlInput("");
@@ -122,8 +122,22 @@ export function ProductForm({ categories, initial = EMPTY, allProducts = [] }: {
       if (err) { setError(err.message); continue; }
       added.push({ path, alt: "" });
     }
-    set("images", [...f.images, ...added].slice(0, 12));
+    set("images", [...f.images, ...added].slice(0, 20));
     setUploading(false);
+  }
+
+  async function onVideo(file: File | undefined) {
+    if (!file) return;
+    const ext = file.type === "video/mp4" ? "mp4" : file.type === "video/webm" ? "webm" : "";
+    if (!ext || file.size > 50 * 1024 * 1024) return setError(`${file.name}: use an MP4 or WebM video under 50 MB`);
+    setUploading(true);
+    setError("");
+    const sb = createClient();
+    const path = `${crypto.randomUUID()}.${ext}`;
+    const { error: err } = await sb.storage.from("product-videos").upload(path, file, { contentType: file.type, cacheControl: "31536000" });
+    setUploading(false);
+    if (err) return setError(err.message);
+    set("videoUrl", sb.storage.from("product-videos").getPublicUrl(path).data.publicUrl);
   }
 
   function submit(e: React.FormEvent) {
@@ -147,6 +161,7 @@ export function ProductForm({ categories, initial = EMPTY, allProducts = [] }: {
       seoDescription: f.seoDescription,
       variants: f.variants.map((v) => ({ id: v.id, sku: v.sku, colorName: v.colorName, colorHex: v.colorHex, size: v.size, priceDelta: Number(v.priceDelta || 0), stock: Number(v.stock || 0) })),
       images: f.images,
+      videoUrl: f.videoUrl,
       relatedIds: f.relatedIds,
     };
     start(async () => {
@@ -219,12 +234,24 @@ export function ProductForm({ categories, initial = EMPTY, allProducts = [] }: {
               </div>
             ))}
           </div>
-          <input type="file" accept="image/jpeg,image/png,image/webp,image/avif" multiple disabled={uploading || f.images.length >= 12} onChange={(e) => { onFiles(e.target.files); e.target.value = ""; }} className="mt-3 text-sm" />
+          <input type="file" accept="image/jpeg,image/png,image/webp,image/avif" multiple disabled={uploading || f.images.length >= 20} onChange={(e) => { onFiles(e.target.files); e.target.value = ""; }} className="mt-3 text-sm" />
           {uploading && <p className="mt-2 text-xs text-muted">Uploading...</p>}
           <div className="mt-3 flex gap-2">
             <input className={input} placeholder="Or paste an image link from Pexels, Unsplash or Pixabay" value={urlInput} onChange={(e) => setUrlInput(e.target.value)} />
             <button type="button" onClick={addUrl} className="shrink-0 rounded-pill border border-line px-4 py-2 text-sm font-medium hover:bg-paper">Add</button>
           </div>
+        </section>
+
+        <section className={box}>
+          <h2 className="font-display text-base font-semibold">Video</h2>
+          <p className="mt-1 text-xs text-muted">Optional. The video shows first in the product gallery. MP4 or WebM, up to 50 MB.</p>
+          {f.videoUrl && (
+            <div className="mt-3 flex items-start gap-3">
+              <video src={f.videoUrl} controls muted playsInline preload="metadata" className="aspect-video w-48 rounded-lg border border-line bg-black object-contain" />
+              <button type="button" onClick={() => set("videoUrl", "")} className="inline-flex items-center gap-1 rounded-pill border border-line px-3 py-1.5 text-xs font-medium hover:bg-paper"><Trash2 size={14} /> Remove video</button>
+            </div>
+          )}
+          <input type="file" accept="video/mp4,video/webm" disabled={uploading} onChange={(e) => { onVideo(e.target.files?.[0]); e.target.value = ""; }} className="mt-3 text-sm" />
         </section>
 
         <section className={box}>

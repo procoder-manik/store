@@ -40,6 +40,7 @@ export default async function EditProduct({ params }: { params: Promise<{ id: st
       priceDelta: String(v.price_delta),
       stock: String(v.stock),
     })),
+    videoUrl: p.video_url ?? "",
     images: (p.product_images ?? []).sort((a: { sort: number }, b: { sort: number }) => a.sort - b.sort).map((i: { path: string; alt: string | null }) => ({ path: i.path, alt: i.alt ?? "" })),
   };
 
