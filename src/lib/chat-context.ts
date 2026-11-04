@@ -30,8 +30,10 @@ function words(s: string) {
   return s.toLowerCase().split(/[^a-z0-9ঀ-৿]+/).filter((w) => w.length > 2);
 }
 
-function score(p: Product, q: string[]) {
-  const name = p.name.toLowerCase(), cat = p.category.toLowerCase();
+function score(p: Product, q: string[], catName: Map<string, string>) {
+  const name = p.name.toLowerCase();
+  // Match on the category's own name too, which may be Bangla, not only its machine slug.
+  const cat = `${catName.get(p.category) ?? ""} ${p.category}`.toLowerCase();
   const desc = p.description.toLowerCase(), cols = p.colors.map((c) => c.name.toLowerCase()).join(" ");
   let s = 0;
   for (const w of q) {
@@ -119,7 +121,7 @@ export async function buildChatContext(question: string, path = ""): Promise<Cha
 
   // Follow-up questions like "how much is it?" lean on what came before, and on the page the customer is reading.
   const q = words(question);
-  const ranked = products.map((p) => ({ p, s: score(p, q) })).sort((a, b) => b.s - a.s);
+  const ranked = products.map((p) => ({ p, s: score(p, q, catName) })).sort((a, b) => b.s - a.s);
   const viewing = path.startsWith("/product/") ? products.find((p) => p.slug === path.slice(9)) : undefined;
   const hits = ranked.filter((x) => x.s > 0).slice(0, 5).map((x) => x.p);
   const detailed = [...new Set([...(viewing ? [viewing] : []), ...hits])];
@@ -139,6 +141,8 @@ export async function buildChatContext(question: string, path = ""): Promise<Cha
 
   const menu = [...settings.header.links, ...settings.footer.columns.flatMap((c) => c.links)];
   for (const l of menu) if (l.href.startsWith("/") && l.href.length > 1 && !links.has(l.href)) links.set(l.href, l.label);
+  // Facebook, Instagram and the like live in the menus as full web links, so the assistant can share them when asked.
+  const social = menu.filter((l) => /^https?:\/\//i.test(l.href) && l.label.trim());
 
   const delivery = zoneRows.length
     ? `${zoneRows.map((z) => `${z.name}: ${formatPrice(z.fee)}${z.freeOver != null ? `, free on orders of ${formatPrice(z.freeOver)} or more` : ", no free delivery offer"}`).join("; ")}. These are the only delivery areas. The customer picks one at checkout.`
@@ -167,7 +171,7 @@ export async function buildChatContext(question: string, path = ""): Promise<Cha
   const fresh = products.filter((p) => p.tags.includes("new" as never)).slice(0, 12);
   const c = settings.contact;
   const whatsapp = settings.chat.waEnabled ? settings.chat.waNumber || c.whatsapp : c.whatsapp;
-  const contact = [c.businessName && `business name ${c.businessName}`, c.phone && `phone ${c.phone}`, c.phone2 && `phone ${c.phone2}`, whatsapp && `WhatsApp ${whatsapp}`, c.email && `email ${c.email}`, c.address && `address ${c.address}`, c.hours && `hours ${c.hours}`].filter(Boolean).join("; ");
+  const contact = [c.businessName && `business name ${c.businessName}`, c.phone && `phone ${c.phone}`, c.phone2 && `phone ${c.phone2}`, whatsapp && `WhatsApp ${whatsapp}`, c.email && `email ${c.email}`, c.address && `address ${c.address}`, c.hours && `hours ${c.hours}`, c.mapUrl && `map ${c.mapUrl}`].filter(Boolean).join("; ");
 
   const text = [
     `STORE: ${settings.brand.name}. ${settings.brand.tagline}. Today is ${dhakaDate(new Date())}.`,
@@ -178,8 +182,9 @@ export async function buildChatContext(question: string, path = ""): Promise<Cha
     `DELIVERY: ${delivery}`,
     `PAYMENT METHODS OPEN NOW: ${pay || "ask the team"}. ${advance}`,
     contact && `CONTACT: ${contact}`,
+    social.length ? `SOCIAL / FOLLOW US: ${social.map((l) => `${l.label} ${l.href}`).join("; ")}` : "",
     `WEBSITE PAGES: ${[...links].map(([href, label]) => `${label} ${href}`).join("; ")}`,
-    `CATEGORIES: ${categories.map((x) => `${x.label} (/category/${x.id})`).join(", ") || "none yet"}`,
+    `CATEGORIES: ${categories.map((x) => `${x.label}${x.description ? ` (${x.description})` : ""} (/category/${x.id})`).join(", ") || "none yet"}`,
     `ALL ${products.length} PRODUCTS:\n${ranked.slice(0, MAX_LISTED).map((x) => brief(x.p, catName)).join("\n") || "none yet"}`,
     detailed.length ? `PRODUCT DETAILS:\n${detailed.map((p) => detail(p, ratings.get(p.id))).join("\n")}` : "",
     `WHAT THE WEBSITE PAGES SAY:\n${[...written, ...builtIn].join("\n")}`,
