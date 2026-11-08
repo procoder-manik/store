@@ -1,179 +1,128 @@
-# 🚀 Headless WordPress React Frontend
+# Sonar Tori — home decor store
 
-A modern, high-performance decoupled front-end application built with **React** and styled using **Tailwind CSS**, consuming WordPress purely as a Headless CMS via the **WordPress REST API**.
+An online store for bedsheets, quilts, pillows, cushions and home decor, built for Bangladesh: cash on delivery, bKash/Nagad/Rocket, delivery by zone, and an admin panel where the owner runs everything without touching code.
+
+**Live site:** https://store.manikhossain.in
 
 ---
 
-## 🌐 Live Demos & Endpoints
+## What it does
 
-| Service | Link |
+**Storefront**
+- Shop, categories, product pages with a picture gallery, a product video that plays first, design swatches, sizes and a clear discount badge
+- Cart, quick checkout, order tracking, wishlist, compare, live search
+- Coupons with rules (start date, per-customer limit, first order only, chosen products or categories, free delivery)
+- Pre-orders, offers page, promo popup with several designs and triggers
+- Shopping assistant chatbot that always answers from the live store data
+- Light, dark and system themes
+
+**Admin** (`/admin`, role guarded, two-step verification)
+- Products with variants, pictures and video; categories; coupons; bundles
+- Orders, customers, leads, reviews, email campaigns and automatic emails
+- Delivery partners (Steadfast booking, other couriers with their own keys), delivery zones and fees
+- Payment methods, theme and colours, header and footer, pages and landing pages, popup editor
+- AI services: several free providers tried in order, with an email warning when one runs out
+
+**Payments and delivery**
+- Cash on delivery, manual mobile banking with transaction ID, and SSLCommerz
+- Steadfast parcel booking from the order page
+
+---
+
+## Tech stack
+
+| Part | Tool |
 | :--- | :--- |
-| **Production Frontend (Vercel)** | [https://headless-wp-nine.vercel.app/](https://headless-wp-nine.vercel.app/) |
-| **WordPress Backend / API Server** | [https://demo.manikhossain.in/](https://demo.manikhossain.in/) |
-| **REST API Base URL** | `https://demo.manikhossain.in/wp-json/wp/v2/` |
+| App | Next.js 15 (App Router), React 19, TypeScript |
+| Styling | Tailwind CSS |
+| Database, login, files | Supabase (Postgres, Auth, Storage) |
+| Hosting | Vercel (auto-deploys from `main`) |
+| Email | Resend |
+| Rate limiting | Upstash Redis |
+| 3D hanger rail | three.js with React Three Fiber |
+| Validation, state | Zod, Zustand |
 
 ---
 
-## ✨ Features
-
-- ⚡ **Decoupled Headless Architecture**: WordPress backend handles content management, while React delivers an interactive Single Page Application (SPA).
-- 🎨 **Utility-First Styling**: Styled with **Tailwind CSS** for responsive design.
-- 📡 **REST API Integration**: Dynamic content fetching for posts, media, categories, and custom fields.
-- 🚀 **Performance Optimized**: Component-level loading states, structured component trees, and client-side routing.
-- ☁️ **Cloud Native Deployment**: Automated continuous deployment configured for Vercel.
-
----
-
-## 🛠️ Tech Stack
-
-- **Frontend Framework:** React 18+ (Create React App)
-- **Styling:** Tailwind CSS, PostCSS, Autoprefixer
-- **HTTP Client:** Fetch API / Axios
-- **Backend CMS:** WordPress (Self-Hosted on Apache/Nginx)
-- **Deployment:** Vercel (Frontend), Custom Hosting (WordPress backend)
-
----
-
-## 📁 Project Structure
+## Project structure
 
 ```text
-headless-wp/
-├── frontend/                     # React Single-Page Application
-│   ├── public/                   # Static assets & index.html
-│   ├── src/
-│   │   ├── components/           # Reusable UI components (Navbar, Footer, Card, etc.)
-│   │   ├── services/             # API handlers (WordPress REST API fetchers)
-│   │   ├── App.css               # Global application styles
-│   │   ├── App.js                # Main router & root application wrapper
-│   │   ├── App.test.js           # Unit test definitions
-│   │   ├── index.css             # Tailwind CSS directives (@tailwind base/components/utilities)
-│   │   ├── index.js              # React DOM render entry point
-│   │   └── setupTests.js         # Jest and React Testing Library setup
-│   ├── .env                      # Local environment variables
-│   ├── .gitignore                # Git untracked pattern definitions
-│   ├── package.json              # Project dependencies, scripts, and versions
-│   ├── postcss.config.js         # PostCSS configuration for Tailwind
-│   └── tailwind.config.js        # Tailwind CSS customizations & themes
-└── README.md                     # Root project documentation
+src/
+  app/          Pages and API routes (shop, product, checkout, admin, media, ...)
+  components/   Storefront and admin components
+  lib/          Pricing, catalog, settings, checkout, couriers, AI, email, security
+supabase/
+  migrations/   SQL files, run in order in the Supabase SQL Editor
+docs/           Architecture, client requirements, go-live checklist
+.github/
+  workflows/    Encrypted nightly database backup to Google Drive
+CHANGES.md      What changed, newest first
 ```
 
 ---
 
-## ⚙️ Getting Started
+## Run it locally
 
-Follow these steps to run the frontend locally:
-
-### 1. Prerequisites
-
-- [Node.js](https://nodejs.org/) (version `18.x` or later recommended)
-- [npm](https://www.npmjs.com/) or [yarn](https://yarnpkg.com/)
-- Accessible WordPress REST API endpoint
-
-### 2. Clone the Repository
-
-```bash
-git clone https://github.com/<your-username>/<your-repo-name>.git
-cd <your-repo-name>/frontend
-```
-
-### 3. Configure Environment Variables
-
-Create a `.env` file in the root of the `frontend` folder:
-
-```env
-REACT_APP_WP_API_URL=https://demo.manikhossain.in/wp-json/wp/v2
-```
-
-### 4. Install Dependencies
+You need Node 20.9 or newer.
 
 ```bash
 npm install
+cp .env.example .env.local     # then fill in the values
+npm run dev
 ```
 
-> **Note:** If you experience peer dependency warnings or conflicts, run:
-> ```bash
-> npm install --legacy-peer-deps
-> ```
+Open http://localhost:3000.
 
-### 5. Launch Development Server
+Run the files in `supabase/migrations/` in order in the Supabase SQL Editor before the first start. `docs/GO-LIVE.md` lists every step.
 
-```bash
-npm start
-```
-
-The application will start and open automatically at [http://localhost:3000](http://localhost:3000).
-
----
-
-## 📜 Available Scripts
-
-In the `frontend` directory, you can execute:
-
-| Command | Action |
+| Command | What it does |
 | :--- | :--- |
-| `npm start` | Runs the app in development mode on [http://localhost:3000](http://localhost:3000) with hot-reloading. |
-| `npm test` | Launches the interactive test runner. |
-| `npm run build` | Compiles a production-ready, minified build to the `build/` directory. |
-| `npm run eject` | Copies build configurations and dependencies directly into your project (one-way operation). |
+| `npm run dev` | Development server with hot reload |
+| `npm run build` | Production build |
+| `npm run start` | Serve the production build |
+| `npm run typecheck` | TypeScript check |
+| `npm run check` | Typecheck, then build |
 
 ---
 
-## 🔌 API Integration Guide
+## Environment variables
 
-This frontend connects to the WordPress REST API to ingest content dynamically. Example request to retrieve posts:
+Real values go only in `.env.local` (never committed) and in the Vercel project settings. `.env.example` lists them all.
 
-```javascript
-// Example service call
-const API_URL = process.env.REACT_APP_WP_API_URL || 'https://demo.manikhossain.in/wp-json/wp/v2';
-
-export const fetchPosts = async () => {
-  try {
-    const response = await fetch(`${API_URL}/posts?_embed`);
-    if (!response.ok) throw new Error('Failed to fetch posts');
-    return await response.json();
-  } catch (error) {
-    console.error('API Error:', error);
-    return [];
-  }
-};
-```
-
-> **WordPress Setup Tip:** Ensure **CORS** headers are enabled on your WordPress server if you encounter origin policy blocks when querying from localhost.
+| Name | Used for |
+| :--- | :--- |
+| `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Connecting the browser to Supabase |
+| `SUPABASE_SERVICE_ROLE_KEY` | Server only. Never expose it |
+| `NEXT_PUBLIC_SITE_URL`, `NEXT_PUBLIC_BRAND_NAME` | Site address and store name |
+| `RESEND_API_KEY`, `EMAIL_FROM`, `EMAIL_SECRET` | Sending email |
+| `UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN` | Rate limiting |
+| `SSLCOMMERZ_STORE_ID`, `SSLCOMMERZ_STORE_PASSWORD`, `SSLCOMMERZ_LIVE` | Online card and wallet payments |
+| `STEADFAST_API_KEY`, `STEADFAST_SECRET_KEY` | Courier booking (can also be set in Admin, Delivery partners) |
+| `GEMINI_API_KEY`, `ANTHROPIC_API_KEY` | AI services (more can be added in Admin, AI services) |
+| `CRON_SECRET` | Protects the daily cleanup job |
+| `REQUIRE_ADMIN_MFA` | Keep unset in production |
 
 ---
 
-## 🗺️ Project Roadmap
+## Deployment
 
-- [x] Decoupled WordPress backend and React frontend connection
-- [x] Dynamic REST API post fetching with embedded featured images
-- [x] Responsive layout using Tailwind CSS
-- [x] Continuous deployment pipeline on Vercel
-- [ ] **Phase 2:** Implement React Router for dedicated single-post routes (`/posts/:id` or `/posts/:slug`)
-- [ ] **Phase 3:** Integrate WPGraphQL / Apollo Client for query optimization
-- [ ] **Phase 4:** Pagination, category filtering, and live search functionality
-- [ ] **Phase 5:** Progressive Web App (PWA) offline caching support
+Pushing to `main` deploys to Vercel by itself. A daily job (`vercel.json`) expires unpaid orders at 03:00.
+
+A nightly backup (`.github/workflows/db-backup.yml`) dumps the database, encrypts it and uploads it to Google Drive. It needs three repository secrets: `SUPABASE_DB_URL`, `BACKUP_PASSPHRASE` and `RCLONE_CONF`. See `docs/GO-LIVE.md` section 7.
 
 ---
 
-## 🚀 Deployment
+## Documents
 
-### Deploying to Vercel
-
-1. Push your repository to GitHub.
-2. Import the repository into [Vercel](https://vercel.com).
-3. Set the **Root Directory** to `frontend`.
-4. Add the environment variable `REACT_APP_WP_API_URL` with value `https://demo.manikhossain.in/wp-json/wp/v2`.
-5. Click **Deploy**.
+- [Go-live and security checklist](docs/GO-LIVE.md)
+- [Architecture](docs/architecture.md)
+- [Client requirements](docs/client.md)
+- [Change log](CHANGES.md)
 
 ---
 
-## 👤 Author
+## Security
 
-- **Live Site:** [headless-wp-nine.vercel.app](https://headless-wp-nine.vercel.app/)
-- **Backend Admin:** [demo.manikhossain.in](https://demo.manikhossain.in/)
-
----
-
-## 📄 License
-
-This project is licensed under the [MIT License](LICENSE).
+- No secret is stored in this repository. `.env` files are ignored, except `.env.example`.
+- The admin panel needs a manager or super admin role and two-step verification.
+- Keys for AI services and couriers saved in Admin are stored encrypted.

@@ -14,3 +14,6 @@ next-env.d.ts
 npm-debug.log*
 .DS_Store
 .vercel
+
+# Claude Code working folders (local copies, never part of the store)
+.claude/
