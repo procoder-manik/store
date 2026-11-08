@@ -10,6 +10,7 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import type { Product } from "@/lib/demo-products";
 import type { Cat } from "@/lib/catalog";
 import { formatPrice } from "@/lib/config";
+import { sized } from "@/lib/utils";
 import { ProductPanel } from "./ProductPanel";
 import { ProductArt } from "./ProductArt";
 import type { Nudge } from "./3d/HangerRail";
@@ -171,7 +172,7 @@ export function Storefront({ products, categories, variant = "hanger", showHero 
           <div className="grid grid-cols-2 gap-x-4 gap-y-8 md:grid-cols-4">
             {list.map((p) => (
               <button key={p.id} onClick={() => select(p.id)} className="group text-left">
-                {p.image ? <img src={p.image} alt={p.name} loading="lazy" className="aspect-[4/5] w-full rounded-2xl border border-line object-cover transition group-hover:-translate-y-1" /> : <ProductArt kind={p.kind} color={p.colors[0].hex} className="aspect-[4/5] w-full rounded-2xl border border-line transition group-hover:-translate-y-1" />}
+                {p.image ? <img src={sized(p.image, 480)} alt={p.name} loading="lazy" decoding="async" className="aspect-[4/5] w-full rounded-2xl border border-line object-cover transition group-hover:-translate-y-1" /> : <ProductArt kind={p.kind} color={p.colors[0].hex} className="aspect-[4/5] w-full rounded-2xl border border-line transition group-hover:-translate-y-1" />}
                 <p className="mt-3 text-sm font-medium">{p.name}</p>
                 <p className={`text-sm ${headDark ? "text-white/70" : "text-muted"}`}>{formatPrice(p.basePrice)}</p>
               </button>

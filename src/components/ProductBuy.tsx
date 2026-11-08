@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { Check, Minus, Plus, Truck } from "lucide-react";
 import type { Product } from "@/lib/demo-products";
 import { formatPrice } from "@/lib/config";
-import { preorderDate } from "@/lib/utils";
+import { preorderDate, sized } from "@/lib/utils";
 import { useCart } from "@/lib/cart";
 import { trackAddToCart } from "@/lib/track";
 import { ListButtons } from "./ListButtons";
@@ -77,7 +77,7 @@ export function ProductBuy({ product, colorIdx, onColor, compact = false }: Prop
           <div className="mt-2 flex flex-wrap gap-2.5">
             {product.colors.map((c, i) => (
               <button key={c.name} aria-label={c.name} title={c.name} aria-pressed={i === colorIdx} onClick={() => onColor(i)} style={c.image ? undefined : { background: c.hex }} className={`overflow-hidden rounded-full border border-line transition ${c.image ? "h-12 w-12" : "h-9 w-9"} ${i === colorIdx ? "ring-2 ring-ink ring-offset-2 ring-offset-surface" : "hover:scale-110"}`}>
-                {c.image && <img src={c.image} alt="" loading="lazy" className="h-full w-full object-cover" />}
+                {c.image && <img src={sized(c.image, 120)} alt="" width={48} height={48} loading="lazy" decoding="async" className="h-full w-full object-cover" />}
               </button>
             ))}
           </div>

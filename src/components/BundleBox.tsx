@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Check } from "lucide-react";
 import type { Product } from "@/lib/demo-products";
 import { formatPrice } from "@/lib/config";
+import { sized } from "@/lib/utils";
 import { useCart } from "@/lib/cart";
 import { trackAddToCart } from "@/lib/track";
 import { ProductArt } from "./ProductArt";
@@ -47,7 +48,7 @@ export function BundleBox({ name, percent, products }: { name: string; percent: 
       <div className="mt-6 grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         {picks.map(({ p, opts, tracked, price }) => (
           <div key={p.id} className="grid content-start gap-3">
-            {p.image ? <img src={p.image} alt={p.name} loading="lazy" className="aspect-[4/5] w-full rounded-2xl border border-line object-cover" /> : <ProductArt kind={p.kind} color={p.colors[0].hex} className="aspect-[4/5] w-full rounded-2xl border border-line" />}
+            {p.image ? <img src={sized(p.image, 480)} alt={p.name} loading="lazy" decoding="async" className="aspect-[4/5] w-full rounded-2xl border border-line object-cover" /> : <ProductArt kind={p.kind} color={p.colors[0].hex} className="aspect-[4/5] w-full rounded-2xl border border-line" />}
             <p className="text-sm font-medium">{p.name}</p>
             {tracked && (opts.length ? (
               <select aria-label={`Option for ${p.name}`} value={sel[p.id]} onChange={(e) => setSel({ ...sel, [p.id]: e.target.value })} className="rounded-xl border border-line bg-paper px-3 py-2 text-sm">

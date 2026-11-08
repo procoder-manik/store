@@ -5,7 +5,7 @@ import { useState } from "react";
 import { Check, Clock, ShoppingBag } from "lucide-react";
 import type { Product } from "@/lib/demo-products";
 import { formatPrice } from "@/lib/config";
-import { preorderDate } from "@/lib/utils";
+import { preorderDate, sized } from "@/lib/utils";
 import { useCart } from "@/lib/cart";
 import { useCardStyle } from "./CardStyle";
 import { HeartButton } from "./ListButtons";
@@ -48,7 +48,7 @@ export function ProductCard({ p, zones }: { p: Product; zones?: Zone[] }) {
       <div style={{ background: `color-mix(in srgb, ${tint} 17%, var(--surface))` }} className="pcard-media relative overflow-hidden transition duration-500 md:group-hover:shadow-[0_22px_44px_-26px_rgba(15,31,28,0.55)]">
         <Link href={`/product/${p.slug}`} className="block" aria-label={p.name}>
           {p.image ? (
-            <img src={p.image} alt={p.name} loading="lazy" className="aspect-[4/5] w-full object-contain p-[10%] drop-shadow-[0_16px_18px_rgba(15,31,28,0.2)] transition duration-700 ease-out md:group-hover:-translate-y-1.5 md:group-hover:scale-[1.06]" />
+            <img src={sized(p.image, 480)} alt={p.name} loading="lazy" decoding="async" className="aspect-[4/5] w-full object-contain p-[10%] drop-shadow-[0_16px_18px_rgba(15,31,28,0.2)] transition duration-700 ease-out md:group-hover:-translate-y-1.5 md:group-hover:scale-[1.06]" />
           ) : (
             <ProductArt kind={p.kind} color={p.colors[0].hex} className="aspect-[4/5] w-full" />
           )}

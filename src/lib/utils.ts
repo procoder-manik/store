@@ -24,7 +24,10 @@ export const imageUrl = (path: string) =>
   : path.startsWith("https://") ? path
   : `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/product-images/${path}`;
 
-export const videoUrl = (u: string) => (u.startsWith(SOURCE_VIDEOS) ? `/media/v/${u.slice(SOURCE_VIDEOS.length)}` : u);
+/** Asks the media route for a smaller copy of a supplier picture: thumbnails and cards must not download the full-size photo. */
+export const sized = <T extends string | undefined>(u: T, w: number): T => (u && u.startsWith("/media/i/") ? (`${u.split("?")[0]}?w=${w}` as T) : u);
+
+export const videoUrl =(u: string) => (u.startsWith(SOURCE_VIDEOS) ? `/media/v/${u.slice(SOURCE_VIDEOS.length)}` : u);
 
 /** Returns a Bangladeshi mobile number as 01XXXXXXXXX, or null if invalid. */
 export function normalizePhone(raw: string): string | null {

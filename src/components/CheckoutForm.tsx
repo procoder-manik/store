@@ -10,6 +10,7 @@ import { useRouter } from "next/navigation";
 import { useCart } from "@/lib/cart";
 import { ProductArt } from "./ProductArt";
 import { formatPrice } from "@/lib/config";
+import { sized } from "@/lib/utils";
 import { placeOrder, quoteOrder } from "@/app/checkout/actions";
 import { captureCart } from "@/app/checkout/capture";
 import { readRef } from "./RefCapture";
@@ -141,7 +142,7 @@ export function CheckoutForm({ zones, bump = null, prefill = null, methods = [] 
           <ul className="mt-3 divide-y divide-line text-sm">
             {items.map((i) => (
               <li key={i.key} className="flex gap-3 py-3">
-                {i.image ? <img src={i.image} alt="" className="h-16 w-12 shrink-0 rounded-lg border border-line object-cover" /> : <ProductArt kind={i.kind ?? "tee"} color={i.hex ?? "#cfd2d8"} className="h-16 w-12 shrink-0 rounded-lg border border-line" />}
+                {i.image ? <img src={sized(i.image, 160)} alt="" loading="lazy" decoding="async" className="h-16 w-12 shrink-0 rounded-lg border border-line object-cover" /> : <ProductArt kind={i.kind ?? "tee"} color={i.hex ?? "#cfd2d8"} className="h-16 w-12 shrink-0 rounded-lg border border-line" />}
                 <span className="min-w-0 flex-1"><span className="block font-medium leading-snug">{i.name}</span><span className="text-xs text-muted">{[i.color, i.size].filter(Boolean).join(", ")}{(i.color || i.size) && ", "}x {i.qty}</span></span>
                 <span className="font-medium tabular-nums">{formatPrice(i.price * i.qty)}</span>
               </li>

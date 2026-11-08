@@ -7,7 +7,7 @@ import { useRouter } from "next/navigation";
 import { Check, Minus, Plus, X } from "lucide-react";
 import type { Product } from "@/lib/demo-products";
 import { formatPrice } from "@/lib/config";
-import { preorderDate } from "@/lib/utils";
+import { preorderDate, sized } from "@/lib/utils";
 import { useCart } from "@/lib/cart";
 import { placeOrder, quoteOrder } from "@/app/checkout/actions";
 import { readRef } from "./RefCapture";
@@ -104,7 +104,7 @@ export function QuickBuy({ product, zones, onClose }: { product: Product; zones:
         <div className="no-scrollbar relative flex flex-col gap-4 overflow-y-auto p-5 text-white md:max-h-[94dvh] md:p-7" style={{ background: `radial-gradient(ellipse 90% 70% at 50% 25%, ${mix(0.35)} 0%, ${mix(0.75)} 70%, ${mix(0.88)} 100%)` }}>
           <div className="flex items-center gap-4 md:flex-col md:items-start md:gap-5">
             <div className="relative w-24 shrink-0 md:mx-auto md:w-[62%]">
-              {product.image ? <img src={product.image} alt="" className="aspect-[4/5] w-full object-contain drop-shadow-[0_18px_22px_rgba(0,0,0,0.45)]" /> : <ProductArt bare kind={product.kind} color={color?.hex ?? "#ccc"} className="aspect-[4/5] w-full" />}
+              {product.image ? <img src={sized(product.image, 640)} alt="" decoding="async" className="aspect-[4/5] w-full object-contain drop-shadow-[0_18px_22px_rgba(0,0,0,0.45)]" /> : <ProductArt bare kind={product.kind} color={color?.hex ?? "#ccc"} className="aspect-[4/5] w-full" />}
             </div>
             <div className="min-w-0 pr-8 md:pr-0">
               <h2 className="font-display text-xl font-semibold leading-snug md:text-2xl">{product.name}</h2>

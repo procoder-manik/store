@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Minus, Plus, ShoppingBag, X } from "lucide-react";
 import { useCart } from "@/lib/cart";
 import { formatPrice } from "@/lib/config";
+import { sized } from "@/lib/utils";
 import { ProductArt } from "./ProductArt";
 import { useOverlay } from "./Portal";
 import { useCallback } from "react";
@@ -36,7 +37,7 @@ export function CartDrawer() {
             <ul className="divide-y divide-line">
               {items.map((i) => (
                 <li key={i.key} className="flex gap-4 py-4">
-                  {i.image ? <img src={i.image} alt="" className="h-20 w-16 shrink-0 rounded-xl border border-line object-contain bg-paper p-1" /> : <ProductArt kind={i.kind ?? "tee"} color={i.hex ?? "#cfd2d8"} className="h-20 w-16 shrink-0 rounded-xl border border-line" />}
+                  {i.image ? <img src={sized(i.image, 160)} alt="" loading="lazy" decoding="async" className="h-20 w-16 shrink-0 rounded-xl border border-line object-contain bg-paper p-1" /> : <ProductArt kind={i.kind ?? "tee"} color={i.hex ?? "#cfd2d8"} className="h-20 w-16 shrink-0 rounded-xl border border-line" />}
                   <div className="flex min-w-0 flex-1 flex-col">
                     <div className="flex justify-between gap-3"><p className="text-sm font-medium leading-snug">{i.name}</p><p className="text-sm font-medium tabular-nums">{formatPrice(i.price * i.qty)}</p></div>
                     <p className="mt-0.5 text-xs text-muted">{[i.color, i.size].filter(Boolean).join(", ")}{(i.color || i.size) && " · "}{formatPrice(i.price)} each</p>

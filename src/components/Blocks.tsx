@@ -5,6 +5,7 @@ import type { Banner } from "@/lib/banners";
 import type { Block } from "@/lib/blocks";
 import { GRID_BOXED, GRID_IN_CARD, showsGrid } from "@/lib/blocks";
 import { formatPrice } from "@/lib/config";
+import { sized } from "@/lib/utils";
 import { Clock, CreditCard, Gift, Headset, RefreshCcw, ShieldCheck, Star, Truck } from "lucide-react";
 import { HtmlBlock } from "./HtmlBlock";
 import { Countdown, UntilEnded } from "./Countdown";
@@ -155,7 +156,7 @@ function BlockBody({ b, ctx, asTitle, crumb }: { b: Block; ctx: BlockCtx; asTitl
         <section className={wrap}>
           <div className="relative grid items-center gap-8 overflow-hidden rounded-3xl border border-line bg-surface p-6 md:grid-cols-2 md:p-10">
             {showsGrid(b) && <span aria-hidden className="section-grid section-grid--in" />}
-            <div className="overflow-hidden rounded-2xl border border-line">{p.image ? <img src={p.image} alt={p.name} className="aspect-[4/5] w-full object-cover" /> : <ProductArt kind={p.kind} color={p.colors[0].hex} className="aspect-[4/5] w-full" />}</div>
+            <div className="overflow-hidden rounded-2xl border border-line">{p.image ? <img src={sized(p.image, 480)} alt={p.name} loading="lazy" decoding="async" className="aspect-[4/5] w-full object-cover" /> : <ProductArt kind={p.kind} color={p.colors[0].hex} className="aspect-[4/5] w-full" />}</div>
             <div>
               {b.heading && <p className="text-sm font-medium text-accent">{b.heading}</p>}
               <Heading as={b.level} className="mt-1 font-display text-3xl font-semibold tracking-tight md:text-5xl">{p.name}</Heading>
@@ -235,7 +236,7 @@ function BlockBody({ b, ctx, asTitle, crumb }: { b: Block; ctx: BlockCtx; asTitl
               const shape = mosaic && i === 0 ? "col-span-2 md:row-span-2 aspect-[4/3] md:aspect-auto" : mosaic && i === 3 ? "col-span-2 aspect-[16/9] md:aspect-auto" : "aspect-[4/5] md:aspect-auto";
               return (
                 <Link key={c.id} href={`/category/${c.id}`} style={{ background: `color-mix(in srgb, ${hex} 22%, var(--surface))` }} className={`group relative block overflow-hidden rounded-[14px] ${mosaic ? shape : "aspect-[4/5]"}`}>
-                  {first?.image && <img src={first.image} alt="" loading="lazy" className="absolute inset-0 h-full w-full object-contain p-[9%] pt-[22%] drop-shadow-[0_18px_20px_rgba(15,31,28,0.22)] transition duration-700 ease-out group-hover:scale-[1.05]" />}
+                  {first?.image && <img src={sized(first.image, 480)} alt="" loading="lazy" decoding="async" className="absolute inset-0 h-full w-full object-contain p-[9%] pt-[22%] drop-shadow-[0_18px_20px_rgba(15,31,28,0.22)] transition duration-700 ease-out group-hover:scale-[1.05]" />}
                   <div className="absolute left-4 right-4 top-4 flex items-start justify-between gap-3 md:left-6 md:right-6 md:top-5">
                     <p className={`font-display font-normal leading-[1.05] ${mosaic && i === 0 ? "text-3xl md:text-5xl" : "text-2xl md:text-3xl"}`}>{c.label}</p>
                     <span aria-hidden className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-surface text-sm transition duration-300 group-hover:bg-accent group-hover:text-accent-ink">{"\u2197"}</span>

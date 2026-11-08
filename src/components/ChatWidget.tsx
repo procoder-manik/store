@@ -6,6 +6,7 @@ import { ArrowUp, RotateCcw, Volume2, VolumeX, X } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { chatLead } from "@/app/actions/leads";
 import { formatPrice } from "@/lib/config";
+import { sized } from "@/lib/utils";
 
 type Card = { name: string; slug: string; price: number; compareAt: number | null; image: string };
 type Chip = { href: string; label: string };
@@ -139,7 +140,7 @@ export function ChatWidget({ name, greeting, avatar = "", whatsapp = "", waNote 
                 <p className={`max-w-[88%] whitespace-pre-line rounded-[18px] px-4 py-2.5 text-sm leading-relaxed ${m.role === "user" ? "rounded-br-[6px] bg-accent text-accent-ink" : "rounded-bl-[6px] bg-ink/[0.07]"}`}>{m.content}</p>
                 {m.products?.map((p) => (
                   <Link key={p.slug} href={`/product/${p.slug}`} className="flex w-[88%] items-center gap-3 rounded-[14px] border border-ink/15 p-2 transition hover:border-ink/50">
-                    {p.image ? <img src={p.image} alt="" className="h-12 w-12 shrink-0 object-contain" /> : <span className="h-12 w-12 shrink-0 rounded-[10px] bg-ink/10" />}
+                    {p.image ? <img src={sized(p.image, 160)} alt="" loading="lazy" decoding="async" className="h-12 w-12 shrink-0 object-contain" /> : <span className="h-12 w-12 shrink-0 rounded-[10px] bg-ink/10" />}
                     <span className="min-w-0 flex-1"><span className="block truncate text-sm font-medium">{p.name}</span><span className="block text-xs tabular-nums">{formatPrice(p.price)}{p.compareAt != null && <s className="ml-1.5 text-ink/60">{formatPrice(p.compareAt)}</s>}</span></span>
                   </Link>
                 ))}

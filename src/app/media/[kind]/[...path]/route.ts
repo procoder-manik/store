@@ -6,11 +6,13 @@ import { NextResponse } from "next/server";
  * Only the supplier's product media paths below can be fetched, never any other address.
  */
 const SOURCES = {
-  i: { base: "https://img.kwcdn.com/product/", ext: /\.(jpe?g|png|webp|avif)$/i, cache: "public, max-age=31536000, immutable" },
-  v: { base: "https://goods-vod.kwcdn.com/goods-video/", ext: /\.mp4$/i, cache: "public, max-age=604800" },
+  i: { base: "https://img.kwcdn.com/product/", ext: /\.(jpe?g|png|webp|avif)$/i, cache: "public, max-age=31536000, s-maxage=31536000, immutable" },
+  v: { base: "https://goods-vod.kwcdn.com/goods-video/", ext: /\.mp4$/i, cache: "public, max-age=604800, s-maxage=604800" },
 } as const;
 
 const PART = /^[A-Za-z0-9._-]{1,120}$/;
+// Pictures are sent as small WebP copies. Only these widths are allowed, so the route cannot be used to make endless variants.
+const WIDTHS = [120, 160, 240, 320, 480, 640, 900];
 const PASS = ["content-type", "content-length", "content-range", "accept-ranges", "etag", "last-modified"];
 
 export async function GET(req: Request, { params }: { params: Promise<{ kind: string; path: string[] }> }) {
@@ -18,10 +20,14 @@ export async function GET(req: Request, { params }: { params: Promise<{ kind: st
   const src = SOURCES[kind as keyof typeof SOURCES];
   if (!src || path.length > 6 || !path.every((p) => PART.test(p)) || !src.ext.test(path[path.length - 1])) return new NextResponse("Not found", { status: 404 });
 
+  const asked = Number(new URL(req.url).searchParams.get("w"));
+  const width = WIDTHS.includes(asked) ? asked : 900;
+  const resize = kind === "i" ? `?imageView2/2/w/${width}/q/75/format/webp` : "";
+
   const range = req.headers.get("range");
   let up: Response;
   try {
-    up = await fetch(src.base + path.join("/"), {
+    up = await fetch(src.base + path.join("/") + resize, {
       headers: { Referer: "https://www.temu.com/", "User-Agent": "Mozilla/5.0", ...(range ? { Range: range } : {}) },
       signal: AbortSignal.timeout(20_000),
     });

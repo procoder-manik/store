@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { Search, X } from "lucide-react";
 import type { Kind } from "@/lib/demo-products";
 import { formatPrice } from "@/lib/config";
+import { sized } from "@/lib/utils";
 import { ProductArt } from "./ProductArt";
 import { Portal, useOverlay } from "./Portal";
 
@@ -15,7 +16,7 @@ type Cat = { id: string; label: string };
 function Row({ h, id, active, onPick, onHover }: { h: Hit; id: string; active: boolean; onPick: () => void; onHover: () => void }) {
   return (
     <Link id={id} role="option" aria-selected={active} href={`/product/${h.slug}`} onClick={onPick} onMouseEnter={onHover} className={`group flex items-center gap-4 border-b border-ink/10 py-3 transition-[padding] duration-200 ${active ? "pl-2" : ""}`}>
-      {h.image ? <img src={h.image} alt="" className="h-14 w-14 shrink-0 object-contain" /> : <ProductArt kind={h.kind} color={h.color} className="h-14 w-14 shrink-0" />}
+      {h.image ? <img src={sized(h.image, 160)} alt="" loading="lazy" decoding="async" className="h-14 w-14 shrink-0 object-contain" /> : <ProductArt kind={h.kind} color={h.color} className="h-14 w-14 shrink-0" />}
       <span className={`min-w-0 flex-1 truncate text-base ${active ? "font-semibold" : ""}`}>{h.name}</span>
       <span className="shrink-0 text-right text-sm tabular-nums">
         {formatPrice(h.price)}

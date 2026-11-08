@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Banknote, Play, RotateCcw, Truck } from "lucide-react";
 import type { Product } from "@/lib/demo-products";
 import { OfferCountdown } from "./OfferCountdown";
@@ -10,6 +10,7 @@ import { ProductBuy } from "./ProductBuy";
 import { ProductArt } from "./ProductArt";
 import { ProductCard } from "./ProductCard";
 import { SITE_URL } from "@/lib/config";
+import { sized } from "@/lib/utils";
 
 export function ProductDetail({ product, related, pairs, reviews, bundle, whatsapp, category }: { product: Product; related: Product[]; pairs: Product[]; reviews: React.ReactNode; bundle?: React.ReactNode; whatsapp?: string; category?: { id: string; label: string } }) {
   const [colorIdx, setColorIdx] = useState(0);
@@ -21,16 +22,33 @@ export function ProductDetail({ product, related, pairs, reviews, bundle, whatsa
   const shown = images[img - off];
   const [zoom, setZoom] = useState<string | null>(null);
 
+  // The video plays by itself only on a wide screen with a normal connection. On a phone it waits for a tap,
+  // so it never downloads or autoplays on mobile data. Its box follows the video's own shape once that is known.
+  const clip = useRef<HTMLVideoElement>(null);
+  const [auto, setAuto] = useState(false);
+  const [ratio, setRatio] = useState(1);
+  useEffect(() => {
+    const saver = (navigator as Navigator & { connection?: { saveData?: boolean } }).connection?.saveData;
+    setAuto(window.matchMedia("(min-width: 768px)").matches && !saver);
+  }, []);
+  useEffect(() => {
+    if (isVideo && auto) clip.current?.play().catch(() => { /* the browser asked for a tap first */ });
+  }, [isVideo, auto]);
+
   return (
     <main className="mx-auto max-w-6xl px-5 py-8 md:py-12">
       <nav aria-label="Breadcrumb" className="mb-6 text-sm text-muted">
         <Link href="/" className="hover:underline">Home</Link> / <Link href="/shop" className="hover:underline">Shop</Link> / {category && <><Link href={`/category/${category.id}`} className="hover:underline">{category.label}</Link> / </>}<span className="text-ink">{product.name}</span>
       </nav>
       <div className="grid gap-8 md:grid-cols-2 md:gap-14">
-        <div className="md:sticky md:top-24 md:self-start">
+        <div className="min-w-0 md:sticky md:top-24 md:self-start">
           {isVideo ? (
             <div className="overflow-hidden rounded-[18px] bg-black">
-              <video key={product.video} src={product.video} poster={images[0]?.url} controls autoPlay muted loop playsInline preload="metadata" className="aspect-[4/5] w-full object-contain" />
+              <video
+                ref={clip} key={product.video} src={product.video} poster={sized(images[0]?.url, 640)} controls muted loop playsInline preload={auto ? "metadata" : "none"}
+                onLoadedMetadata={(e) => { const v = e.currentTarget; if (v.videoWidth && v.videoHeight) setRatio(v.videoWidth / v.videoHeight); }}
+                style={{ aspectRatio: String(ratio) }} className="max-h-[78vh] w-full bg-black object-contain"
+              />
             </div>
           ) : shown ? (
             <div
@@ -38,7 +56,7 @@ export function ProductDetail({ product, related, pairs, reviews, bundle, whatsa
               onMouseMove={(e) => { const r = e.currentTarget.getBoundingClientRect(); setZoom(`${((e.clientX - r.left) / r.width) * 100}% ${((e.clientY - r.top) / r.height) * 100}%`); }}
               onMouseLeave={() => setZoom(null)}
             >
-              <img src={shown.url} alt={shown.alt} style={zoom ? { transformOrigin: zoom, transform: "scale(1.7)" } : undefined} className="aspect-[4/5] w-full cursor-zoom-in object-contain p-[8%] drop-shadow-[0_22px_24px_rgba(15,31,28,0.22)] transition-transform duration-200" />
+              <img src={sized(shown.url, 900)} srcSet={`${sized(shown.url, 480)} 480w, ${sized(shown.url, 640)} 640w, ${sized(shown.url, 900)} 900w`} sizes="(min-width: 768px) 560px, 100vw" decoding="async" fetchPriority="high" alt={shown.alt} style={zoom ? { transformOrigin: zoom, transform: "scale(1.7)" } : undefined} className="aspect-[4/5] w-full cursor-zoom-in object-contain p-[8%] drop-shadow-[0_22px_24px_rgba(15,31,28,0.22)] transition-transform duration-200" />
             </div>
           ) : (
             <ProductArt kind={product.kind} color={product.colors[colorIdx]?.hex ?? product.colors[0].hex} className="aspect-[4/5] w-full rounded-3xl" />
@@ -47,19 +65,19 @@ export function ProductDetail({ product, related, pairs, reviews, bundle, whatsa
             <div className="mt-3 flex gap-2 no-scrollbar overflow-x-auto">
               {off === 1 && (
                 <button aria-label="Play video" aria-pressed={img === 0} onClick={() => setImg(0)} className={`relative h-16 w-16 shrink-0 overflow-hidden rounded-xl border bg-black ${img === 0 ? "border-ink" : "border-line"}`}>
-                  {images[0] && <img src={images[0].url} alt="" className="h-full w-full object-cover opacity-80" />}
+                  {images[0] && <img src={sized(images[0].url, 160)} alt="" width={64} height={64} loading="lazy" decoding="async" className="h-full w-full object-cover opacity-80" />}
                   <span aria-hidden className="absolute inset-0 grid place-items-center"><span className="grid h-7 w-7 place-items-center rounded-full bg-white/90 text-black"><Play size={13} fill="currentColor" /></span></span>
                 </button>
               )}
               {images.map((im, i) => (
                 <button key={im.url} aria-label={`Image ${i + 1}`} aria-pressed={i + off === img} onClick={() => setImg(i + off)} className={`h-16 w-16 shrink-0 overflow-hidden rounded-xl border ${i + off === img ? "border-ink" : "border-line"}`}>
-                  <img src={im.url} alt="" className="h-full w-full object-cover" />
+                  <img src={sized(im.url, 160)} alt="" width={64} height={64} loading="lazy" decoding="async" className="h-full w-full object-cover" />
                 </button>
               ))}
             </div>
           )}
         </div>
-        <div>
+        <div className="min-w-0">
           <h1 className="font-display text-[clamp(2rem,1.4rem+2.4vw,3.25rem)] font-bold leading-[1.02]">{product.name}</h1>
           {product.tags.length > 0 && (
             <div className="mt-3 flex flex-wrap gap-1.5">
