@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import {
-  Boxes, FileText, HeartPulse, Link2, FolderTree, GalleryHorizontal, LayoutDashboard, Mail, Menu, Package, PanelsTopLeft, Rocket, ScrollText,
+  Boxes, Download, FileText, HeartPulse, Link2, FolderTree, GalleryHorizontal, LayoutDashboard, Mail, Menu, Package, PanelsTopLeft, Rocket, ScrollText,
   MoreHorizontal, Plus, Receipt, Search, Settings, CreditCard, PackageCheck, PanelTop, ShieldAlert, ShoppingBag, ShoppingCart, Sparkles, Star, Store, TicketPercent, Truck, Users, X,
 } from "lucide-react";
 import { SignOutButton } from "@/components/SignOutButton";
@@ -25,6 +25,7 @@ const GROUPS = [
   ] },
   { title: "Catalog", items: [
     { href: "/admin/products", label: "Products", icon: Package },
+    { href: "/admin/import", label: "Import products", icon: Download },
     { href: "/admin/categories", label: "Categories", icon: FolderTree },
     { href: "/admin/reviews", label: "Reviews", icon: Star },
   ] },

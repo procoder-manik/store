@@ -18,6 +18,7 @@ An online store for bedsheets, quilts, pillows, cushions and home decor, built f
 
 **Admin** (`/admin`, role guarded, two-step verification)
 - Products with variants, pictures and video; categories; coupons; bundles
+- Import products from other shops (Temu, AliExpress, Amazon, Daraz and more) with a Chrome extension: each product arrives as a draft with pictures copied into your own storage and the price converted to taka. The extension lives in its own folder outside this repository; the store side is `/api/import` and Admin, Import products
 - Orders, customers, leads, reviews, email campaigns and automatic emails
 - Delivery partners (Steadfast booking, other couriers with their own keys), delivery zones and fees
 - Payment methods, theme and colours, header and footer, pages and landing pages, popup editor
